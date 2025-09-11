@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,13 +18,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-use Illuminate\Support\Facades\Mail;
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/test-email', function () {
-    Mail::raw('This is a test from Housing Alerts.', function ($message) {
-        $message->to('leo.spalteholz@gmail.com')
-                ->subject('Test Email from Housing Alerts');
-    });
-
-    return 'Test email sent!';
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+require __DIR__.'/auth.php';
