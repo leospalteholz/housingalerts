@@ -1,3 +1,9 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
 class Region extends Model
 {
     public function organization() {
@@ -9,6 +15,6 @@ class Region extends Model
     }
 
     public function users() {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class, 'user_region');
     }
 }

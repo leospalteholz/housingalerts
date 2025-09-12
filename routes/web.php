@@ -18,9 +18,21 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+
+// Admin-only routes
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RegionController;
+use App\Http\Controllers\HearingController;
+Route::middleware(['auth', 'admin'])->group(function () {
+    // Admin dashboard
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+    // Region management routes
+    Route::resource('regions', RegionController::class);
+    // Hearing management routes
+    Route::resource('hearings', HearingController::class);
+    // User management routes
+    Route::resource('users', UserController::class);
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
