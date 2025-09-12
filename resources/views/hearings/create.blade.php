@@ -17,7 +17,7 @@
             </div>
             <div class="mb-4">
                 <label for="start_date" class="block text-gray-700 font-semibold mb-2">Start Date</label>
-                <input type="date" id="start_date" name="start_date" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="date" id="start_date" name="start_date" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="mb-4">
                 <label for="start_time" class="block text-gray-700 font-semibold mb-2">Start Time</label>

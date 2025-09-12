@@ -31,11 +31,15 @@ class HearingController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
+            'start_date' => 'required|date',
+            'start_time' => 'nullable',
+            'organization_id' => 'nullable|exists:organizations,id',
+            'region_id' => 'nullable|exists:regions,id',
+            'image_url' => 'nullable|string',
+            'more_info_url' => 'nullable|url',
         ]);
 
-        $hearing = new \App\Models\Hearing();
-        $hearing->title = $validated['title'];
-        $hearing->body = $validated['body'];
+        $hearing = new \App\Models\Hearing($validated);
         $hearing->save();
 
         return redirect()->route('hearings.index')->with('success', 'Hearing created successfully!');
@@ -67,11 +71,16 @@ class HearingController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
+            'start_date' => 'required|date',
+            'start_time' => 'nullable',
+            'organization_id' => 'nullable|exists:organizations,id',
+            'region_id' => 'nullable|exists:regions,id',
+            'image_url' => 'nullable|string',
+            'more_info_url' => 'nullable|url',
         ]);
 
         $hearing = \App\Models\Hearing::findOrFail($id);
-        $hearing->title = $validated['title'];
-        $hearing->body = $validated['body'];
+        $hearing->fill($validated);
         $hearing->save();
 
         return redirect()->route('hearings.index')->with('success', 'Hearing updated successfully!');
