@@ -22,5 +22,15 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+        \App\Models\User::updateOrCreate(
+            [ 'email' => 'user@example.com' ],
+            [
+                'name' => 'Regular User',
+                'email' => 'user@example.com',
+                'password' => bcrypt('password'),
+                'is_admin' => false,
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }
