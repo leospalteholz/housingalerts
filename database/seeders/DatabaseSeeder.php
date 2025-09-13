@@ -12,6 +12,33 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $rootOrg = \App\Models\Organization::updateOrCreate(
+            [ 'name' => 'Housing Alerts' ],
+            [ 'slug' => 'root' ]
+        );
+
+        $org = \App\Models\Organization::updateOrCreate(
+            [ 'name' => 'Homes for Living' ],
+            [ 'slug' => 'homes-for-living' ],
+            [ 'areas_active' => 'Greater Victoria, BC' ],
+            [ 'contact-email' => 'hello@homesforliving.a' ]
+        );
+
+        // Create superuser (can manage all organizations)
+        \App\Models\User::updateOrCreate(
+            [ 'email' => 'root@example.com' ],
+            [
+                'name' => 'Super User',
+                'email' => 'root@example.com',
+                'password' => bcrypt('password'),
+                'is_admin' => true,
+                'is_superuser' => true,
+                'email_verified_at' => now(),
+                'organization_id' => $rootOrg->id,
+            ]
+        );
+        
+        // Create regular admin (can only manage within their organization)
         \App\Models\User::updateOrCreate(
             [ 'email' => 'admin@example.com' ],
             [
@@ -19,7 +46,9 @@ class DatabaseSeeder extends Seeder
                 'email' => 'admin@example.com',
                 'password' => bcrypt('password'),
                 'is_admin' => true,
+                'is_superuser' => false,
                 'email_verified_at' => now(),
+                'organization_id' => $org->id,
             ]
         );
         \App\Models\User::updateOrCreate(
@@ -30,6 +59,7 @@ class DatabaseSeeder extends Seeder
                 'password' => bcrypt('password'),
                 'is_admin' => false,
                 'email_verified_at' => now(),
+                'organization_id' => $org->id,
             ]
         );
     }

@@ -11,7 +11,13 @@ class HearingController extends Controller
      */
     public function index()
     {
-        $hearings = \App\Models\Hearing::all();
+        if (auth()->user()->is_superuser) {
+            // Superusers can see all hearings across organizations
+            $hearings = \App\Models\Hearing::with(['organization', 'region'])->get();
+        } else {
+            // Regular admins can only see hearings within their organization
+            $hearings = \App\Models\Hearing::where('organization_id', auth()->user()->organization_id)->get();
+        }
         return view('hearings.index', compact('hearings'));
     }
 
@@ -33,13 +39,23 @@ class HearingController extends Controller
             'body' => 'required|string',
             'start_date' => 'required|date',
             'start_time' => 'nullable',
-            'organization_id' => 'nullable|exists:organizations,id',
-            'region_id' => 'nullable|exists:regions,id',
+            'region_id' => 'required|exists:regions,id',
             'image_url' => 'nullable|string',
             'more_info_url' => 'nullable|url',
         ]);
 
+        // Create a new hearing
         $hearing = new \App\Models\Hearing($validated);
+        
+        // Force organization_id to match the user's organization unless superuser
+        if (!auth()->user()->is_superuser && $request->has('organization_id')) {
+            $hearing->organization_id = auth()->user()->organization_id;
+        } else if (auth()->user()->is_superuser && $request->has('organization_id')) {
+            $hearing->organization_id = $request->organization_id;
+        } else {
+            $hearing->organization_id = auth()->user()->organization_id;
+        }
+        
         $hearing->save();
 
         return redirect()->route('hearings.index')->with('success', 'Hearing created successfully!');

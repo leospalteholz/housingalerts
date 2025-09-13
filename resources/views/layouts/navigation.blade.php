@@ -15,6 +15,11 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @if(auth()->user() && auth()->user()->is_superuser)
+                        <x-nav-link :href="route('organizations.index')" :active="request()->routeIs('organizations.*')">
+                            {{ __('Organizations') }}
+                        </x-nav-link>
+                    @endif
                     @if(auth()->user() && auth()->user()->is_admin)
                         <x-nav-link :href="route('regions.index')" :active="request()->routeIs('regions.*')">
                             {{ __('Regions') }}
@@ -81,6 +86,11 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @if(auth()->user() && auth()->user()->is_superuser)
+                <x-responsive-nav-link :href="route('organizations.index')" :active="request()->routeIs('organizations.*')">
+                    {{ __('Organizations') }}
+                </x-responsive-nav-link>
+            @endif
             @if(auth()->user() && auth()->user()->is_admin)
                 <x-responsive-nav-link :href="route('regions.index')" :active="request()->routeIs('regions.*')">
                     {{ __('Regions') }}

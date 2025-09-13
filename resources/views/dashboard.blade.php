@@ -9,8 +9,14 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    @if(auth()->user() && auth()->user()->is_admin)
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    @if(auth()->user() && auth()->user()->is_superuser)
+                        <!-- Superuser dashboard -->
+                        <h3 class="text-2xl font-bold mb-4">{{ auth()->user()->organization->name }} - Superuser Dashboard</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <a href="{{ route('organizations.index') }}" class="block p-6 bg-white rounded-lg shadow hover:bg-gray-100 transition">
+                                <h4 class="text-lg font-semibold mb-2">Manage Organizations</h4>
+                                <p class="text-gray-600">View, add, edit, or remove organizations.</p>
+                            </a>
                             <a href="{{ route('users.index') }}" class="block p-6 bg-white rounded-lg shadow hover:bg-gray-100 transition">
                                 <h4 class="text-lg font-semibold mb-2">Manage Users</h4>
                                 <p class="text-gray-600">View, add, edit, or remove users.</p>
@@ -22,6 +28,23 @@
                             <a href="{{ route('hearings.index') }}" class="block p-6 bg-white rounded-lg shadow hover:bg-gray-100 transition">
                                 <h4 class="text-lg font-semibold mb-2">Manage Hearings</h4>
                                 <p class="text-gray-600">View, add, edit, or remove hearings.</p>
+                            </a>
+                        </div>
+                    @elseif(auth()->user() && auth()->user()->is_admin)
+                        <!-- Regular admin dashboard -->
+                        <h3 class="text-2xl font-bold mb-4">{{ auth()->user()->organization->name }} - Admin Dashboard</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <a href="{{ route('users.index') }}" class="block p-6 bg-white rounded-lg shadow hover:bg-gray-100 transition">
+                                <h4 class="text-lg font-semibold mb-2">Manage Users</h4>
+                                <p class="text-gray-600">View, add, edit, or remove users in your organization.</p>
+                            </a>
+                            <a href="{{ route('regions.index') }}" class="block p-6 bg-white rounded-lg shadow hover:bg-gray-100 transition">
+                                <h4 class="text-lg font-semibold mb-2">Manage Regions</h4>
+                                <p class="text-gray-600">View, add, edit, or remove regions in your organization.</p>
+                            </a>
+                            <a href="{{ route('hearings.index') }}" class="block p-6 bg-white rounded-lg shadow hover:bg-gray-100 transition">
+                                <h4 class="text-lg font-semibold mb-2">Manage Hearings</h4>
+                                <p class="text-gray-600">View, add, edit, or remove hearings in your organization.</p>
                             </a>
                         </div>
                     @else

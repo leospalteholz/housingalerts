@@ -11,7 +11,14 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = \App\Models\User::all();
+        // If superuser, can see all users across organizations
+        // If admin, can only see users within their organization
+        if (auth()->user()->is_superuser) {
+            $users = \App\Models\User::with('organization')->get();
+        } else {
+            $users = \App\Models\User::where('organization_id', auth()->user()->organization_id)
+                          ->get();
+        }
         return view('users.index', compact('users'));
     }
 

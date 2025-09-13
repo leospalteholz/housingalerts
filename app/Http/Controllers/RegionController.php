@@ -11,7 +11,13 @@ class RegionController extends Controller
      */
     public function index()
     {
-        $regions = \App\Models\Region::all();
+        if (auth()->user()->is_superuser) {
+            // Superusers can see all regions across organizations
+            $regions = \App\Models\Region::with('organization')->get();
+        } else {
+            // Regular admins can only see regions within their organization
+            $regions = \App\Models\Region::where('organization_id', auth()->user()->organization_id)->get();
+        }
         return view('regions.index', compact('regions'));
     }
 
