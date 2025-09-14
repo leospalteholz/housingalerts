@@ -9,7 +9,22 @@
             @csrf
             @method('PUT')
             
-            <!-- Region (moved to first) -->
+            <!-- Hearing Type (Read-only) -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">Hearing Type</label>
+                <div class="p-4 bg-gray-50 rounded-lg border">
+                    <div class="flex items-center">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $hearing->isDevelopment() ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                            {{ $hearing->isDevelopment() ? 'Development Hearing' : 'Policy Hearing' }}
+                        </span>
+                        <span class="ml-3 text-sm text-gray-600">Type cannot be changed after creation</span>
+                    </div>
+                </div>
+                <!-- Hidden field to maintain type -->
+                <input type="hidden" name="type" value="{{ $hearing->type }}">
+            </div>
+            
+            <!-- Region -->
             <div class="mb-4">
                 <label for="region_id" class="block text-gray-700 font-semibold mb-2">Region</label>
                 <select id="region_id" name="region_id" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -28,45 +43,60 @@
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
+
+            @if($hearing->isPolicy())
+                <!-- Title for Policy Hearings -->
+                <div class="mb-4">
+                    <label for="title" class="block text-gray-700 font-semibold mb-2">Hearing Title</label>
+                    <input type="text" id="title" name="title" value="{{ old('title', $hearing->title) }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    @error('title')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            @endif
+
+            @if($hearing->isDevelopment())
+                <!-- Development-specific fields -->
+                <div class="mb-4">
+                    <label for="street_address" class="block text-gray-700 font-semibold mb-2">Street Address</label>
+                    <input type="text" id="street_address" name="street_address" value="{{ old('street_address', $hearing->street_address) }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    @error('street_address')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="mb-4">
+                    <label for="postal_code" class="block text-gray-700 font-semibold mb-2">Postal Code</label>
+                    <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code', $hearing->postal_code) }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    @error('postal_code')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="mb-4">
+                    <label for="rental" class="block text-gray-700 font-semibold mb-2">Property Type</label>
+                    <select id="rental" name="rental" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select property type...</option>
+                        <option value="1" {{ old('rental', $hearing->rental) == '1' ? 'selected' : '' }}>Rental Property</option>
+                        <option value="0" {{ old('rental', $hearing->rental) == '0' ? 'selected' : '' }}>Condo/Owned Property</option>
+                    </select>
+                    @error('rental')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="mb-4">
+                    <label for="units" class="block text-gray-700 font-semibold mb-2">Number of Homes</label>
+                    <input type="number" id="units" name="units" value="{{ old('units', $hearing->units) }}" min="1" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    @error('units')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+            @endif
             
-            <!-- Property Address Information -->
-            <!-- Property Address Information -->
-            <div class="mb-4">
-                <label for="street_address" class="block text-gray-700 font-semibold mb-2">Street Address</label>
-                <input type="text" id="street_address" name="street_address" value="{{ old('street_address', $hearing->street_address) }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                @error('street_address')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="mb-4">
-                <label for="postal_code" class="block text-gray-700 font-semibold mb-2">Postal Code</label>
-                <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code', $hearing->postal_code) }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                @error('postal_code')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="mb-4">
-                <label for="rental" class="block text-gray-700 font-semibold mb-2">Property Type</label>
-                <select id="rental" name="rental" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="1" {{ old('rental', $hearing->rental) == '1' ? 'selected' : '' }}>Rental Property</option>
-                    <option value="0" {{ old('rental', $hearing->rental) == '0' ? 'selected' : '' }}>Condo/Owned Property</option>
-                </select>
-                @error('rental')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="mb-4">
-                <label for="units" class="block text-gray-700 font-semibold mb-2">Number of Homes</label>
-                <input type="number" id="units" name="units" value="{{ old('units', $hearing->units) }}" min="1" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                @error('units')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
+            <!-- Common fields for both types -->
             
             <!-- Hearing Scheduling -->
             <div class="mb-4">
                 <label for="start_date" class="block text-gray-700 font-semibold mb-2">Hearing Date</label>
-                <input type="date" id="start_date" name="start_date" value="{{ old('start_date', $hearing->start_date) }}" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="date" id="start_date" name="start_date" value="{{ old('start_date', $hearing->start_date) }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('start_date')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror

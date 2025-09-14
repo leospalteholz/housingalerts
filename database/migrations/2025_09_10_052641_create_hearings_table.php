@@ -15,10 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('organization_id')->constrained()->onDelete('cascade');
             $table->foreignId('region_id')->constrained()->onDelete('cascade');
-            $table->string('street_address'); // renamed from title, mandatory
-            $table->string('postal_code');
-            $table->boolean('rental')->default(false);
-            $table->integer('units');
+            $table->enum('type', ['development', 'policy'])->default('development');
+            $table->string('title')->nullable(); // for policy hearings, auto-generated for development
+            $table->string('street_address')->nullable(); // only for development hearings
+            $table->string('postal_code')->nullable(); // only for development hearings
+            $table->boolean('rental')->nullable(); // only for development hearings
+            $table->integer('units')->nullable(); // only for development hearings
             $table->text('description'); // details of the hearing
             $table->string('image_url')->nullable();
             $table->date('start_date');

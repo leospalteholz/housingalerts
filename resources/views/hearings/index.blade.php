@@ -23,9 +23,9 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property Type</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title/Address</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Region</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -35,15 +35,34 @@
                         @forelse ($upcomingHearings as $hearing)
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ $hearing->street_address }}</div>
-                                    <div class="text-sm text-gray-500">{{ $hearing->postal_code }}</div>
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ $hearing->display_title }}
+                                    </div>
+                                    @if($hearing->isDevelopment() && $hearing->postal_code)
+                                        <div class="text-sm text-gray-500">{{ $hearing->postal_code }}</div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $hearing->rental ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800' }}">
-                                        {{ $hearing->rental ? 'Rental' : 'Condo' }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $hearing->isDevelopment() ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                        {{ $hearing->isDevelopment() ? 'Development' : 'Policy' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $hearing->units }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($hearing->isDevelopment())
+                                        <div class="text-sm text-gray-900">
+                                            @if($hearing->rental !== null)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $hearing->rental ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800' }}">
+                                                    {{ $hearing->rental ? 'Rental' : 'Condo' }}
+                                                </span>
+                                            @endif
+                                            @if($hearing->units)
+                                                <span class="ml-2 text-sm text-gray-600">{{ $hearing->units }} units</span>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <div class="text-sm text-gray-600">Policy Hearing</div>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($hearing->region)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -85,9 +104,9 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property Type</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title/Address</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Region</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -97,15 +116,34 @@
                         @forelse ($pastHearings as $hearing)
                             <tr class="opacity-75">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ $hearing->street_address }}</div>
-                                    <div class="text-sm text-gray-500">{{ $hearing->postal_code }}</div>
+                                    <div class="text-sm font-medium text-gray-900">
+                                        {{ $hearing->display_title }}
+                                    </div>
+                                    @if($hearing->isDevelopment() && $hearing->postal_code)
+                                        <div class="text-sm text-gray-500">{{ $hearing->postal_code }}</div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $hearing->rental ? 'bg-green-100 text-green-600' : 'bg-purple-100 text-purple-600' }}">
-                                        {{ $hearing->rental ? 'Rental' : 'Condo' }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $hearing->isDevelopment() ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600' }}">
+                                        {{ $hearing->isDevelopment() ? 'Development' : 'Policy' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $hearing->units }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($hearing->isDevelopment())
+                                        <div class="text-sm text-gray-900">
+                                            @if($hearing->rental !== null)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $hearing->rental ? 'bg-green-100 text-green-600' : 'bg-purple-100 text-purple-600' }}">
+                                                    {{ $hearing->rental ? 'Rental' : 'Condo' }}
+                                                </span>
+                                            @endif
+                                            @if($hearing->units)
+                                                <span class="ml-2 text-sm text-gray-600">{{ $hearing->units }} units</span>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <div class="text-sm text-gray-600">Policy Hearing</div>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($hearing->region)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

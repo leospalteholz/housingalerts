@@ -58,11 +58,9 @@ class HearingController extends Controller
      */
     public function store(Request $request)
     {
-                $validated = $request->validate([
-            'street_address' => 'required|string|max:255',
-            'postal_code' => 'required|string|max:20',
-            'rental' => 'required|boolean',
-            'units' => 'required|integer|min:1',
+        // Base validation rules
+        $rules = [
+            'type' => 'required|in:development,policy',
             'description' => 'required|string',
             'remote_instructions' => 'required|string',
             'inperson_instructions' => 'required|string',
@@ -74,10 +72,36 @@ class HearingController extends Controller
             'region_id' => 'nullable|exists:regions,id',
             'image_url' => 'nullable|string',
             'more_info_url' => 'nullable|url',
-        ]);
+        ];
+
+        // Add conditional validation based on hearing type
+        if ($request->type === 'development') {
+            $rules = array_merge($rules, [
+                'street_address' => 'required|string|max:255',
+                'postal_code' => 'required|string|max:20',
+                'rental' => 'required|boolean',
+                'units' => 'required|integer|min:1',
+                'title' => 'nullable|string|max:255',
+            ]);
+        } else if ($request->type === 'policy') {
+            $rules = array_merge($rules, [
+                'title' => 'required|string|max:255',
+                'street_address' => 'nullable|string|max:255',
+                'postal_code' => 'nullable|string|max:20',
+                'rental' => 'nullable|boolean',
+                'units' => 'nullable|integer|min:1',
+            ]);
+        }
+
+        $validated = $request->validate($rules);
 
         // Create a new hearing
         $hearing = new \App\Models\Hearing($validated);
+        
+        // Auto-generate title for development hearings if not provided
+        if ($hearing->type === 'development' && empty($hearing->title)) {
+            $hearing->title = "Hearing for {$hearing->street_address}";
+        }
         
         // Force organization_id to match the user's organization unless superuser
         if (!auth()->user()->is_superuser && $request->has('organization_id')) {
@@ -128,11 +152,11 @@ class HearingController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'street_address' => 'required|string|max:255',
-            'postal_code' => 'required|string|max:20',
-            'rental' => 'required|boolean',
-            'units' => 'required|integer|min:1',
+        $hearing = \App\Models\Hearing::findOrFail($id);
+        
+        // Base validation rules
+        $rules = [
+            'type' => 'required|in:development,policy',
             'description' => 'required|string',
             'remote_instructions' => 'required|string',
             'inperson_instructions' => 'required|string',
@@ -144,10 +168,36 @@ class HearingController extends Controller
             'region_id' => 'nullable|exists:regions,id',
             'image_url' => 'nullable|string',
             'more_info_url' => 'nullable|url',
-        ]);
+        ];
 
-        $hearing = \App\Models\Hearing::findOrFail($id);
+        // Add conditional validation based on hearing type
+        if ($request->type === 'development') {
+            $rules = array_merge($rules, [
+                'street_address' => 'required|string|max:255',
+                'postal_code' => 'required|string|max:20',
+                'rental' => 'required|boolean',
+                'units' => 'required|integer|min:1',
+                'title' => 'nullable|string|max:255',
+            ]);
+        } else if ($request->type === 'policy') {
+            $rules = array_merge($rules, [
+                'title' => 'required|string|max:255',
+                'street_address' => 'nullable|string|max:255',
+                'postal_code' => 'nullable|string|max:20',
+                'rental' => 'nullable|boolean',
+                'units' => 'nullable|integer|min:1',
+            ]);
+        }
+
+        $validated = $request->validate($rules);
+
         $hearing->fill($validated);
+        
+        // Auto-generate title for development hearings if not provided
+        if ($hearing->type === 'development' && empty($hearing->title)) {
+            $hearing->title = "Hearing for {$hearing->street_address}";
+        }
+        
         $hearing->save();
 
         return redirect()->route('hearings.index')->with('success', 'Hearing updated successfully!');

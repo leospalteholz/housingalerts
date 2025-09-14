@@ -8,6 +8,30 @@
         <form method="POST" action="{{ route('hearings.store') }}" class="bg-white rounded shadow p-6">
             @csrf
             
+            <!-- Hearing Type Selection -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">Hearing Type</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="type" value="development" class="sr-only" {{ old('type', 'development') == 'development' ? 'checked' : '' }} onchange="toggleHearingType()">
+                        <div class="border-2 rounded-lg p-4 text-center transition-all duration-200 hover:bg-gray-50" id="development-option">
+                            <div class="text-lg font-medium">Development</div>
+                            <div class="text-sm text-gray-600">Property-specific hearing</div>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="type" value="policy" class="sr-only" {{ old('type') == 'policy' ? 'checked' : '' }} onchange="toggleHearingType()">
+                        <div class="border-2 rounded-lg p-4 text-center transition-all duration-200 hover:bg-gray-50" id="policy-option">
+                            <div class="text-lg font-medium">Policy</div>
+                            <div class="text-sm text-gray-600">General policy hearing</div>
+                        </div>
+                    </label>
+                </div>
+                @error('type')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+            
             <!-- Region (moved to first) -->
             <div class="mb-4">
                 <label for="region_id" class="block text-gray-700 font-semibold mb-2">Region</label>
@@ -26,39 +50,52 @@
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
+
+            <!-- Title for Policy Hearings -->
+            <div class="mb-4" id="title-field" style="display: none;">
+                <label for="title" class="block text-gray-700 font-semibold mb-2">Hearing Title</label>
+                <input type="text" id="title" name="title" value="{{ old('title') }}" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., OCP Update Hearing">
+                @error('title')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
             
-            <!-- Property Address Information -->
-            <div class="mb-4">
-                <label for="street_address" class="block text-gray-700 font-semibold mb-2">Street Address</label>
-                <input type="text" id="street_address" name="street_address" value="{{ old('street_address') }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                @error('street_address')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="mb-4">
-                <label for="postal_code" class="block text-gray-700 font-semibold mb-2">Postal Code</label>
-                <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code') }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                @error('postal_code')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-            <div class="mb-4">
-                <label for="rental" class="block text-gray-700 font-semibold mb-2">Property Type</label>
-                <select id="rental" name="rental" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="1" {{ old('rental') == '1' ? 'selected' : '' }}>Rental Property</option>
-                    <option value="0" {{ old('rental') == '0' ? 'selected' : '' }}>Condo/Owned Property</option>
-                </select>
+            <!-- Development-specific fields -->
+            <div id="development-fields">
+                <!-- Property Address Information -->
+                <div class="mb-4">
+                    <label for="street_address" class="block text-gray-700 font-semibold mb-2">Street Address</label>
+                    <input type="text" id="street_address" name="street_address" value="{{ old('street_address') }}" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    @error('street_address')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="mb-4">
+                    <label for="postal_code" class="block text-gray-700 font-semibold mb-2">Postal Code</label>
+                    <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code') }}" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    @error('postal_code')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="mb-4">
+                    <label for="rental" class="block text-gray-700 font-semibold mb-2">Property Type</label>
+                    <select id="rental" name="rental" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select property type...</option>
+                        <option value="1" {{ old('rental') == '1' ? 'selected' : '' }}>Rental Property</option>
+                        <option value="0" {{ old('rental') == '0' ? 'selected' : '' }}>Condo/Owned Property</option>
+                    </select>
                 @error('rental')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
             <div class="mb-4">
                 <label for="units" class="block text-gray-700 font-semibold mb-2">Number of Homes</label>
-                <input type="number" id="units" name="units" value="{{ old('units') }}" min="1" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="number" id="units" name="units" value="{{ old('units') }}" min="1" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('units')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
+        </div> <!-- End development-fields -->
             
             <!-- Hearing Scheduling -->
             <div class="mb-4">
@@ -139,6 +176,54 @@
     </div>
 
     <script>
+        // Hearing type toggle functionality
+        function toggleHearingType() {
+            const developmentRadio = document.querySelector('input[name="type"][value="development"]');
+            const policyRadio = document.querySelector('input[name="type"][value="policy"]');
+            const developmentOption = document.getElementById('development-option');
+            const policyOption = document.getElementById('policy-option');
+            const titleField = document.getElementById('title-field');
+            const developmentFields = document.getElementById('development-fields');
+            
+            // Update visual styling for radio buttons
+            if (developmentRadio.checked) {
+                developmentOption.classList.add('border-blue-500', 'bg-blue-50');
+                developmentOption.classList.remove('border-gray-300');
+                policyOption.classList.remove('border-blue-500', 'bg-blue-50');
+                policyOption.classList.add('border-gray-300');
+                
+                // Show development fields, hide title field
+                developmentFields.style.display = 'block';
+                titleField.style.display = 'none';
+                
+                // Make development fields required
+                document.getElementById('street_address').required = true;
+                document.getElementById('postal_code').required = true;
+                document.getElementById('units').required = true;
+                document.getElementById('title').required = false;
+            } else if (policyRadio.checked) {
+                policyOption.classList.add('border-blue-500', 'bg-blue-50');
+                policyOption.classList.remove('border-gray-300');
+                developmentOption.classList.remove('border-blue-500', 'bg-blue-50');
+                developmentOption.classList.add('border-gray-300');
+                
+                // Hide development fields, show title field
+                developmentFields.style.display = 'none';
+                titleField.style.display = 'block';
+                
+                // Make title required, development fields not required
+                document.getElementById('title').required = true;
+                document.getElementById('street_address').required = false;
+                document.getElementById('postal_code').required = false;
+                document.getElementById('units').required = false;
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleHearingType();
+        });
+
         // Region data for JavaScript
         const regionData = @json($regions->keyBy('id'));
         
