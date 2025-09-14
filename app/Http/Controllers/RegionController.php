@@ -69,10 +69,13 @@ class RegionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'comments_email' => 'nullable|email|max:255',
+            'remote_instructions' => 'nullable|string',
+            'inperson_instructions' => 'nullable|string',
         ]);
 
         $region = \App\Models\Region::findOrFail($id);
-        $region->name = $validated['name'];
+        $region->fill($validated);
         $region->save();
 
         return redirect()->route('regions.index')->with('success', 'Region updated successfully!');
@@ -84,6 +87,13 @@ class RegionController extends Controller
     public function destroy($id)
     {
         $region = \App\Models\Region::findOrFail($id);
+        
+        // Check if region has any hearings
+        if ($region->hearings()->count() > 0) {
+            return redirect()->route('regions.index')
+                ->withErrors(['error' => 'Cannot delete region "' . $region->name . '" because it contains hearings. Please move or delete the hearings first.']);
+        }
+        
         $region->delete();
         return redirect()->route('regions.index')->with('success', 'Region deleted successfully!');
     }

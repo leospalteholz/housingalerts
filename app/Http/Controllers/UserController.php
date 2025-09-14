@@ -14,12 +14,23 @@ class UserController extends Controller
         // If superuser, can see all users across organizations
         // If admin, can only see users within their organization
         if (auth()->user()->is_superuser) {
-            $users = \App\Models\User::with('organization')->get();
+            $users = \App\Models\User::with(['organization', 'regions'])->get();
         } else {
-            $users = \App\Models\User::where('organization_id', auth()->user()->organization_id)
+            $users = \App\Models\User::with(['organization', 'regions'])
+                          ->where('organization_id', auth()->user()->organization_id)
                           ->get();
         }
-        return view('users.index', compact('users'));
+        
+        // Separate admins and regular users
+        $admins = $users->filter(function ($user) {
+            return $user->is_admin || $user->is_superuser;
+        });
+        
+        $regularUsers = $users->filter(function ($user) {
+            return !$user->is_admin && !$user->is_superuser;
+        });
+        
+        return view('users.index', compact('admins', 'regularUsers'));
     }
 
     /**
@@ -27,7 +38,18 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        // Get organizations for superusers
+        if (auth()->user()->is_superuser) {
+            $organizations = \App\Models\Organization::orderBy('name')->get();
+            $regions = \App\Models\Region::with('organization')->orderBy('name')->get();
+        } else {
+            $organizations = collect();
+            $regions = \App\Models\Region::where('organization_id', auth()->user()->organization_id)
+                ->orderBy('name')
+                ->get();
+        }
+        
+        return view('users.create', compact('organizations', 'regions'));
     }
 
     /**
@@ -35,7 +57,34 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'is_admin' => 'required|boolean',
+            'organization_id' => auth()->user()->is_superuser ? 'required|exists:organizations,id' : 'nullable',
+            'regions' => 'nullable|array',
+            'regions.*' => 'exists:regions,id',
+        ]);
+
+        // Set organization_id based on user role
+        if (!auth()->user()->is_superuser) {
+            $validated['organization_id'] = auth()->user()->organization_id;
+        }
+
+        // Hash the password
+        $validated['password'] = bcrypt($validated['password']);
+        $validated['email_verified_at'] = now(); // Auto-verify admin-created users
+
+        // Create the user
+        $user = \App\Models\User::create($validated);
+
+        // Attach regions if provided
+        if (!empty($validated['regions'])) {
+            $user->regions()->sync($validated['regions']);
+        }
+
+        return redirect()->route('users.index')->with('success', 'User created successfully!');
     }
 
     /**

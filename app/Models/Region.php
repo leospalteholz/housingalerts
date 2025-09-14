@@ -6,7 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Region extends Model
 {
-    protected $fillable = ['name', 'organization_id'];
+    protected $fillable = [
+        'name', 
+        'organization_id', 
+        'comments_email', 
+        'remote_instructions', 
+        'inperson_instructions'
+    ];
 
     public function organization() {
         return $this->belongsTo(Organization::class);

@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('organization_id')->constrained()->onDelete('cascade');
             $table->string('name');
+            $table->string('comments_email')->nullable(); // default email for submitting comments
+            $table->text('remote_instructions')->nullable(); // default remote joining instructions
+            $table->text('inperson_instructions')->nullable(); // default in-person instructions
             $table->timestamps();
         });
     }

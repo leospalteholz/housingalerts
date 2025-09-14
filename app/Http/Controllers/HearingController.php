@@ -13,12 +13,25 @@ class HearingController extends Controller
     {
         if (auth()->user()->is_superuser) {
             // Superusers can see all hearings across organizations
-            $hearings = \App\Models\Hearing::with(['organization', 'region'])->get();
+            $allHearings = \App\Models\Hearing::with(['organization', 'region'])->get();
         } else {
             // Regular admins can only see hearings within their organization
-            $hearings = \App\Models\Hearing::where('organization_id', auth()->user()->organization_id)->get();
+            $allHearings = \App\Models\Hearing::with(['organization', 'region'])
+                ->where('organization_id', auth()->user()->organization_id)
+                ->get();
         }
-        return view('hearings.index', compact('hearings'));
+        
+        // Split hearings into upcoming and past based on start_date
+        $today = now()->startOfDay();
+        $upcomingHearings = $allHearings->filter(function ($hearing) use ($today) {
+            return $hearing->start_date && \Carbon\Carbon::parse($hearing->start_date)->gte($today);
+        })->sortBy('start_date');
+        
+        $pastHearings = $allHearings->filter(function ($hearing) use ($today) {
+            return $hearing->start_date && \Carbon\Carbon::parse($hearing->start_date)->lt($today);
+        })->sortByDesc('start_date');
+        
+        return view('hearings.index', compact('upcomingHearings', 'pastHearings'));
     }
 
     /**
@@ -26,7 +39,18 @@ class HearingController extends Controller
      */
     public function create()
     {
-        return view('hearings.create');
+        // Get regions based on user role
+        if (auth()->user()->is_superuser) {
+            // Superusers can see all regions across organizations
+            $regions = \App\Models\Region::with('organization')->orderBy('name')->get();
+        } else {
+            // Regular admins can only see regions within their organization
+            $regions = \App\Models\Region::where('organization_id', auth()->user()->organization_id)
+                ->orderBy('name')
+                ->get();
+        }
+        
+        return view('hearings.create', compact('regions'));
     }
 
     /**
@@ -34,12 +58,20 @@ class HearingController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'body' => 'required|string',
+                $validated = $request->validate([
+            'street_address' => 'required|string|max:255',
+            'postal_code' => 'required|string|max:20',
+            'rental' => 'required|boolean',
+            'units' => 'required|integer|min:1',
+            'description' => 'required|string',
+            'remote_instructions' => 'required|string',
+            'inperson_instructions' => 'required|string',
+            'comments_email' => 'required|email|max:255',
             'start_date' => 'required|date',
             'start_time' => 'nullable',
-            'region_id' => 'required|exists:regions,id',
+            'end_time' => 'nullable',
+            'organization_id' => 'nullable|exists:organizations,id',
+            'region_id' => 'nullable|exists:regions,id',
             'image_url' => 'nullable|string',
             'more_info_url' => 'nullable|url',
         ]);
@@ -76,7 +108,19 @@ class HearingController extends Controller
     public function edit($id)
     {
         $hearing = \App\Models\Hearing::findOrFail($id);
-        return view('hearings.edit', compact('hearing'));
+        
+        // Get regions based on user role
+        if (auth()->user()->is_superuser) {
+            // Superusers can see all regions across organizations
+            $regions = \App\Models\Region::with('organization')->orderBy('name')->get();
+        } else {
+            // Regular admins can only see regions within their organization
+            $regions = \App\Models\Region::where('organization_id', auth()->user()->organization_id)
+                ->orderBy('name')
+                ->get();
+        }
+        
+        return view('hearings.edit', compact('hearing', 'regions'));
     }
 
     /**
@@ -85,10 +129,17 @@ class HearingController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'body' => 'required|string',
+            'street_address' => 'required|string|max:255',
+            'postal_code' => 'required|string|max:20',
+            'rental' => 'required|boolean',
+            'units' => 'required|integer|min:1',
+            'description' => 'required|string',
+            'remote_instructions' => 'required|string',
+            'inperson_instructions' => 'required|string',
+            'comments_email' => 'required|email|max:255',
             'start_date' => 'required|date',
             'start_time' => 'nullable',
+            'end_time' => 'nullable',
             'organization_id' => 'nullable|exists:organizations,id',
             'region_id' => 'nullable|exists:regions,id',
             'image_url' => 'nullable|string',
