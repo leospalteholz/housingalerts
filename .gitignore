@@ -1,3 +1,10 @@
 /vendor
 .env
 /node_modules
+/public/hot
+/public/build
+/storage/logs
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/testing
+/storage/framework/views
