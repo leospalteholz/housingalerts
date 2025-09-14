@@ -26,10 +26,10 @@ class DatabaseSeeder extends Seeder
 
         // Create superuser (can manage all organizations)
         \App\Models\User::updateOrCreate(
-            [ 'email' => 'root@example.com' ],
+            [ 'email' => 'root@housingalerts.ca' ],
             [
                 'name' => 'Super User',
-                'email' => 'root@example.com',
+                'email' => 'root@housingalerts.ca',
                 'password' => bcrypt('password'),
                 'is_admin' => true,
                 'is_superuser' => true,
@@ -40,10 +40,10 @@ class DatabaseSeeder extends Seeder
         
         // Create regular admin (can only manage within their organization)
         \App\Models\User::updateOrCreate(
-            [ 'email' => 'admin@example.com' ],
+            [ 'email' => 'admin@housingalerts.ca' ],
             [
                 'name' => 'Admin User',
-                'email' => 'admin@example.com',
+                'email' => 'admin@housingalerts.ca',
                 'password' => bcrypt('password'),
                 'is_admin' => true,
                 'is_superuser' => false,
@@ -52,10 +52,10 @@ class DatabaseSeeder extends Seeder
             ]
         );
         \App\Models\User::updateOrCreate(
-            [ 'email' => 'user@example.com' ],
+            [ 'email' => 'user@housingalerts.ca' ],
             [
                 'name' => 'Regular User',
-                'email' => 'user@example.com',
+                'email' => 'user@housingalerts.ca',
                 'password' => bcrypt('password'),
                 'is_admin' => false,
                 'email_verified_at' => now(),

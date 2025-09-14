@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
 
 
@@ -25,30 +25,11 @@ use App\Http\Controllers\RegionController;
 use App\Http\Controllers\HearingController;
 use App\Http\Controllers\OrganizationController;
 
-// Dashboard - accessible by both admins and superusers
+// Dashboard - accessible by all authenticated users
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function() {
-        // Redirect superusers to their dedicated dashboard
-        if (auth()->user()->is_superuser) {
-            return redirect()->route('superuser.dashboard');
-        } 
-        // Redirect admins to their dashboard
-        else if (auth()->user()->is_admin) {
-            return redirect()->route('admin.dashboard');
-        }
-        // Regular users get the standard dashboard
-        return view('dashboard');
-    })->name('dashboard');
-    
-    // Admin dashboard
-    Route::get('/admin/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
-        ->middleware('admin')
-        ->name('admin.dashboard');
-        
-    // Superuser dashboard
-    Route::get('/superuser/dashboard', [App\Http\Controllers\SuperuserDashboardController::class, 'index'])
-        ->middleware('superuser')
-        ->name('superuser.dashboard');
+    // Unified dashboard route that handles all user types
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
+        ->name('dashboard');
 });
 
 // Superuser-only routes
@@ -72,5 +53,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Signup routes
+use App\Http\Controllers\SignupController;
+Route::get('/signup', [SignupController::class, 'showSignupForm'])->name('signup');
+Route::post('/signup', [SignupController::class, 'processSignup'])->name('signup.process');
+Route::get('/signup/regions', [SignupController::class, 'getRegions'])->name('signup.regions');
+Route::get('/signup/thankyou', [SignupController::class, 'showThankYou'])->name('signup.thankyou');
 
 require __DIR__.'/auth.php';

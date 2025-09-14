@@ -15,11 +15,11 @@ class AdminOnly
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if user is authenticated and is admin
-        if (auth()->check() && auth()->user()->is_admin) {
+        // Check if user is authenticated and is admin or superuser
+        if (auth()->check() && (auth()->user()->is_admin || auth()->user()->is_superuser)) {
             return $next($request);
         }
-        // Optionally, redirect to home with error message
-        return redirect('/')->with('error', 'You do not have admin access.');
+        // Redirect to dashboard with error message
+        return redirect()->route('dashboard')->with('error', 'You do not have admin access.');
     }
 }
