@@ -24,6 +24,8 @@ class OrganizationController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:organizations,slug',
             'contact-email' => 'nullable|email',
+            'website_url' => 'nullable|url|max:255',
+            'about' => 'nullable|string|max:1000',
         ]);
         Organization::create($validated);
         return redirect()->route('organizations.index')->with('success', 'Organization created successfully!');
@@ -48,6 +50,8 @@ class OrganizationController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:organizations,slug,' . $organization->id,
             'contact-email' => 'nullable|email',
+            'website_url' => 'nullable|url|max:255',
+            'about' => 'nullable|string|max:1000',
         ]);
         $organization->update($validated);
         return redirect()->route('organizations.index')->with('success', 'Organization updated successfully!');

@@ -7,6 +7,7 @@ use App\Models\Region;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Events\Registered;
 
 class SignupController extends Controller
@@ -45,21 +46,10 @@ class SignupController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'organization_id' => 'required|exists:organizations,id,user_visible,1',
+            'organization_id' => 'required|exists:organizations,id',
             'regions' => 'nullable|array',
             'regions.*' => 'exists:regions,id',
         ]);
-
-        // Additional validation: ensure regions belong to the selected organization
-        if ($request->has('regions') && !empty($request->regions)) {
-            $validRegions = Region::where('organization_id', $request->organization_id)
-                ->whereIn('id', $request->regions)
-                ->count();
-            
-            if ($validRegions !== count($request->regions)) {
-                return back()->withErrors(['regions' => 'Selected regions must belong to the chosen organization.'])->withInput();
-            }
-        }
 
         // Create the user with the provided password
         $user = User::create([
@@ -79,7 +69,11 @@ class SignupController extends Controller
         // Send email verification
         event(new Registered($user));
 
-        return redirect()->route('signup.thankyou');
+        // Log in the user immediately after signup
+        auth()->login($user);
+
+        // Redirect to dashboard instead of thank you page
+        return redirect()->route('dashboard')->with('success', 'Welcome! Your account has been created successfully. Please check your email to verify your address to receive notifications.');
     }
 
     /**

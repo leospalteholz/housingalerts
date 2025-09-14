@@ -24,12 +24,22 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\HearingController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\UserDashboardController;
 
 // Dashboard - accessible by all authenticated users
 Route::middleware(['auth'])->group(function () {
-    // Unified dashboard route that handles all user types
+    // Main dashboard route that routes users to appropriate dashboard
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
         ->name('dashboard');
+    
+    // Specific dashboard routes
+    Route::get('/admin/dashboard', [App\Http\Controllers\AdminDashboardController::class, 'index'])
+        ->middleware('admin')
+        ->name('admin.dashboard');
+    
+    Route::get('/user/dashboard', [App\Http\Controllers\UserDashboardController::class, 'index'])
+        ->name('user.dashboard');
 });
 
 // Superuser-only routes

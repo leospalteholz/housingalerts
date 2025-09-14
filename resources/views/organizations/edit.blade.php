@@ -20,6 +20,14 @@
                 <label for="contact-email" class="block text-gray-700 font-semibold mb-2">Contact Email</label>
                 <input type="email" id="contact-email" name="contact-email" value="{{ old('contact-email', $organization->{'contact-email'}) }}" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
+            <div class="mb-4">
+                <label for="website_url" class="block text-gray-700 font-semibold mb-2">Website URL</label>
+                <input type="url" id="website_url" name="website_url" value="{{ old('website_url', $organization->website_url) }}" placeholder="https://example.com" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-4">
+                <label for="about" class="block text-gray-700 font-semibold mb-2">About</label>
+                <textarea id="about" name="about" rows="4" placeholder="Tell us about your organization..." class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('about', $organization->about) }}</textarea>
+            </div>
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Update</button>
             <a href="{{ route('organizations.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">Cancel</a>
         </form>

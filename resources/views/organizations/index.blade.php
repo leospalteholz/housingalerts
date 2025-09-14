@@ -13,15 +13,30 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Website</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse ($organizations as $organization)
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ $organization->name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ $organization->name }}</div>
+                                @if($organization->about)
+                                    <div class="text-sm text-gray-500">{{ Str::limit($organization->about, 50) }}</div>
+                                @endif
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">{{ $organization->slug }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ $organization->{'contact-email'} }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ $organization->{'contact-email'} ?: '—' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($organization->website_url)
+                                    <a href="{{ $organization->website_url }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline text-sm">
+                                        {{ Str::limit($organization->website_url, 30) }}
+                                    </a>
+                                @else
+                                    —
+                                @endif
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
                                 <a href="{{ route('organizations.show', $organization) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
                                 <a href="{{ route('organizations.edit', $organization) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
@@ -34,7 +49,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-4 text-gray-500">No organizations found.</td>
+                            <td colspan="5" class="px-6 py-4 text-gray-500">No organizations found.</td>
                         </tr>
                     @endforelse
                 </tbody>

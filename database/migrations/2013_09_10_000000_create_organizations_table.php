@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('areas_active')->nullable();
             $table->string('slug')->unique();
             $table->string('contact-email')->nullable();
+            $table->string('website_url')->nullable();
+            $table->text('about')->nullable();
             $table->boolean('user_visible')->default(true);
             $table->timestamps();
         });

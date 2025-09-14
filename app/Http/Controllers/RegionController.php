@@ -36,10 +36,17 @@ class RegionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'comments_email' => 'nullable|email|max:255',
+            'remote_instructions' => 'nullable|string',
+            'inperson_instructions' => 'nullable|string',
         ]);
 
         $region = new \App\Models\Region();
         $region->name = $validated['name'];
+        $region->comments_email = $validated['comments_email'];
+        $region->remote_instructions = $validated['remote_instructions'];
+        $region->inperson_instructions = $validated['inperson_instructions'];
+        $region->organization_id = auth()->user()->organization_id;
         $region->save();
 
         return redirect()->route('regions.index')->with('success', 'Region created successfully!');
