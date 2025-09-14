@@ -38,7 +38,22 @@ class DashboardController extends Controller
             return view('dashboard', compact('stats'));
         }
         
-        // For regular users
-        return view('dashboard');
+        // For regular users, show their monitored regions and upcoming hearings
+        $user = auth()->user();
+        $monitoredRegions = $user->regions()->with('organization')->get();
+        
+        // Get upcoming hearings in the user's monitored regions
+        $upcomingHearings = collect();
+        if ($monitoredRegions->count() > 0) {
+            $regionIds = $monitoredRegions->pluck('id');
+            $upcomingHearings = Hearing::whereIn('region_id', $regionIds)
+                ->where('start_date', '>=', now())
+                ->orderBy('start_date', 'asc')
+                ->with(['region', 'organization'])
+                ->limit(10)
+                ->get();
+        }
+        
+        return view('dashboard', compact('user', 'monitoredRegions', 'upcomingHearings'));
     }
 }
