@@ -9,7 +9,7 @@ class Organization extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['name', 'slug', 'contact-email'];
+    protected $fillable = ['name', 'slug', 'contact-email', 'user_visible'];
 
     public function users() {
         return $this->hasMany(User::class);

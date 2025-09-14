@@ -3,6 +3,18 @@
         {{ __('Register for housing alerts') }}
     </div>
 
+    <!-- Validation Errors -->
+    @if ($errors->any())
+        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <strong>Please fix the following errors:</strong>
+            <ul class="mt-2 list-disc list-inside">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('signup.process') }}" id="signupForm">
         @csrf
 
@@ -18,6 +30,20 @@
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="email" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <!-- Password -->
+        <div class="mt-4">
+            <x-input-label for="password" :value="__('Password')" />
+            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
+            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="mt-4">
+            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+            <x-text-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" />
+            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
         <!-- Organization -->
@@ -36,7 +62,7 @@
 
         <!-- Regions (populated via JavaScript) -->
         <div class="mt-4" id="regions-container" style="display: none;">
-            <x-input-label for="regions" :value="__('Select regions you\'re interested in')" />
+            <x-input-label for="regions" :value="__('Select regions you want to receive notifications about.')" />
             <div class="mt-2 p-2 border rounded-md max-h-60 overflow-y-auto" id="regions-list">
                 <!-- Regions will be populated here via JavaScript -->
                 <div class="text-gray-500 text-sm p-2">Please select an organization first.</div>
@@ -70,8 +96,14 @@
                 regionsContainer.style.display = 'block';
                 
                 // Fetch regions for selected organization
-                fetch(`/signup/regions?organization_id=${organizationId}`)
-                    .then(response => response.json())
+                const url = `{{ route('signup.regions') }}?organization_id=${organizationId}`;
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(regions => {
                         if (regions.length === 0) {
                             regionsList.innerHTML = '<div class="text-gray-500 text-sm p-2">No regions available for this organization.</div>';
@@ -94,7 +126,7 @@
                     })
                     .catch(error => {
                         console.error('Error fetching regions:', error);
-                        regionsList.innerHTML = '<div class="text-red-500 text-sm p-2">Error loading regions. Please try again.</div>';
+                        regionsList.innerHTML = `<div class="text-red-500 text-sm p-2">Error loading regions: ${error.message}. Please try again.</div>`;
                     });
             });
         });

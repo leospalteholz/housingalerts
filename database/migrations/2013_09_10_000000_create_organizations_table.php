@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('areas_active')->nullable();
             $table->string('slug')->unique();
             $table->string('contact-email')->nullable();
+            $table->boolean('user_visible')->default(true);
             $table->timestamps();
         });
     }

@@ -54,11 +54,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Signup routes
+// Signup routes (accessible to guests)
 use App\Http\Controllers\SignupController;
-Route::get('/signup', [SignupController::class, 'showSignupForm'])->name('signup');
-Route::post('/signup', [SignupController::class, 'processSignup'])->name('signup.process');
-Route::get('/signup/regions', [SignupController::class, 'getRegions'])->name('signup.regions');
-Route::get('/signup/thankyou', [SignupController::class, 'showThankYou'])->name('signup.thankyou');
+Route::middleware(['web'])->group(function () {
+    Route::get('/signup', [SignupController::class, 'showSignupForm'])->name('signup');
+    Route::post('/signup', [SignupController::class, 'processSignup'])->name('signup.process');
+    Route::get('/signup/regions', [SignupController::class, 'getRegions'])->name('signup.regions');
+    Route::get('/signup/thankyou', [SignupController::class, 'showThankYou'])->name('signup.thankyou');
+});
 
 require __DIR__.'/auth.php';

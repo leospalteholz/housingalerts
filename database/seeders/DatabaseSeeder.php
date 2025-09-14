@@ -14,14 +14,20 @@ class DatabaseSeeder extends Seeder
     {
         $rootOrg = \App\Models\Organization::updateOrCreate(
             [ 'name' => 'Housing Alerts' ],
-            [ 'slug' => 'root' ]
+            [ 
+                'slug' => 'root',
+                'user_visible' => false  // Hidden from signup - system organization
+            ]
         );
 
-        $org = \App\Models\Organization::updateOrCreate(
+        $hfl = \App\Models\Organization::updateOrCreate(
             [ 'name' => 'Homes for Living' ],
-            [ 'slug' => 'homes-for-living' ],
-            [ 'areas_active' => 'Greater Victoria, BC' ],
-            [ 'contact-email' => 'hello@homesforliving.a' ]
+            [ 
+                'slug' => 'homes-for-living',
+                'areas_active' => 'Greater Victoria, BC',
+                'contact-email' => 'hello@homesforliving.a',
+                'user_visible' => true  // Visible in signup
+            ]
         );
 
         // Create superuser (can manage all organizations)
@@ -48,7 +54,7 @@ class DatabaseSeeder extends Seeder
                 'is_admin' => true,
                 'is_superuser' => false,
                 'email_verified_at' => now(),
-                'organization_id' => $org->id,
+                'organization_id' => $hfl->id,
             ]
         );
         \App\Models\User::updateOrCreate(
@@ -59,8 +65,23 @@ class DatabaseSeeder extends Seeder
                 'password' => bcrypt('password'),
                 'is_admin' => false,
                 'email_verified_at' => now(),
-                'organization_id' => $org->id,
+                'organization_id' => $hfl->id,
             ]
+        );
+
+        \App\Models\Region::updateOrCreate(
+            [ 'name' => 'Victoria', 'organization_id' => $hfl->id ],
+            [ 'name' => 'Victoria', 'organization_id' => $hfl->id ]
+        );
+
+        \App\Models\Region::updateOrCreate(
+            [ 'name' => 'Saanich', 'organization_id' => $hfl->id ],
+            [ 'name' => 'Saanich', 'organization_id' => $hfl->id ]
+        );
+
+        \App\Models\Hearing::updateOrCreate(
+            [ 'title' => 'City Council Meeting', 'organization_id' => $hfl->id ],
+            [ 'start_date' => now()->addDays(30) ]
         );
     }
 }
