@@ -14,10 +14,16 @@ class HearingController extends Controller
         if (auth()->user()->is_superuser) {
             // Superusers can see all hearings across organizations
             $allHearings = \App\Models\Hearing::with(['organization', 'region'])->get();
-        } else {
+        } elseif (auth()->user()->is_admin) {
             // Regular admins can only see hearings within their organization
             $allHearings = \App\Models\Hearing::with(['organization', 'region'])
                 ->where('organization_id', auth()->user()->organization_id)
+                ->get();
+        } else {
+            // Regular users can only see hearings in their monitored regions
+            $monitoredRegionIds = auth()->user()->regions()->pluck('regions.id');
+            $allHearings = \App\Models\Hearing::with(['organization', 'region'])
+                ->whereIn('region_id', $monitoredRegionIds)
                 ->get();
         }
         
@@ -123,6 +129,23 @@ class HearingController extends Controller
     public function show(string $id)
     {
         $hearing = \App\Models\Hearing::findOrFail($id);
+        
+        // Check access permissions
+        if (auth()->user()->is_superuser) {
+            // Superusers can view any hearing
+        } elseif (auth()->user()->is_admin) {
+            // Admins can only view hearings in their organization
+            if ($hearing->organization_id !== auth()->user()->organization_id) {
+                abort(403, 'You do not have permission to view this hearing.');
+            }
+        } else {
+            // Regular users can only view hearings in their monitored regions
+            $monitoredRegionIds = auth()->user()->regions()->pluck('regions.id');
+            if (!$monitoredRegionIds->contains($hearing->region_id)) {
+                abort(403, 'You can only view hearings in regions you are monitoring.');
+            }
+        }
+        
         return view('hearings.show', compact('hearing'));
     }
 

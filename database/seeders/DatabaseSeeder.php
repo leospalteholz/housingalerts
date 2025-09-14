@@ -25,7 +25,9 @@ class DatabaseSeeder extends Seeder
             [ 
                 'slug' => 'homes-for-living',
                 'areas_active' => 'Greater Victoria, BC',
-                'contact-email' => 'hello@homesforliving.a',
+                'about' => 'Homes for Living is a non-profit volunteer organization dedicated to advocating for affordable housing solutions in the Greater Victoria area. We work closely with local governments, developers, and community members to create sustainable and inclusive housing options for all residents.',
+                'website_url' => 'https://homesforliving.ca',
+                'contact_email' => 'hello@homesforliving.ca',
                 'user_visible' => true  // Visible in signup
             ]
         );

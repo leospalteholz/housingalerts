@@ -13,7 +13,7 @@
                 <strong>Slug:</strong> {{ $organization->slug }}
             </div>
             <div class="mb-4">
-                <strong>Contact Email:</strong> {{ $organization->{'contact-email'} ?: 'Not provided' }}
+                <strong>Contact Email:</strong> {{ $organization->{'contact_email'} ?: 'Not provided' }}
             </div>
             <div class="mb-4">
                 <strong>Website:</strong> 

@@ -14,6 +14,16 @@ class UserDashboardController extends Controller
         // For regular users, show their monitored regions and upcoming hearings
         $user = auth()->user();
         $monitoredRegions = $user->regions()->with('organization')->get();
+        $monitoredRegionIds = $monitoredRegions->pluck('id');
+        
+        // Get all regions in the user's organization with monitoring status
+        $allRegions = Region::where('organization_id', $user->organization_id)
+            ->with('organization')
+            ->get()
+            ->map(function ($region) use ($monitoredRegionIds) {
+                $region->is_monitored = $monitoredRegionIds->contains($region->id);
+                return $region;
+            });
         
         // Get upcoming hearings in the user's monitored regions
         $upcomingHearings = collect();
@@ -27,6 +37,6 @@ class UserDashboardController extends Controller
                 ->get();
         }
         
-        return view('user.dashboard', compact('user', 'monitoredRegions', 'upcomingHearings'));
+        return view('user.dashboard', compact('user', 'monitoredRegions', 'upcomingHearings', 'allRegions'));
     }
 }

@@ -15,9 +15,19 @@ class RegionController extends Controller
             // Superusers can see all regions across organizations
             $regions = \App\Models\Region::with('organization')->get();
         } else {
-            // Regular admins can only see regions within their organization
+            // All authenticated users can see regions within their organization
             $regions = \App\Models\Region::where('organization_id', auth()->user()->organization_id)->get();
         }
+        
+        // For regular users, also get their monitored regions to show which ones they're following
+        if (!auth()->user()->is_admin) {
+            $monitoredRegionIds = auth()->user()->regions()->pluck('regions.id');
+            $regions = $regions->map(function ($region) use ($monitoredRegionIds) {
+                $region->is_monitored = $monitoredRegionIds->contains($region->id);
+                return $region;
+            });
+        }
+        
         return view('regions.index', compact('regions'));
     }
 
@@ -57,7 +67,25 @@ class RegionController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $region = \App\Models\Region::with(['organization', 'hearings'])->findOrFail($id);
+        
+        // Check access permissions
+        if (auth()->user()->is_superuser) {
+            // Superusers can view any region
+        } else {
+            // All other users can only view regions in their organization
+            if ($region->organization_id !== auth()->user()->organization_id) {
+                abort(403, 'You do not have permission to view this region.');
+            }
+        }
+        
+        // For regular users, check if they're monitoring this region
+        $isMonitored = false;
+        if (!auth()->user()->is_admin) {
+            $isMonitored = auth()->user()->regions()->where('regions.id', $region->id)->exists();
+        }
+        
+        return view('regions.show', compact('region', 'isMonitored'));
     }
 
     /**
@@ -103,5 +131,40 @@ class RegionController extends Controller
         
         $region->delete();
         return redirect()->route('regions.index')->with('success', 'Region deleted successfully!');
+    }
+
+    /**
+     * Subscribe user to a region
+     */
+    public function subscribe($id)
+    {
+        $region = \App\Models\Region::findOrFail($id);
+        $user = auth()->user();
+        
+        // Check if user can access this region (same organization)
+        if (!$user->is_superuser && $region->organization_id !== $user->organization_id) {
+            return response()->json(['error' => 'You can only subscribe to regions in your organization.'], 403);
+        }
+        
+        // Add user to region if not already subscribed
+        if (!$user->regions()->where('regions.id', $region->id)->exists()) {
+            $user->regions()->attach($region->id);
+        }
+        
+        return response()->json(['success' => true, 'message' => 'Successfully subscribed to ' . $region->name]);
+    }
+
+    /**
+     * Unsubscribe user from a region
+     */
+    public function unsubscribe($id)
+    {
+        $region = \App\Models\Region::findOrFail($id);
+        $user = auth()->user();
+        
+        // Remove user from region
+        $user->regions()->detach($region->id);
+        
+        return response()->json(['success' => true, 'message' => 'Successfully unsubscribed from ' . $region->name]);
     }
 }

@@ -1,20 +1,53 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Dashboard
-            </h2>
-            <div class="text-sm text-gray-600">
-                Welcome back, {{ auth()->user()->name }}
-            </div>
-        </div>
-    </x-slot>
-
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-8">
+            <!-- Welcome Section -->
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                    Welcome {{ auth()->user()->name }}!
+                </h1>
+                <div class="max-w-3xl mx-auto">
+                    <p class="text-lg text-gray-600 mb-6">
+                        Thank you for signing up to help support housing in your community. 
+                        Hearing tracking is provided by <strong>{{ auth()->user()->organization->name }}</strong>.
+                    </p>
+                    
+                    @if(auth()->user()->organization->about)
+                        <div class="bg-blue-50 rounded-lg p-6 mb-6">
+                            <div class="text-gray-700 leading-relaxed">
+                                {{ auth()->user()->organization->about }}
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4 text-sm text-gray-600">
+                        <span>Want to learn more?</span>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            @if(auth()->user()->organization->contact_email)
+                                <a href="mailto:{{ auth()->user()->organization->contact_email }}" 
+                                   class="inline-flex items-center px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    Contact Us
+                                </a>
+                            @endif
+                            @if(auth()->user()->organization->website_url)
+                                <a href="{{ auth()->user()->organization->website_url }}" target="_blank"
+                                   class="inline-flex items-center px-3 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                    Visit Website
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Email Verification Status -->
             @if(!auth()->user()->hasVerifiedEmail())
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
@@ -39,285 +72,312 @@
                 </div>
             @endif
 
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white overflow-hidden shadow rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Monitored Regions</dt>
-                                    <dd class="text-lg font-medium text-gray-900">{{ $monitoredRegions->count() }}</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Upcoming Hearings Section -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900">Upcoming Hearings in Your Regions</h2>
+                    <p class="text-sm text-gray-600 mt-1">Housing development and policy hearings you should know about</p>
                 </div>
-
-                <div class="bg-white overflow-hidden shadow rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                @if($upcomingHearings->count() > 0)
+                    <div class="divide-y divide-gray-200">
+                        @foreach($upcomingHearings->take(5) as $hearing)
+                            <div class="px-6 py-4 hover:bg-gray-50 transition">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <h3 class="text-lg font-medium text-gray-900 mb-2">
+                                            {{ $hearing->display_title }}
+                                        </h3>
+                                        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
+                                            @if($hearing->start_date)
+                                                <div class="flex items-center">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                    </svg>
+                                                    {{ \Carbon\Carbon::parse($hearing->start_date)->format('M j, Y \a\t g:i A') }}
+                                                </div>
+                                            @endif
+                                            @if($hearing->region)
+                                                <div class="flex items-center">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                                    </svg>
+                                                    {{ $hearing->region->name }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $hearing->isDevelopment() ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                                {{ $hearing->isDevelopment() ? 'Development' : 'Policy' }}
+                                            </span>
+                                            @if($hearing->isDevelopment() && $hearing->units)
+                                                <span class="text-sm text-gray-600">{{ $hearing->units }} units</span>
+                                            @endif
+                                            @if($hearing->isDevelopment() && $hearing->rental !== null)
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $hearing->rental ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800' }}">
+                                                    {{ $hearing->rental ? 'Rental' : 'Condo' }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <a href="{{ route('hearings.show', $hearing) }}" 
+                                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
+                                            View Details
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Upcoming Hearings</dt>
-                                    <dd class="text-lg font-medium text-gray-900">{{ $upcomingHearings->count() }}</dd>
-                                </dl>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow rounded-lg">
-                    <div class="p-5">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Organization</dt>
-                                    <dd class="text-lg font-medium text-gray-900">{{ auth()->user()->organization->name }}</dd>
-                                </dl>
-                            </div>
+                    @if($upcomingHearings->count() > 5)
+                        <div class="px-6 py-4 bg-gray-50 text-center">
+                            <a href="{{ route('hearings.index') }}" 
+                               class="text-blue-600 hover:text-blue-800 font-medium">
+                                View all {{ $upcomingHearings->count() }} upcoming hearings →
+                            </a>
                         </div>
+                    @endif
+                @else
+                    <div class="px-6 py-12 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No upcoming hearings</h3>
+                        @if($monitoredRegions->count() > 0)
+                            <p class="text-gray-600 mb-4">There are no upcoming hearings in your monitored regions.</p>
+                        @else
+                            <p class="text-gray-600 mb-4">Start monitoring regions to see upcoming hearings here.</p>
+                            <a href="{{ route('regions.index') }}" 
+                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition">
+                                Browse Regions
+                            </a>
+                        @endif
                     </div>
-                </div>
+                @endif
             </div>
 
-            <!-- Monitored Regions -->
+            <!-- Region Subscription Management -->
             <div class="bg-white shadow rounded-lg">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">Your Monitored Regions</h3>
-                        <a href="{{ route('regions.index') }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            Browse All Regions
-                        </a>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900">Manage Your Region Subscriptions</h2>
+                            <p class="text-sm text-gray-600 mt-1">Select regions to monitor for housing developments and policy changes</p>
+                        </div>
                     </div>
                 </div>
+                
+                <!-- Success/Error Messages -->
+                <div id="subscription-message" class="hidden mx-6 mt-4 p-4 rounded-md"></div>
+                
                 <div class="px-6 py-4">
-                    @if($monitoredRegions->count() > 0)
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            @foreach($monitoredRegions as $region)
-                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex-1">
-                                            <h4 class="text-sm font-medium text-gray-900">{{ $region->name }}</h4>
+                    @if($allRegions->count() > 0)
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach($allRegions as $region)
+                                <div class="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="flex-shrink-0 mt-1">
+                                            <label class="inline-flex items-center">
+                                                <input type="checkbox" 
+                                                       class="region-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" 
+                                                       data-region-id="{{ $region->id }}"
+                                                       data-region-name="{{ $region->name }}"
+                                                       {{ $region->is_monitored ? 'checked' : '' }}>
+                                                <span class="sr-only">Subscribe to {{ $region->name }}</span>
+                                            </label>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between">
+                                                <h3 class="text-sm font-medium text-gray-900">{{ $region->name }}</h3>
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                    {{ $region->hearings->count() }} hearings
+                                                </span>
+                                            </div>
                                             <p class="text-sm text-gray-500 mt-1">{{ $region->organization->name }}</p>
                                             @if($region->description)
-                                                <p class="text-xs text-gray-600 mt-2">{{ Str::limit($region->description, 100) }}</p>
+                                                <p class="text-xs text-gray-600 mt-2">{{ Str::limit($region->description, 120) }}</p>
                                             @endif
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M10 2L3 7v11a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V7l-7-5z"/>
-                                            </svg>
+                                            
+                                            <!-- Subscription Status -->
+                                            <div class="mt-2">
+                                                <span class="subscription-status inline-flex items-center text-xs" data-region-id="{{ $region->id }}">
+                                                    @if($region->is_monitored)
+                                                        <svg class="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                        <span class="text-green-700 font-medium">Subscribed</span>
+                                                    @else
+                                                        <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                                        </svg>
+                                                        <span class="text-gray-500">Not subscribed</span>
+                                                    @endif
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
                     @else
-                        <div class="text-center py-8">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <div class="text-center py-12">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                             </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No regions monitored</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by selecting regions to monitor for hearing notifications.</p>
-                            <div class="mt-6">
-                                <a href="{{ route('regions.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    <svg class="-ml-1 mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                    </svg>
-                                    Browse Regions
-                                </a>
-                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No regions available</h3>
+                            <p class="text-gray-600">There are no regions available for subscription in your organization yet.</p>
                         </div>
                     @endif
                 </div>
             </div>
 
-            <!-- Upcoming Hearings -->
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">Upcoming Hearings in Your Regions</h3>
-                        <a href="{{ route('hearings.index') }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            View All Hearings
-                        </a>
-                    </div>
-                </div>
-                @if($upcomingHearings->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title/Address</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Region</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($upcomingHearings as $hearing)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-gray-900">
-                                                {{ $hearing->display_title }}
-                                            </div>
-                                            @if($hearing->isDevelopment() && $hearing->postal_code)
-                                                <div class="text-sm text-gray-500">{{ $hearing->postal_code }}</div>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $hearing->isDevelopment() ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
-                                                {{ $hearing->isDevelopment() ? 'Development' : 'Policy' }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($hearing->isDevelopment())
-                                                <div class="text-sm text-gray-900">
-                                                    @if($hearing->rental !== null)
-                                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $hearing->rental ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800' }}">
-                                                            {{ $hearing->rental ? 'Rental' : 'Condo' }}
-                                                        </span>
-                                                    @endif
-                                                    @if($hearing->units)
-                                                        <span class="ml-2 text-sm text-gray-600">{{ $hearing->units }} units</span>
-                                                    @endif
-                                                </div>
-                                            @else
-                                                <div class="text-sm text-gray-600">Policy Hearing</div>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($hearing->region)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                    {{ $hearing->region->name }}
-                                                </span>
-                                            @else
-                                                <span class="text-gray-500">No region</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($hearing->start_date)
-                                                <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($hearing->start_date)->format('M j, Y') }}</div>
-                                                <div class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($hearing->start_date)->format('g:i A') }}</div>
-                                            @else
-                                                <span class="text-gray-500">&mdash;</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <a href="{{ route('hearings.show', $hearing) }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                View Details
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="px-6 py-8">
-                        <div class="text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No upcoming hearings</h3>
-                            @if($monitoredRegions->count() > 0)
-                                <p class="mt-1 text-sm text-gray-500">There are no upcoming hearings in your monitored regions.</p>
-                            @else
-                                <p class="mt-1 text-sm text-gray-500">Start monitoring regions to see upcoming hearings here.</p>
-                                <div class="mt-6">
-                                    <a href="{{ route('regions.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                        Browse Regions
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-            </div>
-
             <!-- Quick Actions -->
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Quick Actions</h3>
+            <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4 text-center">What would you like to do?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="{{ route('hearings.index') }}" 
+                       class="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition text-center">
+                        <div class="text-blue-600 mb-2">
+                            <svg class="h-8 w-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-medium text-gray-900 mb-1">View All Hearings</h3>
+                        <p class="text-sm text-gray-600">See all development and policy hearings</p>
+                    </a>
+
+                    <a href="{{ route('regions.index') }}" 
+                       class="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition text-center">
+                        <div class="text-green-600 mb-2">
+                            <svg class="h-8 w-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-medium text-gray-900 mb-1">Manage Regions</h3>
+                        <p class="text-sm text-gray-600">Add or remove monitored regions</p>
+                    </a>
+
+                    <a href="{{ route('profile.edit') }}" 
+                       class="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition text-center">
+                        <div class="text-purple-600 mb-2">
+                            <svg class="h-8 w-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-medium text-gray-900 mb-1">Update Profile</h3>
+                        <p class="text-sm text-gray-600">Manage your account settings</p>
+                    </a>
                 </div>
-                <div class="px-6 py-4">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <a href="{{ route('regions.index') }}" class="group relative bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
-                            <div>
-                                <span class="rounded-lg inline-flex p-3 bg-blue-50 text-blue-700 ring-4 ring-white">
-                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    </svg>
-                                </span>
-                            </div>
-                            <div class="mt-4">
-                                <h3 class="text-lg font-medium text-gray-900">Browse Regions</h3>
-                                <p class="mt-2 text-sm text-gray-500">Explore and monitor housing regions for hearing notifications.</p>
-                            </div>
-                        </a>
-
-                        <a href="{{ route('hearings.index') }}" class="group relative bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
-                            <div>
-                                <span class="rounded-lg inline-flex p-3 bg-green-50 text-green-700 ring-4 ring-white">
-                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </span>
-                            </div>
-                            <div class="mt-4">
-                                <h3 class="text-lg font-medium text-gray-900">View All Hearings</h3>
-                                <p class="mt-2 text-sm text-gray-500">See all development and policy hearings in your areas.</p>
-                            </div>
-                        </a>
-
-                        <a href="{{ route('profile.edit') }}" class="group relative bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
-                            <div>
-                                <span class="rounded-lg inline-flex p-3 bg-purple-50 text-purple-700 ring-4 ring-white">
-                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                </span>
-                            </div>
-                            <div class="mt-4">
-                                <h3 class="text-lg font-medium text-gray-900">Update Profile</h3>
-                                <p class="mt-2 text-sm text-gray-500">Manage your account settings and preferences.</p>
-                            </div>
-                        </a>
-
-                        <a href="{{ route('organizations.show', auth()->user()->organization_id) }}" class="group relative bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
-                            <div>
-                                <span class="rounded-lg inline-flex p-3 bg-orange-50 text-orange-700 ring-4 ring-white">
-                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
-                                </span>
-                            </div>
-                            <div class="mt-4">
-                                <h3 class="text-lg font-medium text-gray-900">Organization Info</h3>
-                                <p class="mt-2 text-sm text-gray-500">View details about your organization and team.</p>
-                            </div>
-                        </a>
-                    </div>
-                </</div>
             </div>
         </div>
     </div>
+
+    <!-- JavaScript for handling region subscriptions -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('.region-checkbox');
+            const messageDiv = document.getElementById('subscription-message');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const regionId = this.dataset.regionId;
+                    const regionName = this.dataset.regionName;
+                    const isChecked = this.checked;
+                    
+                    // Disable checkbox during request
+                    this.disabled = true;
+                    
+                    const url = isChecked 
+                        ? `/regions/${regionId}/subscribe`
+                        : `/regions/${regionId}/unsubscribe`;
+                    
+                    const method = isChecked ? 'POST' : 'DELETE';
+                    
+                    fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update status indicator
+                            updateSubscriptionStatus(regionId, isChecked);
+                            
+                            // Show success message
+                            showMessage(data.message, 'success');
+                        } else {
+                            // Revert checkbox if failed
+                            this.checked = !isChecked;
+                            showMessage(data.error || 'An error occurred', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Revert checkbox if failed
+                        this.checked = !isChecked;
+                        showMessage('An error occurred while updating your subscription', 'error');
+                    })
+                    .finally(() => {
+                        // Re-enable checkbox
+                        this.disabled = false;
+                    });
+                });
+            });
+            
+            function updateSubscriptionStatus(regionId, isSubscribed) {
+                const statusElement = document.querySelector(`[data-region-id="${regionId}"].subscription-status`);
+                
+                if (isSubscribed) {
+                    statusElement.innerHTML = `
+                        <svg class="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-green-700 font-medium">Subscribed</span>
+                    `;
+                } else {
+                    statusElement.innerHTML = `
+                        <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <span class="text-gray-500">Not subscribed</span>
+                    `;
+                }
+            }
+            
+            function showMessage(message, type) {
+                const bgClass = type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
+                const textClass = type === 'success' ? 'text-green-800' : 'text-red-800';
+                const iconClass = type === 'success' ? 'text-green-400' : 'text-red-400';
+                
+                const icon = type === 'success' 
+                    ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>'
+                    : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>';
+                
+                messageDiv.className = `border rounded-md p-4 ${bgClass}`;
+                messageDiv.innerHTML = `
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 ${iconClass}" viewBox="0 0 20 20" fill="currentColor">
+                                ${icon}
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm ${textClass}">${message}</p>
+                        </div>
+                    </div>
+                `;
+                messageDiv.classList.remove('hidden');
+                
+                // Auto-hide success messages after 3 seconds
+                if (type === 'success') {
+                    setTimeout(() => {
+                        messageDiv.classList.add('hidden');
+                    }, 3000);
+                }
+            }
+        });
+    </script>
 </x-app-layout>

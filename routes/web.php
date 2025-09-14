@@ -52,10 +52,25 @@ Route::middleware(['auth', 'superuser'])->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     // Region management routes
     Route::resource('regions', RegionController::class);
-    // Hearing management routes
-    Route::resource('hearings', HearingController::class);
+    // Hearing management routes (create, edit, update, delete)
+    Route::resource('hearings', HearingController::class)->except(['index', 'show']);
     // User management routes
     Route::resource('users', UserController::class);
+});
+
+// Routes accessible to all authenticated users
+Route::middleware(['auth'])->group(function () {
+    // Allow all users to view hearings list and individual hearings
+    Route::get('/hearings', [HearingController::class, 'index'])->name('hearings.index');
+    Route::get('/hearings/{hearing}', [HearingController::class, 'show'])->name('hearings.show');
+    
+    // Allow all users to view regions list (for monitoring)
+    Route::get('/regions', [RegionController::class, 'index'])->name('regions.index');
+    Route::get('/regions/{region}', [RegionController::class, 'show'])->name('regions.show');
+    
+    // Region subscription endpoints for regular users
+    Route::post('/regions/{region}/subscribe', [RegionController::class, 'subscribe'])->name('regions.subscribe');
+    Route::delete('/regions/{region}/unsubscribe', [RegionController::class, 'unsubscribe'])->name('regions.unsubscribe');
 });
 
 Route::middleware('auth')->group(function () {
