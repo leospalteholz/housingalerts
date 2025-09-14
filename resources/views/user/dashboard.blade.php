@@ -3,29 +3,33 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-8">
             <!-- Welcome Section -->
             <div class="text-center">
-                <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                <h1 class="text-4xl font-bold text-gray-900 mb-6">
                     Welcome {{ auth()->user()->name }}!
                 </h1>
-                <div class="max-w-3xl mx-auto">
-                    <p class="text-lg text-gray-600 mb-6">
-                        Thank you for signing up to help support housing in your community. 
-                        Hearing tracking is provided by <strong>{{ auth()->user()->organization->name }}</strong>.
-                    </p>
+                <p class="text-lg text-gray-600 mb-8">
+                    Thank you for signing up to help support housing in your community. Hearing tracking is provided by:
+                </p>
+            </div>
+
+            <!-- Organization Information Card -->
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center">
+                        {{ auth()->user()->organization->name }}
+                    </h2>
                     
                     @if(auth()->user()->organization->about)
-                        <div class="bg-blue-50 rounded-lg p-6 mb-6">
-                            <div class="text-gray-700 leading-relaxed">
-                                {{ auth()->user()->organization->about }}
-                            </div>
+                        <div class="text-gray-700 leading-relaxed mb-6 text-center">
+                            {{ auth()->user()->organization->about }}
                         </div>
                     @endif
 
-                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4 text-sm text-gray-600">
-                        <span>Want to learn more?</span>
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                        <span class="text-sm text-gray-600">Want to learn more?</span>
                         <div class="flex flex-wrap justify-center gap-4">
                             @if(auth()->user()->organization->contact_email)
                                 <a href="mailto:{{ auth()->user()->organization->contact_email }}" 
-                                   class="inline-flex items-center px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition">
+                                   class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                     </svg>
@@ -34,9 +38,9 @@
                             @endif
                             @if(auth()->user()->organization->website_url)
                                 <a href="{{ auth()->user()->organization->website_url }}" target="_blank"
-                                   class="inline-flex items-center px-3 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition">
+                                   class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                     </svg>
                                     Visit Website
                                 </a>
@@ -57,7 +61,7 @@
                         <div class="ml-3">
                             <p class="text-sm text-yellow-700">
                                 <strong>Please verify your email address.</strong> 
-                                We've sent a verification link to your email. Check your inbox and click the link to verify your account.
+                                Check your inbox and click the link to verify your account.
                             </p>
                             <div class="mt-2">
                                 <form method="POST" action="{{ route('verification.send') }}" class="inline">
