@@ -26,6 +26,7 @@ use App\Http\Controllers\HearingController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\NotificationSettingsController;
 
 // Dashboard - accessible by all authenticated users
 Route::middleware(['auth'])->group(function () {
@@ -40,6 +41,12 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/user/dashboard', [App\Http\Controllers\UserDashboardController::class, 'index'])
         ->name('user.dashboard');
+    
+    // Notification settings
+    Route::get('/notification-settings', [NotificationSettingsController::class, 'show'])
+        ->name('notification-settings');
+    Route::post('/notification-settings', [NotificationSettingsController::class, 'update'])
+        ->name('notification-settings.update');
 });
 
 // Superuser-only routes

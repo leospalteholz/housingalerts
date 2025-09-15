@@ -62,4 +62,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function regions() {
         return $this->belongsToMany(Region::class, 'user_region');
     }
+
+    /**
+     * Get the user's notification settings.
+     */
+    public function notificationSettings()
+    {
+        return $this->hasOne(UserNotificationSettings::class);
+    }
+
+    /**
+     * Get notification settings, creating default ones if they don't exist.
+     */
+    public function getNotificationSettings(): UserNotificationSettings
+    {
+        return UserNotificationSettings::getOrCreateForUser($this);
+    }
 }
