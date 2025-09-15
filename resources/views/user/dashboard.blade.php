@@ -123,11 +123,14 @@
                                             @endif
                                         </div>
                                     </div>
-                                    <div class="ml-4">
+                                    <div class="ml-4 flex gap-2">
                                         <a href="{{ route('hearings.show', $hearing) }}" 
                                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
                                             View Details
                                         </a>
+                                        
+                                        <!-- Add to Calendar Dropdown -->
+                                        <x-calendar-button :hearing="$hearing" compact="true" />
                                     </div>
                                 </div>
                             </div>
@@ -388,4 +391,5 @@
             }
         });
     </script>
+    <script src="{{ asset('js/calendar-button.js') }}"></script>
 </x-app-layout>
