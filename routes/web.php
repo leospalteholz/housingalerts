@@ -64,13 +64,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/hearings', [HearingController::class, 'index'])->name('hearings.index');
     Route::get('/hearings/{hearing}', [HearingController::class, 'show'])->name('hearings.show');
     
+    // Calendar functionality for hearings
+    Route::get('/hearings/{hearing}/calendar/{provider}', [HearingController::class, 'addToCalendar'])->name('hearings.calendar');
+    Route::get('/hearings/{hearing}/calendar.ics', [HearingController::class, 'downloadIcs'])->name('hearings.ics');
+    
     // Allow all users to view regions list (for monitoring)
     Route::get('/regions', [RegionController::class, 'index'])->name('regions.index');
     Route::get('/regions/{region}', [RegionController::class, 'show'])->name('regions.show');
     
     // Region subscription endpoints for regular users
-    Route::post('/regions/{region}/subscribe', [RegionController::class, 'subscribe'])->name('regions.subscribe');
-    Route::delete('/regions/{region}/unsubscribe', [RegionController::class, 'unsubscribe'])->name('regions.unsubscribe');
+    Route::post('/regions/{id}/subscribe', [RegionController::class, 'subscribe'])->name('regions.subscribe');
+    Route::post('/regions/{id}/unsubscribe', [RegionController::class, 'unsubscribe'])->name('regions.unsubscribe');
 });
 
 Route::middleware('auth')->group(function () {

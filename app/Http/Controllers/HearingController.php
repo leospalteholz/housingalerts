@@ -235,4 +235,186 @@ class HearingController extends Controller
         $hearing->delete();
         return redirect()->route('hearings.index')->with('success', 'Hearing deleted successfully!');
     }
+
+    /**
+     * Add hearing to calendar - redirect to calendar service
+     */
+    public function addToCalendar(\App\Models\Hearing $hearing, $provider)
+    {
+        $url = $this->generateCalendarUrl($hearing, $provider);
+        return redirect($url);
+    }
+
+    /**
+     * Download ICS file for hearing
+     */
+    public function downloadIcs(\App\Models\Hearing $hearing)
+    {
+        $icsContent = $this->generateIcsContent($hearing);
+        $filename = 'hearing-' . $hearing->id . '.ics';
+        
+        return response($icsContent)
+            ->header('Content-Type', 'text/calendar; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
+
+    /**
+     * Generate calendar URL for different providers
+     */
+    private function generateCalendarUrl(\App\Models\Hearing $hearing, $provider)
+    {
+        $startDateTime = $this->getHearingDateTime($hearing, 'start');
+        $endDateTime = $this->getHearingDateTime($hearing, 'end');
+        $title = $hearing->display_title;
+        $description = $this->formatHearingDescription($hearing);
+        $location = $this->getHearingLocation($hearing);
+
+        switch ($provider) {
+            case 'google':
+                return "https://calendar.google.com/calendar/render?" . http_build_query([
+                    'action' => 'TEMPLATE',
+                    'text' => $title,
+                    'dates' => $startDateTime . '/' . $endDateTime,
+                    'details' => $description,
+                    'location' => $location,
+                    'ctz' => config('app.timezone', 'UTC')
+                ]);
+
+            case 'outlook':
+                return "https://outlook.live.com/calendar/0/deeplink/compose?" . http_build_query([
+                    'subject' => $title,
+                    'startdt' => \Carbon\Carbon::parse($startDateTime)->toISOString(),
+                    'enddt' => \Carbon\Carbon::parse($endDateTime)->toISOString(),
+                    'body' => $description,
+                    'location' => $location
+                ]);
+
+            case 'yahoo':
+                $duration = \Carbon\Carbon::parse($startDateTime)->diffInMinutes(\Carbon\Carbon::parse($endDateTime));
+                $durationFormatted = sprintf('%02d%02d', floor($duration / 60), $duration % 60);
+                
+                return "https://calendar.yahoo.com/?" . http_build_query([
+                    'v' => 60,
+                    'title' => $title,
+                    'st' => $startDateTime,
+                    'dur' => $durationFormatted,
+                    'desc' => $description,
+                    'in_loc' => $location
+                ]);
+
+            default:
+                abort(404, 'Calendar provider not supported');
+        }
+    }
+
+    /**
+     * Generate ICS file content
+     */
+    private function generateIcsContent(\App\Models\Hearing $hearing)
+    {
+        $startDateTime = $this->getHearingDateTime($hearing, 'start');
+        $endDateTime = $this->getHearingDateTime($hearing, 'end');
+        $title = $hearing->display_title;
+        $description = $this->formatHearingDescription($hearing);
+        $location = $this->getHearingLocation($hearing);
+        $uid = 'hearing-' . $hearing->id . '@' . request()->getHost();
+        $timestamp = now()->format('Ymd\THis\Z');
+
+        $ics = "BEGIN:VCALENDAR\r\n";
+        $ics .= "VERSION:2.0\r\n";
+        $ics .= "PRODID:-//Housing Alerts//Housing Alerts//EN\r\n";
+        $ics .= "BEGIN:VEVENT\r\n";
+        $ics .= "UID:" . $uid . "\r\n";
+        $ics .= "DTSTAMP:" . $timestamp . "\r\n";
+        $ics .= "DTSTART:" . $startDateTime . "\r\n";
+        $ics .= "DTEND:" . $endDateTime . "\r\n";
+        $ics .= "SUMMARY:" . $this->escapeIcsText($title) . "\r\n";
+        $ics .= "DESCRIPTION:" . $this->escapeIcsText($description) . "\r\n";
+        $ics .= "LOCATION:" . $this->escapeIcsText($location) . "\r\n";
+        $ics .= "END:VEVENT\r\n";
+        $ics .= "END:VCALENDAR\r\n";
+
+        return $ics;
+    }
+
+    /**
+     * Get formatted datetime for hearing
+     */
+    private function getHearingDateTime(\App\Models\Hearing $hearing, $type = 'start')
+    {
+        if (!$hearing->start_date) {
+            // Default to today if no date set
+            $date = now()->format('Y-m-d');
+        } else {
+            $date = \Carbon\Carbon::parse($hearing->start_date)->format('Y-m-d');
+        }
+
+        if ($type === 'start' && $hearing->start_time) {
+            $time = $hearing->start_time;
+        } elseif ($type === 'end' && $hearing->end_time) {
+            $time = $hearing->end_time;
+        } else {
+            // Default times
+            $time = $type === 'start' ? '10:00:00' : '11:00:00';
+        }
+
+        return \Carbon\Carbon::parse($date . ' ' . $time)->utc()->format('Ymd\THis\Z');
+    }
+
+    /**
+     * Format hearing description for calendar
+     */
+    private function formatHearingDescription(\App\Models\Hearing $hearing)
+    {
+        $description = $hearing->description ?: '';
+        
+        // Add instructions for participation
+        if ($hearing->remote_instructions || $hearing->inperson_instructions) {
+            $description .= "\n\n--- PARTICIPATION INSTRUCTIONS ---";
+            
+            if ($hearing->remote_instructions) {
+                $description .= "\n\nVIRTUAL PARTICIPATION:\n" . $hearing->remote_instructions;
+            }
+            
+            if ($hearing->inperson_instructions) {
+                $description .= "\n\nIN-PERSON PARTICIPATION:\n" . $hearing->inperson_instructions;
+            }
+        }
+        
+        if ($hearing->comments_email) {
+            $description .= "\n\nCOMMENTS EMAIL: " . $hearing->comments_email;
+        }
+        
+        if ($hearing->more_info_url) {
+            $description .= "\n\nMORE INFORMATION: " . $hearing->more_info_url;
+        }
+
+        return trim($description);
+    }
+
+    /**
+     * Get hearing location for calendar
+     */
+    private function getHearingLocation(\App\Models\Hearing $hearing)
+    {
+        // Return empty location - instructions will be in the description
+        return '';
+    }
+
+    /**
+     * Escape text for ICS format
+     */
+    private function escapeIcsText($text)
+    {
+        // First normalize line endings to \n
+        $text = str_replace(["\r\n", "\r"], "\n", $text);
+        
+        // Then escape special characters
+        $text = str_replace(["\\", ",", ";"], ["\\\\", "\\,", "\\;"], $text);
+        
+        // Finally convert \n to proper ICS line breaks
+        $text = str_replace("\n", "\\n", $text);
+        
+        return $text;
+    }
 }

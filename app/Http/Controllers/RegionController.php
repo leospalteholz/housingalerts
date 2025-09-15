@@ -138,20 +138,54 @@ class RegionController extends Controller
      */
     public function subscribe($id)
     {
-        $region = \App\Models\Region::findOrFail($id);
-        $user = auth()->user();
-        
-        // Check if user can access this region (same organization)
-        if (!$user->is_superuser && $region->organization_id !== $user->organization_id) {
-            return response()->json(['error' => 'You can only subscribe to regions in your organization.'], 403);
+        try {
+            \Log::info('Region subscription attempt:', [
+                'region_id' => $id,
+                'user_id' => auth()->id(),
+                'user_organization_id' => auth()->user()->organization_id
+            ]);
+            
+            $region = \App\Models\Region::findOrFail($id);
+            $user = auth()->user();
+            
+            \Log::info('Region found:', [
+                'region_name' => $region->name,
+                'region_organization_id' => $region->organization_id
+            ]);
+            
+            // Check if user can access this region (same organization)
+            if (!$user->is_superuser && $region->organization_id !== $user->organization_id) {
+                \Log::warning('User tried to subscribe to region from different organization:', [
+                    'user_org' => $user->organization_id,
+                    'region_org' => $region->organization_id
+                ]);
+                return response()->json(['error' => 'You can only subscribe to regions in your organization.'], 403);
+            }
+            
+            // Check if already subscribed
+            $alreadySubscribed = $user->regions()->where('regions.id', $region->id)->exists();
+            \Log::info('Subscription status check:', [
+                'already_subscribed' => $alreadySubscribed
+            ]);
+            
+            // Add user to region if not already subscribed
+            if (!$alreadySubscribed) {
+                $user->regions()->attach($region->id);
+                \Log::info('User subscribed to region successfully');
+            } else {
+                \Log::info('User was already subscribed to region');
+            }
+            
+            return response()->json(['success' => true, 'message' => 'Successfully subscribed to ' . $region->name]);
+        } catch (\Exception $e) {
+            \Log::error('Region subscription error:', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'An error occurred while subscribing: ' . $e->getMessage()], 500);
         }
-        
-        // Add user to region if not already subscribed
-        if (!$user->regions()->where('regions.id', $region->id)->exists()) {
-            $user->regions()->attach($region->id);
-        }
-        
-        return response()->json(['success' => true, 'message' => 'Successfully subscribed to ' . $region->name]);
     }
 
     /**
@@ -159,12 +193,17 @@ class RegionController extends Controller
      */
     public function unsubscribe($id)
     {
-        $region = \App\Models\Region::findOrFail($id);
-        $user = auth()->user();
-        
-        // Remove user from region
-        $user->regions()->detach($region->id);
-        
-        return response()->json(['success' => true, 'message' => 'Successfully unsubscribed from ' . $region->name]);
+        try {
+            $region = \App\Models\Region::findOrFail($id);
+            $user = auth()->user();
+            
+            // Remove user from region
+            $user->regions()->detach($region->id);
+            
+            return response()->json(['success' => true, 'message' => 'Successfully unsubscribed from ' . $region->name]);
+        } catch (\Exception $e) {
+            \Log::error('Region unsubscription error: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred while unsubscribing: ' . $e->getMessage()], 500);
+        }
     }
 }

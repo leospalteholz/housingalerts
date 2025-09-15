@@ -150,11 +150,7 @@
                         @if($monitoredRegions->count() > 0)
                             <p class="text-gray-600 mb-4">There are no upcoming hearings in your monitored regions.</p>
                         @else
-                            <p class="text-gray-600 mb-4">Start monitoring regions to see upcoming hearings here.</p>
-                            <a href="{{ route('regions.index') }}" 
-                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition">
-                                Browse Regions
-                            </a>
+                            <p class="text-gray-600 mb-4">Subscribe to some regions below to see upcoming hearings here.</p>
                         @endif
                     </div>
                 @endif
@@ -291,20 +287,29 @@
                     // Disable checkbox during request
                     this.disabled = true;
                     
+                    const baseUrl = '{{ url('/') }}';
                     const url = isChecked 
-                        ? `/regions/${regionId}/subscribe`
-                        : `/regions/${regionId}/unsubscribe`;
+                        ? `${baseUrl}/regions/${regionId}/subscribe`
+                        : `${baseUrl}/regions/${regionId}/unsubscribe`;
                     
-                    const method = isChecked ? 'POST' : 'DELETE';
+                    const method = 'POST'; // Use POST for both subscribe and unsubscribe
+                    
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                     
                     fetch(url, {
                         method: method,
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            'X-CSRF-TOKEN': csrfToken
                         }
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
                             // Update status indicator
@@ -319,10 +324,9 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
                         // Revert checkbox if failed
                         this.checked = !isChecked;
-                        showMessage('An error occurred while updating your subscription', 'error');
+                        showMessage(`Error: ${error.message}`, 'error');
                     })
                     .finally(() => {
                         // Re-enable checkbox
