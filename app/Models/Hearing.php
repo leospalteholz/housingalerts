@@ -29,6 +29,8 @@ class Hearing extends Model
     protected $casts = [
         'rental' => 'boolean',
         'start_date' => 'date',
+        'start_time' => 'datetime:H:i',
+        'end_time' => 'datetime:H:i',
     ];
 
     public function organization() {
@@ -47,6 +49,16 @@ class Hearing extends Model
         } else {
             return $this->title ?: "Hearing for {$this->street_address}";
         }
+    }
+
+    // Helper method to get combined date/time for display
+    public function getHearingDateAttribute()
+    {
+        if ($this->start_time) {
+            return $this->start_date->setTimeFromTimeString($this->start_time);
+        }
+        
+        return $this->start_date;
     }
 
     // Helper method to check if this is a development hearing
