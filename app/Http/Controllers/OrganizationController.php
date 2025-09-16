@@ -23,7 +23,7 @@ class OrganizationController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:organizations,slug',
-            'contact-email' => 'nullable|email',
+            'contact_email' => 'nullable|email',
             'website_url' => 'nullable|url|max:255',
             'about' => 'nullable|string|max:1000',
         ]);
@@ -49,7 +49,7 @@ class OrganizationController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:organizations,slug,' . $organization->id,
-            'contact-email' => 'nullable|email',
+            'contact_email' => 'nullable|email',
             'website_url' => 'nullable|url|max:255',
             'about' => 'nullable|string|max:1000',
         ]);
