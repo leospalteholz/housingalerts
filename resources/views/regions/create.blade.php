@@ -26,12 +26,14 @@
                                    name="name" 
                                    value="{{ old('name') }}" 
                                    required 
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                   placeholder="e.g., Downtown, West Side, etc.">
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <p class="mt-1 text-sm text-gray-500">Name of the jurisdiction (e.g., Victoria, Langley, etc.)</p>
                             @error('name')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+
+                        <p class="mt-1 text-sm text-gray-500">The following details for engaging with hearings over email, remotely, or in person can be customized when creating new hearings in this region.</p>
 
                         <!-- Comments Email -->
                         <div>
@@ -43,8 +45,7 @@
                                    name="comments_email" 
                                    value="{{ old('comments_email') }}" 
                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                   placeholder="e.g., comments@example.com">
-                            <p class="mt-1 text-sm text-gray-500">Default email address for receiving public comments on hearings in this region.</p>
+                                   placeholder="e.g., council@city.com">
                             @error('comments_email')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -59,8 +60,8 @@
                                       name="remote_instructions" 
                                       rows="4" 
                                       class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                      placeholder="Default instructions for joining hearings remotely (e.g., Zoom links, phone numbers, etc.)">{{ old('remote_instructions') }}</textarea>
-                            <p class="mt-1 text-sm text-gray-500">These instructions will be used as defaults when creating new hearings in this region.</p>
+                                      placeholder="Instructions for joining hearings remotely (e.g., Zoom links, phone numbers, etc.)">{{ old('remote_instructions') }}</textarea>
+                            
                             @error('remote_instructions')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -75,8 +76,7 @@
                                       name="inperson_instructions" 
                                       rows="4" 
                                       class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                      placeholder="Default instructions for attending hearings in person (e.g., address, parking, entrance details, etc.)">{{ old('inperson_instructions') }}</textarea>
-                            <p class="mt-1 text-sm text-gray-500">These instructions will be used as defaults when creating new hearings in this region.</p>
+                                      placeholder="Instructions for attending hearings in person (e.g., address, parking, entrance details, etc.)">{{ old('inperson_instructions') }}</textarea>
                             @error('inperson_instructions')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
