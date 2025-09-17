@@ -48,28 +48,82 @@ class ProcessPendingNotifications extends Command
     }
     
     /**
-     * Process hearing_created notifications with 1 minute delay
+     * Process hearing_created notifications - check all hearings and send to subscribed users who haven't received them
      */
     private function processHearingCreatedNotifications(): int
     {
         $cutoffTime = Carbon::now()->subMinutes($this->delayAfterHearingCreated);
         
-        $this->line("Looking for hearing_created notifications older than: {$cutoffTime}");
+        $this->line("Looking for hearings created before: {$cutoffTime}");
         
-        $notifications = EmailNotification::where('status', 'queued')
-            ->where('notification_type', 'hearing_created')
-            ->where('created_at', '<=', $cutoffTime)
-            ->with(['user', 'hearing.region'])
+        // Get all hearings that are old enough to send notifications for
+        $hearings = Hearing::where('created_at', '<=', $cutoffTime)
+            ->with(['region'])
             ->get();
             
-        $this->line("Found {$notifications->count()} hearing_created notifications to process");
+        $this->line("Found {$hearings->count()} hearings to check for notifications");
             
         $count = 0;
         
-        foreach ($notifications as $notification) {
-            $this->line("Processing notification ID {$notification->id} created at {$notification->created_at}");
-            if ($this->sendNotification($notification, 'created')) {
-                $count++;
+        foreach ($hearings as $hearing) {
+            $this->line("Checking hearing ID {$hearing->id}: {$hearing->title}");
+            $this->line("  Hearing region: {$hearing->region_id} ({$hearing->region->name})");
+            $this->line("  Hearing type: {$hearing->type}");
+            
+            // Get all users who should receive notifications for this hearing
+            $subscribedUsers = User::whereHas('regions', function ($query) use ($hearing) {
+                $query->where('regions.id', $hearing->region_id);
+            })
+            ->whereHas('notificationSettings', function ($query) use ($hearing) {
+                if ($hearing->type === 'development') {
+                    $query->where('notify_development_hearings', true);
+                } else if ($hearing->type === 'policy') {
+                    $query->where('notify_policy_hearings', true);
+                } else {
+                    // For any other type, check both
+                    $query->where(function ($q) {
+                        $q->where('notify_development_hearings', true)
+                          ->orWhere('notify_policy_hearings', true);
+                    });
+                }
+            })
+            ->whereNull('unsubscribed_at')  // User is opted in (not unsubscribed)
+            ->whereNotNull('email_verified_at')  // User has verified their email
+            ->get();
+            
+            $this->line("  Found {$subscribedUsers->count()} subscribed users for this hearing");
+            
+            // Debug: show details for each user
+            foreach ($subscribedUsers as $user) {
+                $this->line("    User: {$user->email} (verified: " . ($user->email_verified_at ? 'YES' : 'NO') . ", unsubscribed: " . ($user->unsubscribed_at ? 'YES' : 'NO') . ")");
+            }
+            
+            foreach ($subscribedUsers as $user) {
+                // Check if this user has already received a hearing_created notification for this hearing
+                $existingNotification = EmailNotification::where('user_id', $user->id)
+                    ->where('hearing_id', $hearing->id)
+                    ->where('notification_type', 'hearing_created')
+                    ->first();
+                
+                if (!$existingNotification) {
+                    // Create and send notification
+                    $notification = EmailNotification::create([
+                        'user_id' => $user->id,
+                        'hearing_id' => $hearing->id,
+                        'notification_type' => 'hearing_created',
+                        'email_address' => $user->email,
+                        'status' => 'queued',
+                        'opted_in' => is_null($user->unsubscribed_at)  // True if not unsubscribed
+                    ]);
+                    
+                    $this->line("  Created notification for user {$user->email}");
+                    
+                    if ($this->sendNotification($notification, 'created')) {
+                        $count++;
+                    }
+                } else {
+                    $this->line("  User {$user->email} already has notification (status: {$existingNotification->status})");
+                }
             }
         }
         

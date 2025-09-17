@@ -204,6 +204,7 @@
                 // Make development fields required
                 document.getElementById('street_address').required = true;
                 document.getElementById('postal_code').required = true;
+                document.getElementById('rental').required = true;
                 document.getElementById('units').required = true;
                 document.getElementById('title').required = false;
             } else if (policyRadio.checked) {
@@ -220,6 +221,7 @@
                 document.getElementById('title').required = true;
                 document.getElementById('street_address').required = false;
                 document.getElementById('postal_code').required = false;
+                document.getElementById('rental').required = false;
                 document.getElementById('units').required = false;
             }
         }

@@ -68,20 +68,20 @@
                     <div>
                         <p class="text-sm font-medium text-gray-500">Start Date</p>
                         <p class="text-gray-900">
-                            @if($hearing->start_date)
                                 {{ \Carbon\Carbon::parse($hearing->start_date)->format('F j, Y') }}
-                            @else
-                                Not scheduled
-                            @endif
                         </p>
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">Start Time</p>
-                        <p class="text-gray-900">{{ $hearing->start_time ?: 'Not specified' }}</p>
+                        <p class="text-gray-900">
+                                {{ \Carbon\Carbon::parse($hearing->start_time)->format('g:i A') }}
+                        </p>
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">End Time</p>
-                        <p class="text-gray-900">{{ $hearing->end_time ?: 'Not specified' }}</p>
+                        <p class="text-gray-900">
+                                {{ \Carbon\Carbon::parse($hearing->end_time)->format('g:i A') }}
+                        </p>
                     </div>
                     
                     <!-- Add to Calendar Button -->
@@ -97,16 +97,14 @@
                             </a>
                         </p>
                     </div>
-                    @if($hearing->more_info_url)
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">More Information</p>
-                            <p class="text-gray-900">
-                                <a href="{{ $hearing->more_info_url }}" class="text-blue-600 hover:underline" target="_blank">
-                                    {{ $hearing->more_info_url }}
-                                </a>
-                            </p>
-                        </div>
-                    @endif
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">More Information</p>
+                        <p class="text-gray-900">
+                            <a href="{{ $hearing->more_info_url }}" class="text-blue-600 hover:underline" target="_blank">
+                                {{ $hearing->more_info_url }}
+                            </a>
+                        </p>
+                    </div>
                 </div>
             </div>
 
