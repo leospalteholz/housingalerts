@@ -16,8 +16,8 @@
                 <input type="text" id="slug" name="slug" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="mb-4">
-                <label for="contact-email" class="block text-gray-700 font-semibold mb-2">Contact Email</label>
-                <input type="email" id="contact-email" name="contact-email" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label for="contact_email" class="block text-gray-700 font-semibold mb-2">Contact Email</label>
+                <input type="email" id="contact_email" name="contact_email" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="mb-4">
                 <label for="website_url" class="block text-gray-700 font-semibold mb-2">Website URL</label>
