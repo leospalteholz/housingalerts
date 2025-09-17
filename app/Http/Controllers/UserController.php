@@ -79,6 +79,14 @@ class UserController extends Controller
         // Create the user
         $user = \App\Models\User::create($validated);
 
+        // Create default notification settings
+        \App\Models\UserNotificationSettings::create([
+            'user_id' => $user->id,
+            'notify_development_hearings' => true,
+            'notify_policy_hearings' => true,
+            'send_day_of_reminders' => true,
+        ]);
+
         // Attach regions if provided
         if (!empty($validated['regions'])) {
             $user->regions()->sync($validated['regions']);

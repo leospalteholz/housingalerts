@@ -61,6 +61,14 @@ class SignupController extends Controller
             'is_superuser' => false,
         ]);
 
+        // Create default notification settings
+        \App\Models\UserNotificationSettings::create([
+            'user_id' => $user->id,
+            'notify_development_hearings' => true,
+            'notify_policy_hearings' => true,
+            'send_day_of_reminders' => true,
+        ]);
+
         // Attach selected regions
         if ($request->has('regions')) {
             $user->regions()->attach($request->regions);

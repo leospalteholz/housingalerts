@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
 
 class HearingNotificationMail extends Mailable
@@ -59,7 +60,14 @@ class HearingNotificationMail extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        // Generate ICS file content
+        $icsContent = $this->hearing->generateIcsContent();
+        $filename = 'hearing-' . $this->hearing->id . '.ics';
+        
+        return [
+            Attachment::fromData(fn () => $icsContent, $filename)
+                ->withMime('text/calendar')
+        ];
     }
 
     /**

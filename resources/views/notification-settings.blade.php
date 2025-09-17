@@ -80,7 +80,7 @@
                                         Day-of Reminders
                                     </label>
                                     <p class="text-gray-500">
-                                        Get reminder emails on the day of hearings you're interested in
+                                        Get reminder emails on the day of hearings
                                     </p>
                                 </div>
                             </div>

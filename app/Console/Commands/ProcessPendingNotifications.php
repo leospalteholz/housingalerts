@@ -67,8 +67,6 @@ class ProcessPendingNotifications extends Command
         
         foreach ($hearings as $hearing) {
             $this->line("Checking hearing ID {$hearing->id}: {$hearing->title}");
-            $this->line("  Hearing region: {$hearing->region_id} ({$hearing->region->name})");
-            $this->line("  Hearing type: {$hearing->type}");
             
             // Get all users who should receive notifications for this hearing
             $subscribedUsers = User::whereHas('regions', function ($query) use ($hearing) {
@@ -92,11 +90,6 @@ class ProcessPendingNotifications extends Command
             ->get();
             
             $this->line("  Found {$subscribedUsers->count()} subscribed users for this hearing");
-            
-            // Debug: show details for each user
-            foreach ($subscribedUsers as $user) {
-                $this->line("    User: {$user->email} (verified: " . ($user->email_verified_at ? 'YES' : 'NO') . ", unsubscribed: " . ($user->unsubscribed_at ? 'YES' : 'NO') . ")");
-            }
             
             foreach ($subscribedUsers as $user) {
                 // Check if this user has already received a hearing_created notification for this hearing

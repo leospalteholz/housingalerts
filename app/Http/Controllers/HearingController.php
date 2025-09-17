@@ -104,9 +104,9 @@ class HearingController extends Controller
         // Create a new hearing
         $hearing = new \App\Models\Hearing($validated);
         
-        // Auto-generate title for development hearings if not provided
+        // Auto-generate title for development hearings to match the address
         if ($hearing->type === 'development' && empty($hearing->title)) {
-            $hearing->title = "Hearing for {$hearing->street_address}";
+            $hearing->title = "{$hearing->street_address}";
         }
         
         // Force organization_id to match the user's organization unless superuser

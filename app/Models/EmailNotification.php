@@ -9,21 +9,19 @@ class EmailNotification extends Model
 {
     /**
      * Indicates if the model should be timestamped.
-     * We only want created_at, not updated_at since these are immutable logs.
      *
      * @var bool
      */
     public $timestamps = true;
-    
+
     /**
      * The name of the "updated at" column.
-     * Set to null to disable updated_at.
      *
      * @var string|null
      */
     const UPDATED_AT = null;
 
-        /**
+     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

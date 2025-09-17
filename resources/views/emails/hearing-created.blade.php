@@ -36,7 +36,7 @@
         .button {
             display: inline-block;
             background-color: #2563eb;
-            color: white;
+            color: black;
             padding: 12px 24px;
             text-decoration: none;
             border-radius: 6px;
@@ -56,50 +56,50 @@
         }
     </style>
 </head>
-<body>
-    <div class="header">
-        <h1>New Housing Hearing Posted</h1>
-    </div>
-    
+<body>    
     <div class="content">
         <p>Hello {{ $user->name }},</p>
-        
-        <p>A new {{ strtolower($hearing->type) }} hearing has been posted in {{ $hearing->region->name }} that may interest you:</p>
+
+        @if($hearing->type === 'development')
+            <p>Housing is being proposed in {{ $hearing->region->name }} and it needs your help!</p>
+        @else
+            <p>An important housing policy hearing is coming up in {{ $hearing->region->name }} and it needs your help to pass!</p>
+        @endif
         
         <div class="hearing-details">
             <h2>{{ $hearing->title }}</h2>
             
-            <p><strong>Type:</strong> {{ $hearing->type }}</p>
             <p><strong>Date & Time:</strong> {{ $hearing->hearing_date->format('l, F j, Y \a\t g:i A') }}</p>
-            <p><strong>Region:</strong> {{ $hearing->region->name }}</p>
-            
-            @if($hearing->location)
-                <p><strong>Location:</strong> {{ $hearing->location }}</p>
-            @endif
-            
-            @if($hearing->description)
-                <p><strong>Description:</strong></p>
-                <p>{{ $hearing->description }}</p>
-            @endif
-            
+            <p><strong>Description:</strong></p>
+            <p>{{ $hearing->description }}</p>
+                        
             @if($hearing->meeting_url)
                 <p><strong>Meeting Link:</strong> <a href="{{ $hearing->meeting_url }}">{{ $hearing->meeting_url }}</a></p>
             @endif
         </div>
+
+        <div class="call-for-action">
+            <h2>What You Can Do</h2>
+            <ol>
+                <li>Good - Send your support to {{ $hearing->comments_email }}</li>
+                <li>Amazing - Speak in support at this hearing.  You can do that over the phone or in person.</li>
+                <li>Cherry on top - Share this hearing with your network and encourage others to participate.</li>
+            </ol>
+        </div>
         
         <p>
             <a href="{{ route('hearings.show', $hearing) }}" class="button">
-                View Full Details
+                View Details
             </a>
         </p>
         
         <div class="footer">
             <p>You're receiving this email because you've subscribed to hearing notifications for {{ $hearing->region->name }}.</p>
             
-            <p>You can manage your notification preferences in your <a href="{{ route('user.dashboard') }}">dashboard</a>.</p>
+            <p>You can manage your notification preferences in your <a href="{{ route('dashboard') }}">dashboard</a>.</p>
             
             <div class="unsubscribe">
-                <p>If you no longer wish to receive these notifications, you can <a href="{{ route('user.dashboard') }}">update your preferences</a> or unsubscribe from this region.</p>
+                <p>If you no longer wish to receive notifications about hearings in {{ $hearing->region->name }}, you can <a href="{{ route('dashboard') }}">unsubscribe</a>.</p>
             </div>
         </div>
     </div>

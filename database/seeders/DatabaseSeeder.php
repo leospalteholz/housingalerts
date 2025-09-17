@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
             [ 'name' => 'Housing Alerts' ],
             [ 
                 'slug' => 'root',
+                'contact_email' => 'leo.spalteholz@gmail.com',
+                'website_url' => 'https://housingalerts.ca',
+                'about' => 'Housing Alerts is the platform that powers this site.  We are dedicated to providing a way for housing advocates and members of the public to stay informed about upcoming housing-related hearings in their communities.',
                 'user_visible' => false  // Hidden from signup - system organization
             ]
         );
@@ -76,15 +79,9 @@ class DatabaseSeeder extends Seeder
             [ 
                 'name' => 'Victoria', 
                 'organization_id' => $hfl->id,
-                'comments_email' => 'comments@victoria.ca',
-                'remote_instructions' => 'Join via Zoom: https://zoom.us/j/victoria-hearings
-Phone: 1-778-907-2071
-Meeting ID: Victoria Hearings
-Passcode: housing2025',
-                'inperson_instructions' => 'Victoria City Hall Council Chambers
-1 Centennial Square, Victoria, BC
-Doors open 30 minutes before meeting
-Public parking available in surrounding area'
+                'comments_email' => 'publichearings@victoria.ca',
+                'remote_instructions' => 'Phone: 778-698-2440 participation code 1551794#',
+                'inperson_instructions' => 'Victoria City Hall Council Chambers, 1 Centennial Square, Victoria, BC'
             ]
         );
 
@@ -93,20 +90,16 @@ Public parking available in surrounding area'
             [ 
                 'name' => 'Saanich', 
                 'organization_id' => $hfl->id,
-                'comments_email' => 'planning@saanich.ca',
-                'remote_instructions' => 'Remote participation not typically available.
-For exceptional circumstances, contact planning@saanich.ca',
-                'inperson_instructions' => 'Saanich Municipal Hall
-770 Vernon Avenue, Saanich, BC
-Committee Room A
-Free parking in municipal lot
-Wheelchair accessible entrance on north side'
+                'comments_email' => 'council@saanich.ca',
+                'remote_instructions' => 'Find the teams link at https://www.saanich.ca/EN/main/local-government/mayor-council/schedule-agendas-minutes.html',
+                'inperson_instructions' => 'Saanich Municipal Hall, 770 Vernon Avenue, Saanich, BC'
             ]
         );
 
         \App\Models\Hearing::updateOrCreate(
             [ 'street_address' => '123 Douglas Street', 'organization_id' => $hfl->id ],
             [ 
+                'title' => '123 Douglas Street',
                 'street_address' => '123 Douglas Street',
                 'postal_code' => 'V8W 2E6',
                 'rental' => true,
@@ -127,6 +120,7 @@ Wheelchair accessible entrance on north side'
         \App\Models\Hearing::updateOrCreate(
             [ 'street_address' => '456 Quadra Street', 'organization_id' => $hfl->id ],
             [ 
+                'title' => '456 Quadra Street',
                 'street_address' => '456 Quadra Street',
                 'postal_code' => 'V8T 4E2',
                 'rental' => false,
