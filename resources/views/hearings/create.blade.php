@@ -16,7 +16,7 @@
                         <input type="radio" name="type" value="development" class="sr-only" {{ old('type', 'development') == 'development' ? 'checked' : '' }} onchange="toggleHearingType()">
                         <div class="border-2 rounded-lg p-4 text-center transition-all duration-200 hover:bg-gray-50" id="development-option">
                             <div class="text-lg font-medium">Development</div>
-                            <div class="text-sm text-gray-600">Property-specific hearing</div>
+                            <div class="text-sm text-gray-600">Housing approval hearing</div>
                         </div>
                     </label>
                     <label class="cursor-pointer">
@@ -65,7 +65,7 @@
                 <!-- Property Address Information -->
                 <div class="mb-4">
                     <label for="street_address" class="block text-gray-700 font-semibold mb-2">Street Address</label>
-                    <input type="text" id="street_address" name="street_address" value="{{ old('street_address') }}" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="street_address" name="street_address" value="{{ old('street_address') }}" placeholder="eg. 123 Main St" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     @error('street_address')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -107,14 +107,14 @@
             </div>
             <div class="mb-4">
                 <label for="start_time" class="block text-gray-700 font-semibold mb-2">Start Time</label>
-                <input type="time" id="start_time" name="start_time" value="{{ old('start_time') }}" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="time" id="start_time" name="start_time" value="{{ old('start_time') }}" step="900" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('start_time')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
             <div class="mb-4">
                 <label for="end_time" class="block text-gray-700 font-semibold mb-2">End Time</label>
-                <input type="time" id="end_time" name="end_time" value="{{ old('end_time') }}" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="time" id="end_time" name="end_time" value="{{ old('end_time') }}" step="900" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('end_time')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -123,7 +123,7 @@
             <!-- Content Section -->
             <div class="mb-4">
                 <label for="description" class="block text-gray-700 font-semibold mb-2">Hearing Description</label>
-                <p class="text-sm text-gray-600 mb-2">💡 Add important details that might entice someone to support this project</p>
+                <p class="text-sm text-gray-600 mb-2">Add important details that might entice someone to support this project</p>
                 <textarea id="description" name="description" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4">{{ old('description') }}</textarea>
                 @error('description')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -131,7 +131,7 @@
             </div>
             <div class="mb-6">
                 <label for="more_info_url" class="block text-gray-700 font-semibold mb-2">More Info URL</label>
-                <p class="text-sm text-gray-600 mb-2">� Link to the municipality's meeting details page</p>
+                <p class="text-sm text-gray-600 mb-2">Link to the municipality's page for this hearing</p>
                 <input type="url" id="more_info_url" name="more_info_url" value="{{ old('more_info_url') }}" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('more_info_url')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -155,7 +155,7 @@
                 </div>
                 <div class="mb-4">
                     <label for="remote_instructions" class="block text-gray-700 font-semibold mb-2">Remote Joining Instructions</label>
-                    <p class="text-sm text-gray-600 mb-2">� How to join remotely (phone, video call, etc.)</p>
+                    <p class="text-sm text-gray-600 mb-2">How to join remotely (phone, video call, etc.)</p>
                     <textarea id="remote_instructions" name="remote_instructions" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3">{{ old('remote_instructions') }}</textarea>
                     @error('remote_instructions')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -163,7 +163,7 @@
                 </div>
                 <div class="mb-4">
                     <label for="inperson_instructions" class="block text-gray-700 font-semibold mb-2">In-Person Instructions</label>
-                    <p class="text-sm text-gray-600 mb-2">🏢 Where and how to attend in person</p>
+                    <p class="text-sm text-gray-600 mb-2">Where and how to attend in person</p>
                     <textarea id="inperson_instructions" name="inperson_instructions" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3">{{ old('inperson_instructions') }}</textarea>
                     @error('inperson_instructions')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
