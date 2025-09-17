@@ -10,7 +10,7 @@
             
             <!-- Hearing Type Selection -->
             <div class="mb-6">
-                <label class="block text-gray-700 font-semibold mb-2">Hearing Type</label>
+                <label class="block text-gray-700 font-semibold mb-2 required-field">Hearing Type</label>
                 <div class="grid grid-cols-2 gap-4">
                     <label class="cursor-pointer">
                         <input type="radio" name="type" value="development" class="sr-only" {{ old('type', 'development') == 'development' ? 'checked' : '' }} onchange="toggleHearingType()">
@@ -72,14 +72,14 @@
                 </div>
                 <div class="mb-4">
                     <label for="postal_code" class="block text-gray-700 font-semibold mb-2">Postal Code</label>
-                    <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code') }}" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code') }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     @error('postal_code')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
                 <div class="mb-4">
                     <label for="rental" class="block text-gray-700 font-semibold mb-2">Property Type</label>
-                    <select id="rental" name="rental" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="rental" name="rental" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Select property type...</option>
                         <option value="1" {{ old('rental') == '1' ? 'selected' : '' }}>Rental Property</option>
                         <option value="0" {{ old('rental') == '0' ? 'selected' : '' }}>Condo/Owned Property</option>
@@ -90,7 +90,7 @@
             </div>
             <div class="mb-4">
                 <label for="units" class="block text-gray-700 font-semibold mb-2">Number of Homes</label>
-                <input type="number" id="units" name="units" value="{{ old('units') }}" min="1" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="number" id="units" name="units" value="{{ old('units') }}" min="1" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('units')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -107,14 +107,14 @@
             </div>
             <div class="mb-4">
                 <label for="start_time" class="block text-gray-700 font-semibold mb-2">Start Time</label>
-                <input type="time" id="start_time" name="start_time" value="{{ old('start_time') }}" step="900" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="time" id="start_time" name="start_time" value="{{ old('start_time') }}" step="900" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('start_time')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
             <div class="mb-4">
                 <label for="end_time" class="block text-gray-700 font-semibold mb-2">End Time</label>
-                <input type="time" id="end_time" name="end_time" value="{{ old('end_time') }}" step="900" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="time" id="end_time" name="end_time" value="{{ old('end_time') }}" step="900" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('end_time')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -123,16 +123,16 @@
             <!-- Content Section -->
             <div class="mb-4">
                 <label for="description" class="block text-gray-700 font-semibold mb-2">Hearing Description</label>
-                <p class="text-sm text-gray-600 mb-2">Add important details that might entice someone to support this project</p>
                 <textarea id="description" name="description" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4">{{ old('description') }}</textarea>
+                <p class="text-sm text-gray-600 mt-1">Add important details that might entice someone to support this project</p>
                 @error('description')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
             <div class="mb-6">
                 <label for="more_info_url" class="block text-gray-700 font-semibold mb-2">More Info URL</label>
-                <p class="text-sm text-gray-600 mb-2">Link to the municipality's page for this hearing</p>
-                <input type="url" id="more_info_url" name="more_info_url" value="{{ old('more_info_url') }}" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="url" id="more_info_url" name="more_info_url" value="{{ old('more_info_url') }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-sm text-gray-600 mt-1">Link to the municipality's page for this hearing</p>
                 @error('more_info_url')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -155,21 +155,26 @@
                 </div>
                 <div class="mb-4">
                     <label for="remote_instructions" class="block text-gray-700 font-semibold mb-2">Remote Joining Instructions</label>
-                    <p class="text-sm text-gray-600 mb-2">How to join remotely (phone, video call, etc.)</p>
                     <textarea id="remote_instructions" name="remote_instructions" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3">{{ old('remote_instructions') }}</textarea>
+                    <p class="text-sm text-gray-600 mt-1">How to join remotely (phone, video call, etc.)</p>
                     @error('remote_instructions')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
                 <div class="mb-4">
                     <label for="inperson_instructions" class="block text-gray-700 font-semibold mb-2">In-Person Instructions</label>
-                    <p class="text-sm text-gray-600 mb-2">Where and how to attend in person</p>
                     <textarea id="inperson_instructions" name="inperson_instructions" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3">{{ old('inperson_instructions') }}</textarea>
+                    <p class="text-sm text-gray-600 mt-1">Where and how to attend in person</p>
                     @error('inperson_instructions')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
+            
+            <div class="mb-4 text-sm text-gray-600">
+                <span class="text-red-500">*</span> Required fields
+            </div>
+            
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Create</button>
             <a href="{{ route('hearings.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">Cancel</a>
         </form>
