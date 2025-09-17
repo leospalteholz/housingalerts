@@ -128,7 +128,7 @@ class HearingController extends Controller
      */
     public function show(string $id)
     {
-        $hearing = \App\Models\Hearing::findOrFail($id);
+        $hearing = \App\Models\Hearing::with(['region', 'organization'])->findOrFail($id);
         
         // Check access permissions
         if (auth()->user()->is_superuser) {
@@ -146,7 +146,26 @@ class HearingController extends Controller
             }
         }
         
-        return view('hearings.show', compact('hearing'));
+        // Get count of users subscribed to receive notifications for this hearing
+        $subscribedUsersCount = \App\Models\User::whereHas('regions', function ($query) use ($hearing) {
+            $query->where('region_id', $hearing->region_id);
+        })
+        ->whereHas('notificationSettings', function ($query) use ($hearing) {
+            if ($hearing->type === 'development') {
+                $query->where('notify_development_hearings', true);
+            } else {
+                $query->where('notify_policy_hearings', true);
+            }
+        })
+        ->count();
+        
+        // Get email notifications for this hearing
+        $emailNotifications = \App\Models\EmailNotification::where('hearing_id', $hearing->id)
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('hearings.show', compact('hearing', 'subscribedUsersCount', 'emailNotifications'));
     }
 
     /**

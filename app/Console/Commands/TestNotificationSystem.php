@@ -55,7 +55,7 @@ class TestNotificationSystem extends Command
             'user_id' => $user->id,
             'hearing_id' => $hearing->id,
             'notification_type' => 'hearing_created',
-            'email_address' => $user->email,
+            'email_address' => 'leo.spalteholz@gmail.com',
             'status' => 'queued',
             'opted_in' => true,
         ]);
