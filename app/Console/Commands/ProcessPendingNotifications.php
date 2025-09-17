@@ -18,6 +18,7 @@ class ProcessPendingNotifications extends Command
      * @var string
      */
     protected $signature = 'notifications:process-pending';
+    protected $delayAfterHearingCreated = 5; // minutes
 
     /**
      * The console command description.
@@ -51,7 +52,7 @@ class ProcessPendingNotifications extends Command
      */
     private function processHearingCreatedNotifications(): int
     {
-        $cutoffTime = Carbon::now()->subMinute();
+        $cutoffTime = Carbon::now()->subMinutes($this->delayAfterHearingCreated);
         
         $this->line("Looking for hearing_created notifications older than: {$cutoffTime}");
         
