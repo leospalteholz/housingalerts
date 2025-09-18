@@ -72,8 +72,23 @@ class HearingController extends Controller
         $startTime = $validated['start_time'];
         $endTime = $validated['end_time'];
         
+        // Extract image file if present
+        $imageFile = $request->file('image');
+        
+        // Debug logging
+        if ($imageFile) {
+            \Log::info('Image file received:', [
+                'name' => $imageFile->getClientOriginalName(),
+                'size' => $imageFile->getSize(),
+                'mime' => $imageFile->getMimeType(),
+                'extension' => $imageFile->getClientOriginalExtension()
+            ]);
+        } else {
+            \Log::info('No image file received');
+        }
+        
         // Remove form-only fields before mass assignment
-        unset($validated['start_date'], $validated['start_time'], $validated['end_time']);
+        unset($validated['start_date'], $validated['start_time'], $validated['end_time'], $validated['image']);
 
         // Create hearing with mass assignment
         $hearing = new \App\Models\Hearing($validated);
@@ -95,7 +110,20 @@ class HearingController extends Controller
             $hearing->organization_id = auth()->user()->organization_id;
         }
         
+        // Save first to get an ID for the image filename
         $hearing->save();
+        
+        // Handle image upload after saving (needs the hearing ID)
+        if ($imageFile) {
+            try {
+                $hearing->image_url = $hearing->handleImageUpload($imageFile, $hearing->id);
+                $hearing->save(); // Save again with the image URL
+            } catch (\Exception $e) {
+                // Log the error but don't fail the entire operation
+                \Log::error('Image upload failed for hearing ' . $hearing->id . ': ' . $e->getMessage());
+                // Continue without the image - the hearing will still be created
+            }
+        }
 
         return redirect()->route('hearings.index')->with('success', 'Hearing created successfully!');
     }
@@ -173,13 +201,31 @@ class HearingController extends Controller
         $startTime = $validated['start_time'];
         $endTime = $validated['end_time'];
         
+        // Extract image file if present
+        $imageFile = $request->file('image');
+        
         // Remove form-only fields before mass assignment
-        unset($validated['start_date'], $validated['start_time'], $validated['end_time']);
+        unset($validated['start_date'], $validated['start_time'], $validated['end_time'], $validated['image']);
 
         $hearing->fill($validated);
         
         // Set datetime fields from form data
         $hearing->setDateTimeFromForm($startDate, $startTime, $endTime);
+        
+        // Handle image upload
+        if ($imageFile) {
+            try {
+                // Delete old image if exists
+                $hearing->deleteImage();
+                
+                // Upload new image
+                $hearing->image_url = $hearing->handleImageUpload($imageFile, $hearing->id);
+            } catch (\Exception $e) {
+                // Log the error but don't fail the entire operation
+                \Log::error('Image upload failed for hearing ' . $hearing->id . ': ' . $e->getMessage());
+                // Continue without updating the image
+            }
+        }
         
         // Auto-generate title for development hearings if not provided
         if ($hearing->type === 'development' && empty($hearing->title)) {
@@ -197,6 +243,10 @@ class HearingController extends Controller
     public function destroy($id)
     {
         $hearing = \App\Models\Hearing::findOrFail($id);
+        
+        // Delete associated image file
+        $hearing->deleteImage();
+        
         $hearing->delete();
         return redirect()->route('hearings.index')->with('success', 'Hearing deleted successfully!');
     }

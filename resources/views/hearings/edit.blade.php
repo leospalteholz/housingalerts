@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
     <div class="max-w-md mx-auto py-8">
-        <form method="POST" action="{{ route('hearings.update', $hearing) }}" class="bg-white rounded shadow p-6">
+        <form method="POST" action="{{ route('hearings.update', $hearing) }}" enctype="multipart/form-data" class="bg-white rounded shadow p-6">
             @csrf
             @method('PUT')
             
@@ -125,6 +125,16 @@
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
+            
+            <!-- Image Upload -->
+            <x-image-upload 
+                name="image" 
+                label="Header Image (Optional)"
+                :current-image="$hearing->image_url"
+                :required="false"
+                help-text="Upload a landscape image (recommended: 1200x400px) to make your hearing more visually appealing. Supports JPEG and WebP formats up to 2MB."
+            />
+            
             <div class="mb-6">
                 <label for="more_info_url" class="block text-gray-700 font-semibold mb-2">More Info URL</label>
                 <p class="text-sm text-gray-600 mb-2">� Link to the municipality's meeting details page</p>

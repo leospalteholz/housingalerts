@@ -30,7 +30,7 @@ class HearingRequest extends FormRequest
             'end_time' => 'required',
             'organization_id' => 'nullable|exists:organizations,id',
             'region_id' => 'nullable|exists:regions,id',
-            'image_url' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,jpg,webp|max:2048', // 2MB max, JPEG and WebP only
             'more_info_url' => 'nullable|url',
         ];
 
@@ -54,5 +54,17 @@ class HearingRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    /**
+     * Get custom validation messages
+     */
+    public function messages(): array
+    {
+        return [
+            'image.image' => 'The file must be an image.',
+            'image.mimes' => 'The image must be a JPEG or WebP file.',
+            'image.max' => 'The image must be smaller than 2MB.',
+        ];
     }
 }

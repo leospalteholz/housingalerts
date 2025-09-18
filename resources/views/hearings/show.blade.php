@@ -5,8 +5,16 @@
         </h2>
     </x-slot>
     <div class="max-w-4xl mx-auto py-8">
-        <div class="bg-white rounded shadow p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded shadow">
+            <!-- Header Image (if exists) -->
+            @if($hearing->image_url)
+                <div class="w-full h-48 md:h-64 overflow-hidden rounded-t">
+                    <img src="{{ $hearing->image_url }}" alt="Header image for {{ $hearing->display_title }}" class="w-full h-full object-cover">
+                </div>
+            @endif
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Hearing Details (Dynamic based on type) -->
                 <div class="space-y-4">
                     @if($hearing->isDevelopment())
@@ -66,21 +74,9 @@
                 <div class="space-y-4">
                     <h3 class="text-lg font-semibold text-gray-900 border-b pb-2">Hearing Information</h3>
                     <div>
-                        <p class="text-sm font-medium text-gray-500">Start Date</p>
-                        <p class="text-gray-900">
-                                {{ $hearing->start_datetime ? $hearing->start_datetime->format('F j, Y') : 'Not set' }}
-                        </p>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-500">Start Time</p>
-                        <p class="text-gray-900">
-                                {{ $hearing->start_datetime ? $hearing->start_datetime->format('g:i A') : 'Not set' }}
-                        </p>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-500">End Time</p>
-                        <p class="text-gray-900">
-                                {{ $hearing->end_datetime ? $hearing->end_datetime->format('g:i A') : 'Not set' }}
+                        <p class="text-sm font-medium text-gray-500">Date & Time</p>
+                        <p class="text-gray-900 text-lg font-medium">
+                            {{ $hearing->formatted_date_time }}
                         </p>
                     </div>
                     
@@ -88,14 +84,6 @@
                     <div>
                         <p class="text-sm font-medium text-gray-500 mb-2">Add to Calendar</p>
                         <x-calendar-button :hearing="$hearing" />
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-500">Comments Email</p>
-                        <p class="text-gray-900">
-                            <a href="mailto:{{ $hearing->comments_email }}" class="text-blue-600 hover:underline">
-                                {{ $hearing->comments_email }}
-                            </a>
-                        </p>
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">More Information</p>
@@ -109,7 +97,7 @@
             </div>
 
             <!-- Full-width sections -->
-            <div class="mt-6 space-y-4">
+            <div class="mt-6 space-y-6">
                 <div>
                     <p class="text-sm font-medium text-gray-500 mb-2">Hearing Description</p>
                     <div class="bg-gray-50 rounded p-4">
@@ -117,19 +105,54 @@
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 mb-2">Remote Joining Instructions</p>
-                        <div class="bg-blue-50 rounded p-4">
-                            <p class="text-gray-900 whitespace-pre-wrap">{{ $hearing->remote_instructions }}</p>
+                <!-- How to Help Section -->
+                <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6 border border-orange-200">
+                    <h3 class="text-xl font-semibold text-orange-900 mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        How to Help
+                    </h3>
+                    
+                    <!-- Comments Email - Prominent -->
+                    <div class="mb-6 bg-white rounded-lg p-4 border-l-4 border-orange-500">
+                        <h4 class="font-semibold text-orange-900 mb-2">📧 Submit Written Comments</h4>
+                        <p class="text-gray-600 mb-2">Send your support via email:</p>
+                        <a href="mailto:{{ $hearing->comments_email }}" class="inline-flex items-center bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 7.89a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            {{ $hearing->comments_email }}
+                        </a>
+                    </div>
+                    
+                    <!-- Participation Instructions -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white rounded-lg p-4">
+                            <h4 class="font-semibold text-blue-900 mb-2 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                                Join Virtually
+                            </h4>
+                            <div class="text-gray-700 text-sm whitespace-pre-wrap">{!! $hearing->remote_instructions_linked !!}</div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4">
+                            <h4 class="font-semibold text-green-900 mb-2 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                </svg>
+                                Attend In Person
+                            </h4>
+                            <div class="text-gray-700 text-sm whitespace-pre-wrap">{!! $hearing->inperson_instructions_linked !!}</div>
                         </div>
                     </div>
                     
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 mb-2">In-Person Instructions</p>
-                        <div class="bg-green-50 rounded p-4">
-                            <p class="text-gray-900 whitespace-pre-wrap">{{ $hearing->inperson_instructions }}</p>
-                        </div>
+                    <div class="mt-4 p-3 bg-orange-100 rounded-lg">
+                        <p class="text-sm text-orange-800">
+                            <strong>💡 Pro tip:</strong> Your voice matters! Participating in housing hearings helps shape your community's future.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -387,6 +410,7 @@
                         </p>
                     </div>
                 @endif
+            </div>
             </div>
         </div>
         @endif

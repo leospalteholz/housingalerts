@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Hearing extends Model
 {
@@ -60,6 +61,82 @@ class Hearing extends Model
     {
         $this->start_datetime = \Carbon\Carbon::parse($startDate . ' ' . $startTime);
         $this->end_datetime = \Carbon\Carbon::parse($startDate . ' ' . $endTime);
+    }
+
+    /**
+     * Handle image upload and return the URL
+     */
+    public function handleImageUpload($imageFile, $customId = null)
+    {
+        if (!$imageFile) {
+            return null;
+        }
+
+        // Use custom ID or the model's ID
+        $hearingId = $customId ?: $this->id;
+        
+        if (!$hearingId) {
+            throw new \Exception('Cannot upload image without hearing ID');
+        }
+
+        // Generate a unique filename
+        $filename = 'hearing-' . $hearingId . '-' . time() . '.' . $imageFile->getClientOriginalExtension();
+        
+        // Store in public disk under hearings folder
+        $path = $imageFile->storeAs('hearings', $filename, 'public');
+        
+        // Return the public URL
+        return asset('storage/' . $path);
+    }
+
+    /**
+     * Delete the associated image file
+     */
+    public function deleteImage()
+    {
+        if ($this->image_url) {
+            // Extract the storage path from the URL
+            $path = str_replace(asset('storage/'), '', $this->image_url);
+            \Storage::disk('public')->delete($path);
+        }
+    }
+
+    // Helper method to get combined date/time for display
+    public function getFormattedDateTimeAttribute()
+    {
+        if (!$this->start_datetime || !$this->end_datetime) {
+            return 'Date/time not set';
+        }
+        
+        $startDate = $this->start_datetime->format('M j, Y');
+        $startTime = $this->start_datetime->format('g:i A');
+        $endTime = $this->end_datetime->format('g:i A');
+        
+        return "{$startDate} {$startTime} to {$endTime}";
+    }
+
+    // Helper method to convert URLs to clickable links
+    public function linkifyText($text)
+    {
+        // Pattern to match URLs
+        $pattern = '/https?:\/\/[^\s<>"\']+/i';
+        
+        return preg_replace_callback($pattern, function($matches) {
+            $url = $matches[0];
+            return '<a href="' . htmlspecialchars($url) . '" target="_blank" class="text-blue-600 hover:text-blue-800 underline">' . htmlspecialchars($url) . '</a>';
+        }, htmlspecialchars($text));
+    }
+
+    // Get remote instructions with clickable links
+    public function getRemoteInstructionsLinkedAttribute()
+    {
+        return $this->linkifyText($this->remote_instructions);
+    }
+
+    // Get in-person instructions with clickable links
+    public function getInpersonInstructionsLinkedAttribute()
+    {
+        return $this->linkifyText($this->inperson_instructions);
     }
 
     // Helper method to get display title
