@@ -23,9 +23,8 @@ return new class extends Migration
             $table->integer('units')->nullable(); // only for development hearings
             $table->text('description'); // details of the hearing
             $table->string('image_url')->nullable();
-            $table->date('start_date');
-            $table->time('start_time')->nullable();
-            $table->time('end_time')->nullable();
+            $table->datetime('start_datetime');
+            $table->datetime('end_datetime');
             $table->string('more_info_url')->nullable();
             $table->text('remote_instructions'); // how to join (phone/virtual), could contain links
             $table->text('inperson_instructions'); // how to join in person

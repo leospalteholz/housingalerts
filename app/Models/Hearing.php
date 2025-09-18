@@ -16,21 +16,19 @@ class Hearing extends Model
         'rental',
         'units',
         'description',
+        'image_url',
+        'start_datetime',
+        'end_datetime',
+        'more_info_url',
         'remote_instructions',
         'inperson_instructions',
         'comments_email',
-        'image_url',
-        'start_date',
-        'start_time',
-        'end_time',
-        'more_info_url',
     ];
 
     protected $casts = [
+        'start_datetime' => 'datetime',
+        'end_datetime' => 'datetime',
         'rental' => 'boolean',
-        'start_date' => 'date',
-        'start_time' => 'datetime:H:i',
-        'end_time' => 'datetime:H:i',
     ];
 
     public function organization() {
@@ -39,6 +37,29 @@ class Hearing extends Model
 
     public function region() {
         return $this->belongsTo(Region::class);
+    }
+
+    // Accessor methods for form compatibility
+    public function getStartDateAttribute()
+    {
+        return $this->start_datetime ? $this->start_datetime->format('Y-m-d') : null;
+    }
+
+    public function getStartTimeAttribute()
+    {
+        return $this->start_datetime ? $this->start_datetime->format('H:i:s') : null;
+    }
+
+    public function getEndTimeAttribute()
+    {
+        return $this->end_datetime ? $this->end_datetime->format('H:i:s') : null;
+    }
+
+    // Method to set datetime fields from form data
+    public function setDateTimeFromForm($startDate, $startTime, $endTime)
+    {
+        $this->start_datetime = \Carbon\Carbon::parse($startDate . ' ' . $startTime);
+        $this->end_datetime = \Carbon\Carbon::parse($startDate . ' ' . $endTime);
     }
 
     // Helper method to get display title
@@ -54,11 +75,7 @@ class Hearing extends Model
     // Helper method to get combined date/time for display
     public function getHearingDateAttribute()
     {
-        if ($this->start_time) {
-            return $this->start_date->setTimeFromTimeString($this->start_time);
-        }
-        
-        return $this->start_date;
+        return $this->start_datetime;
     }
 
     // Helper method to check if this is a development hearing
@@ -108,23 +125,17 @@ class Hearing extends Model
      */
     private function getHearingDateTime($type = 'start')
     {
-        if (!$this->start_date) {
-            // Default to today if no date set
-            $date = now()->format('Y-m-d');
+        if ($type === 'start' && $this->start_datetime) {
+            return $this->start_datetime->utc()->format('Ymd\THis\Z');
+        } elseif ($type === 'end' && $this->end_datetime) {
+            return $this->end_datetime->utc()->format('Ymd\THis\Z');
         } else {
-            $date = \Carbon\Carbon::parse($this->start_date)->format('Y-m-d');
+            // Default datetimes if not set
+            $defaultStart = $this->start_datetime ?: now()->addHour()->setMinute(0)->setSecond(0);
+            $defaultEnd = $defaultStart->copy()->addHours(2);
+            
+            return ($type === 'start' ? $defaultStart : $defaultEnd)->utc()->format('Ymd\THis\Z');
         }
-
-        if ($type === 'start' && $this->start_time) {
-            $time = \Carbon\Carbon::parse($this->start_time)->format('H:i:s');
-        } elseif ($type === 'end' && $this->end_time) {
-            $time = \Carbon\Carbon::parse($this->end_time)->format('H:i:s');
-        } else {
-            // Default times
-            $time = $type === 'start' ? '10:00:00' : '11:00:00';
-        }
-
-        return \Carbon\Carbon::parse($date . ' ' . $time)->utc()->format('Ymd\THis\Z');
     }
 
     /**

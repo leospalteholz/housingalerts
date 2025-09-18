@@ -68,19 +68,19 @@
                     <div>
                         <p class="text-sm font-medium text-gray-500">Start Date</p>
                         <p class="text-gray-900">
-                                {{ \Carbon\Carbon::parse($hearing->start_date)->format('F j, Y') }}
+                                {{ $hearing->start_datetime ? $hearing->start_datetime->format('F j, Y') : 'Not set' }}
                         </p>
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">Start Time</p>
                         <p class="text-gray-900">
-                                {{ \Carbon\Carbon::parse($hearing->start_time)->format('g:i A') }}
+                                {{ $hearing->start_datetime ? $hearing->start_datetime->format('g:i A') : 'Not set' }}
                         </p>
                     </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500">End Time</p>
                         <p class="text-gray-900">
-                                {{ \Carbon\Carbon::parse($hearing->end_time)->format('g:i A') }}
+                                {{ $hearing->end_datetime ? $hearing->end_datetime->format('g:i A') : 'Not set' }}
                         </p>
                     </div>
                     
@@ -135,27 +135,150 @@
             </div>
         </div>
 
+        <!-- Call to Action for Non-Authenticated Users -->
+        @if(!auth()->check())
+            <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow p-6 mt-6">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-white mb-2">Want to stay informed about hearings like this?</h3>
+                    <p class="text-blue-100 mb-4">Sign up to receive email notifications about upcoming housing hearings in your area.</p>
+                    <div class="space-x-4">
+                        <a href="{{ route('signup') }}" class="bg-white text-blue-600 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 transition duration-200">
+                            Sign Up for Notifications
+                        </a>
+                        <a href="{{ route('login') }}" class="border border-white text-white font-semibold py-2 px-6 rounded-lg hover:bg-white hover:bg-opacity-10 transition duration-200">
+                            Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Notification Statistics (Admin/Superuser Only) -->
-        @if(auth()->user()->is_admin || auth()->user()->is_superuser)
+        @if(auth()->check() && (auth()->user()->is_admin || auth()->user()->is_superuser))
             <div class="bg-white rounded shadow p-6 mt-6">
                 <h3 class="text-lg font-semibold text-gray-900 border-b pb-2 mb-4">Notification Information</h3>
             
-            <div class="bg-blue-50 rounded-lg p-4 mb-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <svg class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2v-6a2 2 0 012-2h2V4a2 2 0 012-2h4a2 2 0 012 2v4z" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm font-medium text-blue-800">
-                            Subscribed Users
-                        </p>
-                        <p class="text-2xl font-bold text-blue-900">
-                            {{ $subscribedUsersCount }}
-                        </p>
-                    </div>
+            <!-- Subscribed Users Table -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-md font-semibold text-gray-900">Subscribed Users</h4>
+                    <span class="text-sm text-gray-500">{{ $subscribedUsers->count() }} users subscribed</span>
                 </div>
+
+                @if($subscribedUsers->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        User
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Role
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Notification Types
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Regions
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Email Verified
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($subscribedUsers as $user)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-8 w-8">
+                                                    <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                                        <span class="text-sm font-medium text-blue-700">
+                                                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <div class="text-sm font-medium text-gray-900">
+                                                        {{ $user->name }}
+                                                    </div>
+                                                    <div class="text-sm text-gray-500">
+                                                        {{ $user->email }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($user->is_superuser)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                    Superuser
+                                                </span>
+                                            @elseif($user->is_admin)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    Admin
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                    User
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex flex-col space-y-1">
+                                                @if($user->notificationSettings && $user->notificationSettings->notify_development_hearings)
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                                        Development
+                                                    </span>
+                                                @endif
+                                                @if($user->notificationSettings && $user->notificationSettings->notify_policy_hearings)
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                        Policy
+                                                    </span>
+                                                @endif
+                                                @if($user->notificationSettings && $user->notificationSettings->notify_day_of_hearing)
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                                        Day-of Reminders
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            @if($user->regions->count() > 0)
+                                                <div class="flex flex-col">
+                                                    @foreach($user->regions->take(2) as $region)
+                                                        <span class="text-sm">{{ $region->name }}</span>
+                                                    @endforeach
+                                                    @if($user->regions->count() > 2)
+                                                        <span class="text-xs text-gray-500">+{{ $user->regions->count() - 2 }} more</span>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="text-gray-500">No regions</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($user->email_verified_at)
+                                                <span class="text-green-600 text-sm">✓ Verified</span>
+                                            @else
+                                                <span class="text-red-600 text-sm">✗ Unverified</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-8">
+                        <div class="inline-flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mb-4">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 text-sm">No users are currently subscribed to notifications for this region/hearing type.</p>
+                    </div>
+                @endif
             </div>
 
             <!-- Email Notifications Table -->

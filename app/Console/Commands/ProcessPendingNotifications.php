@@ -137,7 +137,7 @@ class ProcessPendingNotifications extends Command
         $notifications = EmailNotification::where('status', 'queued')
             ->where('notification_type', 'day_of_reminder')
             ->whereHas('hearing', function ($query) use ($today) {
-                $query->whereDate('start_date', $today);
+                $query->whereDate('start_datetime', $today);
             })
             ->with(['user', 'hearing.region'])
             ->get();

@@ -1,6 +1,13 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RegionController;
+use App\Http\Controllers\HearingController;
+use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\NotificationSettingsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,15 +25,15 @@ Route::get('/', function () {
     return view('home');
 });
 
-
 // Admin-only routes
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\RegionController;
-use App\Http\Controllers\HearingController;
-use App\Http\Controllers\OrganizationController;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\UserDashboardController;
-use App\Http\Controllers\NotificationSettingsController;
+Route::middleware(['auth', 'admin'])->group(function () {
+    // Region management routes
+    Route::resource('regions', RegionController::class);
+    // Hearing management routes (create, edit, update, delete) - MUST be before public hearing routes
+    Route::resource('hearings', HearingController::class)->except(['index', 'show']);
+    // User management routes
+    Route::resource('users', UserController::class);
+});
 
 // Dashboard - accessible by all authenticated users
 Route::middleware(['auth'])->group(function () {
@@ -55,25 +62,16 @@ Route::middleware(['auth', 'superuser'])->group(function () {
     Route::resource('organizations', OrganizationController::class);
 });
 
-// Regular admin routes (organization-specific)
-Route::middleware(['auth', 'admin'])->group(function () {
-    // Region management routes
-    Route::resource('regions', RegionController::class);
-    // Hearing management routes (create, edit, update, delete)
-    Route::resource('hearings', HearingController::class)->except(['index', 'show']);
-    // User management routes
-    Route::resource('users', UserController::class);
-});
+// Public routes - accessible to everyone
+// Individual hearing details and calendar functionality
+Route::get('/hearings/{hearing}', [HearingController::class, 'show'])->name('hearings.show');
+Route::get('/hearings/{hearing}/calendar/{provider}', [HearingController::class, 'addToCalendar'])->name('hearings.calendar');
+Route::get('/hearings/{hearing}/calendar.ics', [HearingController::class, 'downloadIcs'])->name('hearings.ics');
 
 // Routes accessible to all authenticated users
 Route::middleware(['auth'])->group(function () {
-    // Allow all users to view hearings list and individual hearings
+    // Allow all users to view hearings list
     Route::get('/hearings', [HearingController::class, 'index'])->name('hearings.index');
-    Route::get('/hearings/{hearing}', [HearingController::class, 'show'])->name('hearings.show');
-    
-    // Calendar functionality for hearings
-    Route::get('/hearings/{hearing}/calendar/{provider}', [HearingController::class, 'addToCalendar'])->name('hearings.calendar');
-    Route::get('/hearings/{hearing}/calendar.ics', [HearingController::class, 'downloadIcs'])->name('hearings.ics');
     
     // Allow all users to view regions list (for monitoring)
     Route::get('/regions', [RegionController::class, 'index'])->name('regions.index');

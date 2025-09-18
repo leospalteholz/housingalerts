@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\HearingRequest;
 
 class HearingController extends Controller
 {
@@ -27,15 +28,15 @@ class HearingController extends Controller
                 ->get();
         }
         
-        // Split hearings into upcoming and past based on start_date
+        // Split hearings into upcoming and past based on start_datetime
         $today = now()->startOfDay();
         $upcomingHearings = $allHearings->filter(function ($hearing) use ($today) {
-            return $hearing->start_date && \Carbon\Carbon::parse($hearing->start_date)->gte($today);
-        })->sortBy('start_date');
+            return $hearing->start_datetime && $hearing->start_datetime->gte($today);
+        })->sortBy('start_datetime');
         
         $pastHearings = $allHearings->filter(function ($hearing) use ($today) {
-            return $hearing->start_date && \Carbon\Carbon::parse($hearing->start_date)->lt($today);
-        })->sortByDesc('start_date');
+            return $hearing->start_datetime && $hearing->start_datetime->lt($today);
+        })->sortByDesc('start_datetime');
         
         return view('hearings.index', compact('upcomingHearings', 'pastHearings'));
     }
@@ -62,47 +63,23 @@ class HearingController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(HearingRequest $request)
     {
-        // Base validation rules
-        $rules = [
-            'type' => 'required|in:development,policy',
-            'description' => 'required|string',
-            'remote_instructions' => 'required|string',
-            'inperson_instructions' => 'required|string',
-            'comments_email' => 'required|email|max:255',
-            'start_date' => 'required|date',
-            'start_time' => 'nullable',
-            'end_time' => 'nullable',
-            'organization_id' => 'nullable|exists:organizations,id',
-            'region_id' => 'nullable|exists:regions,id',
-            'image_url' => 'nullable|string',
-            'more_info_url' => 'nullable|url',
-        ];
+        $validated = $request->validated();
 
-        // Add conditional validation based on hearing type
-        if ($request->type === 'development') {
-            $rules = array_merge($rules, [
-                'street_address' => 'required|string|max:255',
-                'postal_code' => 'required|string|max:20',
-                'rental' => 'required|boolean',
-                'units' => 'required|integer|min:1',
-                'title' => 'nullable|string|max:255',
-            ]);
-        } else if ($request->type === 'policy') {
-            $rules = array_merge($rules, [
-                'title' => 'required|string|max:255',
-                'street_address' => 'nullable|string|max:255',
-                'postal_code' => 'nullable|string|max:20',
-                'rental' => 'nullable|boolean',
-                'units' => 'nullable|integer|min:1',
-            ]);
-        }
+        // Extract datetime fields for conversion
+        $startDate = $validated['start_date'];
+        $startTime = $validated['start_time'];
+        $endTime = $validated['end_time'];
+        
+        // Remove form-only fields before mass assignment
+        unset($validated['start_date'], $validated['start_time'], $validated['end_time']);
 
-        $validated = $request->validate($rules);
-
-        // Create a new hearing
+        // Create hearing with mass assignment
         $hearing = new \App\Models\Hearing($validated);
+        
+        // Set datetime fields from form data
+        $hearing->setDateTimeFromForm($startDate, $startTime, $endTime);
         
         // Auto-generate title for development hearings to match the address
         if ($hearing->type === 'development' && empty($hearing->title)) {
@@ -130,42 +107,35 @@ class HearingController extends Controller
     {
         $hearing = \App\Models\Hearing::with(['region', 'organization'])->findOrFail($id);
         
-        // Check access permissions
-        if (auth()->user()->is_superuser) {
-            // Superusers can view any hearing
-        } elseif (auth()->user()->is_admin) {
-            // Admins can only view hearings in their organization
-            if ($hearing->organization_id !== auth()->user()->organization_id) {
-                abort(403, 'You do not have permission to view this hearing.');
-            }
-        } else {
-            // Regular users can only view hearings in their monitored regions
-            $monitoredRegionIds = auth()->user()->regions()->pluck('regions.id');
-            if (!$monitoredRegionIds->contains($hearing->region_id)) {
-                abort(403, 'You can only view hearings in regions you are monitoring.');
-            }
+        // Public hearing view - no access restrictions needed
+        
+        // Get list of users subscribed to receive notifications for this hearing (only for authenticated admins)
+        $subscribedUsers = collect();
+        $emailNotifications = collect();
+        
+        if (auth()->check() && (auth()->user()->is_admin || auth()->user()->is_superuser)) {
+            $subscribedUsers = \App\Models\User::whereHas('regions', function ($query) use ($hearing) {
+                $query->where('region_id', $hearing->region_id);
+            })
+            ->whereHas('notificationSettings', function ($query) use ($hearing) {
+                if ($hearing->type === 'development') {
+                    $query->where('notify_development_hearings', true);
+                } else {
+                    $query->where('notify_policy_hearings', true);
+                }
+            })
+            ->with(['regions', 'notificationSettings'])
+            ->orderBy('name')
+            ->get();
+            
+            // Get email notifications for this hearing
+            $emailNotifications = \App\Models\EmailNotification::where('hearing_id', $hearing->id)
+                ->with('user')
+                ->orderBy('created_at', 'desc')
+                ->get();
         }
         
-        // Get count of users subscribed to receive notifications for this hearing
-        $subscribedUsersCount = \App\Models\User::whereHas('regions', function ($query) use ($hearing) {
-            $query->where('region_id', $hearing->region_id);
-        })
-        ->whereHas('notificationSettings', function ($query) use ($hearing) {
-            if ($hearing->type === 'development') {
-                $query->where('notify_development_hearings', true);
-            } else {
-                $query->where('notify_policy_hearings', true);
-            }
-        })
-        ->count();
-        
-        // Get email notifications for this hearing
-        $emailNotifications = \App\Models\EmailNotification::where('hearing_id', $hearing->id)
-            ->with('user')
-            ->orderBy('created_at', 'desc')
-            ->get();
-        
-        return view('hearings.show', compact('hearing', 'subscribedUsersCount', 'emailNotifications'));
+        return view('hearings.show', compact('hearing', 'subscribedUsers', 'emailNotifications'));
     }
 
     /**
@@ -192,48 +162,24 @@ class HearingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(HearingRequest $request, $id)
     {
         $hearing = \App\Models\Hearing::findOrFail($id);
         
-        // Base validation rules
-        $rules = [
-            'type' => 'required|in:development,policy',
-            'description' => 'required|string',
-            'remote_instructions' => 'required|string',
-            'inperson_instructions' => 'required|string',
-            'comments_email' => 'required|email|max:255',
-            'start_date' => 'required|date',
-            'start_time' => 'nullable',
-            'end_time' => 'nullable',
-            'organization_id' => 'nullable|exists:organizations,id',
-            'region_id' => 'nullable|exists:regions,id',
-            'image_url' => 'nullable|string',
-            'more_info_url' => 'nullable|url',
-        ];
+        $validated = $request->validated();
 
-        // Add conditional validation based on hearing type
-        if ($request->type === 'development') {
-            $rules = array_merge($rules, [
-                'street_address' => 'required|string|max:255',
-                'postal_code' => 'required|string|max:20',
-                'rental' => 'required|boolean',
-                'units' => 'required|integer|min:1',
-                'title' => 'nullable|string|max:255',
-            ]);
-        } else if ($request->type === 'policy') {
-            $rules = array_merge($rules, [
-                'title' => 'required|string|max:255',
-                'street_address' => 'nullable|string|max:255',
-                'postal_code' => 'nullable|string|max:20',
-                'rental' => 'nullable|boolean',
-                'units' => 'nullable|integer|min:1',
-            ]);
-        }
-
-        $validated = $request->validate($rules);
+        // Extract datetime fields for conversion
+        $startDate = $validated['start_date'];
+        $startTime = $validated['start_time'];
+        $endTime = $validated['end_time'];
+        
+        // Remove form-only fields before mass assignment
+        unset($validated['start_date'], $validated['start_time'], $validated['end_time']);
 
         $hearing->fill($validated);
+        
+        // Set datetime fields from form data
+        $hearing->setDateTimeFromForm($startDate, $startTime, $endTime);
         
         // Auto-generate title for development hearings if not provided
         if ($hearing->type === 'development' && empty($hearing->title)) {
@@ -361,23 +307,17 @@ class HearingController extends Controller
      */
     private function getHearingDateTime(\App\Models\Hearing $hearing, $type = 'start')
     {
-        if (!$hearing->start_date) {
-            // Default to today if no date set
-            $date = now()->format('Y-m-d');
+        if ($type === 'start' && $hearing->start_datetime) {
+            return $hearing->start_datetime->utc()->format('Ymd\THis\Z');
+        } elseif ($type === 'end' && $hearing->end_datetime) {
+            return $hearing->end_datetime->utc()->format('Ymd\THis\Z');
         } else {
-            $date = \Carbon\Carbon::parse($hearing->start_date)->format('Y-m-d');
+            // Default datetimes if not set
+            $defaultStart = $hearing->start_datetime ?: now()->addHour()->setMinute(0)->setSecond(0);
+            $defaultEnd = $hearing->end_datetime ?: $defaultStart->copy()->addHours(2);
+            
+            return ($type === 'start' ? $defaultStart : $defaultEnd)->utc()->format('Ymd\THis\Z');
         }
-
-        if ($type === 'start' && $hearing->start_time) {
-            $time = $hearing->start_time;
-        } elseif ($type === 'end' && $hearing->end_time) {
-            $time = $hearing->end_time;
-        } else {
-            // Default times
-            $time = $type === 'start' ? '10:00:00' : '11:00:00';
-        }
-
-        return \Carbon\Carbon::parse($date . ' ' . $time)->utc()->format('Ymd\THis\Z');
     }
 
     /**

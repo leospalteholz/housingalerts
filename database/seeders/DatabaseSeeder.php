@@ -110,9 +110,8 @@ class DatabaseSeeder extends Seeder
                 'comments_email' => 'comments@victoria.ca',
                 'organization_id' => $hfl->id,
                 'region_id' => $victoriaRegion->id,
-                'start_date' => now()->addDays(30),
-                'start_time' => '19:00:00',
-                'end_time' => '21:00:00',
+                'start_datetime' => now()->addDays(30)->setTime(19, 0, 0),
+                'end_datetime' => now()->addDays(30)->setTime(21, 0, 0),
                 'more_info_url' => 'https://victoria.ca/hearings/123-douglas'
             ]
         );
@@ -131,9 +130,8 @@ class DatabaseSeeder extends Seeder
                 'comments_email' => 'planning@saanich.ca',
                 'organization_id' => $hfl->id,
                 'region_id' => $saanichRegion->id,
-                'start_date' => now()->addDays(45),
-                'start_time' => '19:30:00',
-                'end_time' => '22:00:00',
+                'start_datetime' => now()->addDays(45)->setTime(19, 30, 0),
+                'end_datetime' => now()->addDays(45)->setTime(22, 0, 0),
                 'more_info_url' => 'https://saanich.ca/planning/456-quadra'
             ]
         );
