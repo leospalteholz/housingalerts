@@ -22,6 +22,8 @@
                 </div>
                 <!-- Hidden field to maintain type -->
                 <input type="hidden" name="type" value="{{ $hearing->type }}">
+                <!-- Hidden field to maintain organization -->
+                <input type="hidden" name="organization_id" value="{{ $hearing->organization_id }}">
             </div>
             
             <!-- Region -->
