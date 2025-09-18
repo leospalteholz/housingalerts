@@ -14,13 +14,32 @@
             @endif
             
             <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Hearing Details (Dynamic based on type) -->
+                <!-- Float the date/time and calendar button to the right -->
+                <div class="float-right ml-6 mb-4 bg-gray-50 rounded-lg p-4 border">
+                    <div class="flex items-start justify-between">
+                        <div class="text-left">
+                            <p class="text-gray-900 text-base font-medium">
+                                {{ $hearing->start_datetime->format('M j, Y') }}
+                            </p>
+                            <p class="text-gray-700 text-sm">
+                                {{ $hearing->start_datetime->format('g:i A') }} - {{ $hearing->end_datetime->format('g:i A') }}
+                            </p>
+                        </div>
+                        <div class="ml-3">
+                            <x-calendar-button :hearing="$hearing" compact="true" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hearing Description that wraps around the floated element -->
                 <div class="space-y-4">
-                    <!-- Hearing Description -->
                     <div>
                         <p class="text-gray-900 whitespace-pre-wrap">{{ $hearing->description }}</p>
                     </div>
+                </div>
+                
+                <!-- Additional details in a separate section after clearing the float -->
+                <div class="clear-both mt-6 space-y-4">
                     
                     <!-- More Information -->
                     <div>
@@ -61,26 +80,13 @@
                     @else
                     @endif
                 </div>
-
-                <!-- Hearing Information -->
-                <div class="space-y-4">
-                    <div>
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="text-gray-900 text-lg font-medium">
-                                    {{ $hearing->formatted_date_time }}
-                                </p>
-                            </div>
-                            <div class="ml-4">
-                                <x-calendar-button :hearing="$hearing" compact="true" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
+            <!-- Clear float before full-width sections -->
+            <div class="clear-both"></div>
+
             <!-- Full-width sections -->
-            <div class="mt-6 space-y-6">
+            <div class="space-y-6">
                 <!-- How to Help Section -->
                 <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6 border border-orange-200">
                     <h3 class="text-xl font-semibold text-orange-900 mb-4 flex items-center">
