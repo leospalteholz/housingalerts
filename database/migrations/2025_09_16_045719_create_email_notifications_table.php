@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('email_notifications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('SET NULL');
-            $table->foreignId('hearing_id')->constrained()->onDelete('SET NULL');
+            $table->foreignId('user_id')->nullable()->nullOnDelete()->constrained();
+            $table->foreignId('hearing_id')->nullable()->nullOnDelete()->constrained();
             $table->enum('notification_type', ['hearing_created', 'day_of_reminder']);
             $table->string('email_address');
             $table->timestamp('sent_at');
