@@ -30,6 +30,13 @@ else
     echo "📦 No composer changes detected, skipping dependency update"
 fi
 
+# Build frontend assets
+if [ -f "package.json" ]; then
+    echo "🛠️  Building frontend assets..."
+    npm install
+    npm run build
+fi
+
 # Clear all caches
 echo "🧹 Clearing caches..."
 php artisan config:clear
