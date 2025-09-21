@@ -1,4 +1,33 @@
 <x-app-layout>
+    <x-slot name="title">{{ $hearing->title }} - {{ config('app.name') }}</x-slot>
+    
+    <x-slot name="meta">
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="article">
+        <meta property="og:title" content="{{ $hearing->title }}">
+        <meta property="og:description" content="{{ Str::limit(strip_tags($hearing->description), 150) }}">
+        <meta property="og:url" content="{{ route('hearings.show', $hearing) }}">
+        <meta property="og:site_name" content="{{ config('app.name') }}">
+        @if($hearing->image_url)
+            <meta property="og:image" content="{{ $hearing->image_url }}">
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
+        @endif
+        <meta property="article:published_time" content="{{ $hearing->created_at->toISOString() }}">
+        <meta property="article:modified_time" content="{{ $hearing->updated_at->toISOString() }}">
+        
+        <!-- Twitter -->
+        <meta name="twitter:card" content="{{ $hearing->image_url ? 'summary_large_image' : 'summary' }}">
+        <meta name="twitter:title" content="{{ $hearing->title }}">
+        <meta name="twitter:description" content="{{ Str::limit(strip_tags($hearing->description), 150) }}">
+        @if($hearing->image_url)
+            <meta name="twitter:image" content="{{ $hearing->image_url }}">
+        @endif
+        
+        <!-- Additional meta -->
+        <meta name="description" content="{{ Str::limit(strip_tags($hearing->description), 160) }}">
+    </x-slot>
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ $hearing->title }}
