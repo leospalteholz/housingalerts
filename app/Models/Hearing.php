@@ -84,6 +84,9 @@ class Hearing extends Model
         
         // Store in public disk under hearings folder
         $path = $imageFile->storeAs('hearings', $filename, 'public');
+
+        // Log the storage path
+        \Log::info("Image uploaded to: " . $path);
         
         // Return the public URL
         return asset('storage/' . $path);
