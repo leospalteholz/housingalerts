@@ -30,10 +30,9 @@ class UserDashboardController extends Controller
         if ($monitoredRegions->count() > 0) {
             $regionIds = $monitoredRegions->pluck('id');
             $upcomingHearings = Hearing::whereIn('region_id', $regionIds)
-                ->where('start_date', '>=', now())
-                ->orderBy('start_date', 'asc')
+                ->where('start_datetime', '>=', now())
+                ->orderBy('start_datetime', 'asc')
                 ->with(['region', 'organization'])
-                ->limit(10)
                 ->get();
         }
         
