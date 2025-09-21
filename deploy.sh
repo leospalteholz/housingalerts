@@ -48,6 +48,10 @@ php artisan cache:clear
 echo "🗄️  Running database migrations..."
 php artisan migrate --force
 
+# Create storage symbolic link (if it doesn't exist)
+echo "🔗 Creating storage symbolic link..."
+php artisan storage:link
+
 # Rebuild caches for production
 echo "⚡ Rebuilding production caches..."
 php artisan config:cache
