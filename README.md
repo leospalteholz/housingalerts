@@ -121,17 +121,15 @@ The system features automated email notifications with 1-minute delays for new h
 ## 🔮 Future Enhancements
 
 - Multi-organization onboarding wizard.  
-- Region hierarchy (province → city → neighborhood).  
 - Webhooks to ingest public notices automatically.  
 - Analytics: track open/click rates for hearings.  
-- Support for SMS notifications.  
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Framework**: Laravel 12.x (PHP 8.2+)
-- **Database**: MySQL with foreign key constraints
+- **Database**: Sqlite for easy deploy
 - **Email Service**: SendGrid SMTP
 - **Task Scheduling**: Laravel Scheduler with cron
 - **Frontend**: Blade templates with Tailwind CSS

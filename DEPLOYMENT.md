@@ -83,19 +83,14 @@ APP_NAME="Housing Alerts"
 APP_ENV=production
 APP_KEY=
 APP_DEBUG=false
-APP_URL=https://yourdomain.com
+APP_URL=https://housingalerts.a
 
 LOG_CHANNEL=stack
 LOG_DEPRECATIONS_CHANNEL=null
 LOG_LEVEL=error
 
-# Database (from Cloudways dashboard)
-DB_CONNECTION=mysql
-DB_HOST=[your_db_host]
-DB_PORT=3306
-DB_DATABASE=[your_db_name]
-DB_USERNAME=[your_db_username]
-DB_PASSWORD=[your_db_password]
+# Database 
+DB_CONNECTION=sqlite
 
 # Session and Cache
 SESSION_DRIVER=database
