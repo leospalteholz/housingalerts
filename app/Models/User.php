@@ -72,6 +72,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the user's email notifications.
+     */
+    public function emailNotifications()
+    {
+        return $this->hasMany(EmailNotification::class);
+    }
+
+    /**
      * Get notification settings, creating default ones if they don't exist.
      */
     public function getNotificationSettings(): UserNotificationSettings
