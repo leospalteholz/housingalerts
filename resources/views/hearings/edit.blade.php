@@ -183,16 +183,16 @@
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Update</button>
                     <a href="{{ route('hearings.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">Cancel</a>
                 </div>
-                
-                <!-- Delete Button -->
-                <form action="{{ route('hearings.destroy', $hearing) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this hearing? This action cannot be undone.');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded">
-                        Delete Hearing
-                    </button>
-                </form>
             </div>
+        </form>
+
+        <!-- Delete Button (separate form) -->
+        <form action="{{ route('hearings.destroy', $hearing) }}" method="POST" class="mt-4" onsubmit="return confirm('Are you sure you want to delete this hearing? This action cannot be undone.');">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded w-full">
+                Delete Hearing
+            </button>
         </form>
     </div>
 
