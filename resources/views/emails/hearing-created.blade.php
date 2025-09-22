@@ -383,7 +383,7 @@
             <p>You can manage your notification preferences in your <a href="{{ route('dashboard') }}">dashboard</a>.</p>
             
             <div class="unsubscribe">
-                <p>If you no longer wish to receive notifications about hearings in {{ $hearing->region->name }}, you can <a href="{{ route('dashboard') }}">unsubscribe</a>.</p>
+                <p>If you no longer wish to receive any housing alert emails, you can <a href="{{ \App\Http\Controllers\UnsubscribeController::generateUnsubscribeUrl($user) }}">unsubscribe from all notifications</a>.</p>
             </div>
         </div>
     </div>
