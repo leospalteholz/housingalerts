@@ -49,6 +49,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/dashboard', [App\Http\Controllers\UserDashboardController::class, 'index'])
         ->name('user.dashboard');
     
+    Route::post('/user/resubscribe', [App\Http\Controllers\UserDashboardController::class, 'resubscribe'])
+        ->name('user.resubscribe');
+    
     // Notification settings
     Route::get('/notification-settings', [NotificationSettingsController::class, 'show'])
         ->name('notification-settings');
