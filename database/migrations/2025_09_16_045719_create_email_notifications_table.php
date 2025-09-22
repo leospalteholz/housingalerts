@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('hearing_id')->nullable()->nullOnDelete()->constrained();
             $table->enum('notification_type', ['hearing_created', 'day_of_reminder']);
             $table->string('email_address');
-            $table->timestamp('sent_at');
+            $table->timestamp('sent_at')->nullable();
             $table->enum('status', ['queued', 'sent', 'failed'])->default('queued');
             $table->text('failure_reason')->nullable();
             $table->boolean('opted_in')->default(true);
