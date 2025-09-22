@@ -143,86 +143,113 @@
             text-align: center;
         }
         
-        .action-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        
-        .action-card {
-            background-color: white;
-            border: 2px solid #e5e7eb;
+        .checklist {
+            background-color: #f8fafc;
+            border: 1px solid #e5e7eb;
             border-radius: 12px;
-            padding: 20px;
-            transition: all 0.2s ease;
+            padding: 24px;
         }
         
-        .action-card.good {
-            border-color: #10b981;
-            background: linear-gradient(135deg, #f0fdf4 0%, #f0fdf4 100%);
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px 0;
+            border-bottom: 1px solid #e5e7eb;
         }
         
-        .action-card.amazing {
-            border-color: #f59e0b;
-            background: linear-gradient(135deg, #fffbeb 0%, #fffbeb 100%);
+        .checklist-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
         }
         
-        .action-card.cherry {
-            border-color: #8b5cf6;
-            background: linear-gradient(135deg, #faf5ff 0%, #faf5ff 100%);
+        .checklist-item:first-child {
+            padding-top: 0;
         }
         
-        .action-level {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            margin-right: 16px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            position: relative;
+            background-color: white;
         }
         
-        .action-card.good .action-level {
+        .checkbox::after {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 10px;
+            border: solid #10b981;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            opacity: 0;
+        }
+        
+        .checklist-item.completed .checkbox {
             background-color: #10b981;
-            color: white;
+            border-color: #10b981;
         }
         
-        .action-card.amazing .action-level {
-            background-color: #f59e0b;
-            color: white;
+        .checklist-item.completed .checkbox::after {
+            opacity: 1;
+            border-color: white;
         }
         
-        .action-card.cherry .action-level {
-            background-color: #8b5cf6;
-            color: white;
+        .checklist-content {
+            flex: 1;
         }
         
-        .action-text {
-            font-size: 16px;
+        .checklist-label {
+            font-weight: 600;
             color: #374151;
+            margin-bottom: 4px;
+            font-size: 16px;
+        }
+        
+        .checklist-description {
+            color: #6b7280;
+            font-size: 14px;
             line-height: 1.5;
             margin: 0;
         }
         
+        .checklist-description a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        
+        .checklist-description a:hover {
+            text-decoration: underline;
+        }
+        
         .cta-button {
             display: inline-block;
-            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-            color: white;
+            background: #2563eb !important;
+            color: #ffffff !important;
             padding: 16px 32px;
-            text-decoration: none;
+            text-decoration: none !important;
             border-radius: 8px;
             margin: 32px 0;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 16px;
             text-align: center;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             transition: all 0.2s ease;
+            border: 2px solid #2563eb;
         }
         
         .cta-button:hover {
+            background: #1d4ed8 !important;
+            color: #ffffff !important;
             transform: translateY(-1px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            text-decoration: none !important;
         }
         
         .footer {
@@ -308,22 +335,37 @@
             </div>
 
             <div class="action-section">
-                <h2 class="action-title">Here's How You Can Help</h2>
+                <h2 class="action-title">Your Action Checklist</h2>
                 
-                <div class="action-cards">
-                    <div class="action-card good">
-                        <div class="action-level">Good</div>
-                        <p class="action-text">Send your support via email to <a href="mailto:{{ $hearing->comments_email }}">{{ $hearing->comments_email }}</a>. Even a simple message saying you support more housing makes a difference!</p>
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <div class="checkbox"></div>
+                        <div class="checklist-content">
+                            <div class="checklist-label">📧 Send an email in support</div>
+                            <p class="checklist-description">
+                                Email <a href="mailto:{{ $hearing->comments_email }}">{{ $hearing->comments_email }}</a> with your support. Even a simple message saying you support more housing makes a difference!
+                            </p>
+                        </div>
                     </div>
                     
-                    <div class="action-card amazing">
-                        <div class="action-level">Amazing</div>
-                        <p class="action-text">Add this hearing to your calendar and plan to speak in support at this hearing. You can participate over the phone or in person. Your personal story about housing matters!</p>
+                    <div class="checklist-item">
+                        <div class="checkbox"></div>
+                        <div class="checklist-content">
+                            <div class="checklist-label">🗣️ Speak at the hearing</div>
+                            <p class="checklist-description">
+                                Add this hearing to your calendar and plan to speak in support. You can participate over the phone or in person. Your personal story about housing matters!
+                            </p>
+                        </div>
                     </div>
                     
-                    <div class="action-card cherry">
-                        <div class="action-level">Cherry on Top</div>
-                        <p class="action-text">Share this hearing with your network and encourage others to participate. The more voices supporting housing, the better!</p>
+                    <div class="checklist-item">
+                        <div class="checkbox"></div>
+                        <div class="checklist-content">
+                            <div class="checklist-label">📢 Share with your network</div>
+                            <p class="checklist-description">
+                                Forward this email or share details about this hearing with friends, family, and colleagues. The more voices supporting housing, the better!
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
