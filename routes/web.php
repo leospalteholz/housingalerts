@@ -97,4 +97,11 @@ Route::middleware(['web'])->group(function () {
     Route::get('/signup/thankyou', [SignupController::class, 'showThankYou'])->name('signup.thankyou');
 });
 
+// Unsubscribe routes (accessible to guests with signed URLs)
+use App\Http\Controllers\UnsubscribeController;
+Route::middleware(['web', 'signed'])->group(function () {
+    Route::get('/unsubscribe', [UnsubscribeController::class, 'show'])->name('unsubscribe.show');
+    Route::post('/unsubscribe', [UnsubscribeController::class, 'unsubscribe'])->name('unsubscribe.confirm');
+});
+
 require __DIR__.'/auth.php';

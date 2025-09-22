@@ -152,7 +152,7 @@
             <p>You can manage your notification preferences in your <a href="{{ route('user.dashboard') }}">dashboard</a>.</p>
             
             <div class="unsubscribe">
-                <p>To stop receiving day-of reminders, <a href="{{ route('notification-settings') }}">update your notification settings</a>.</p>
+                <p>To stop receiving all housing alert emails, <a href="{{ \App\Http\Controllers\UnsubscribeController::generateUnsubscribeUrl($user) }}">unsubscribe from all notifications</a>.</p>
             </div>
         </div>
     </div>
