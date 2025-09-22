@@ -30,18 +30,14 @@
                             @if(auth()->user()->organization->contact_email)
                                 <a href="mailto:{{ auth()->user()->organization->contact_email }}" 
                                    class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
+                                    <x-icon name="mail" class="w-4 h-4 mr-2" />
                                     Contact Us
                                 </a>
                             @endif
                             @if(auth()->user()->organization->website_url)
                                 <a href="{{ auth()->user()->organization->website_url }}" target="_blank"
                                    class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                    </svg>
+                                    <x-icon name="external-link" class="w-4 h-4 mr-2" />
                                     Visit Website
                                 </a>
                             @endif
@@ -54,9 +50,7 @@
                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                            </svg>
+                            <x-icon name="exclamation-triangle" class="h-5 w-5 text-yellow-400" />
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-yellow-700">
@@ -86,10 +80,7 @@
                         </div>
                         <a href="{{ route('notification-settings') }}" 
                            class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
+                            <x-icon name="cog" class="w-4 h-4 mr-2" />
                             Configure notifications
                         </a>
                     </div>
@@ -106,17 +97,13 @@
                                         <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
                                             @if($hearing->start_date)
                                                 <div class="flex items-center">
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                                    </svg>
+                                                    <x-icon name="calendar" class="w-4 h-4 mr-1" />
                                                     {{ \Carbon\Carbon::parse($hearing->start_date)->format('M j, Y \a\t g:i A') }}
                                                 </div>
                                             @endif
                                             @if($hearing->region)
                                                 <div class="flex items-center">
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                                    </svg>
+                                                    <x-icon name="location" class="w-4 h-4 mr-1" />
                                                     {{ $hearing->region->name }}
                                                 </div>
                                             @endif
@@ -158,9 +145,7 @@
                     @endif
                 @else
                     <div class="px-6 py-12 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
+                        <x-icon name="calendar" class="mx-auto h-12 w-12 text-gray-400 mb-4" />
                         <h3 class="text-lg font-medium text-gray-900 mb-2">No upcoming hearings</h3>
                         @if($monitoredRegions->count() > 0)
                             <p class="text-gray-600 mb-4">There are no upcoming hearings in your monitored regions.</p>
@@ -217,14 +202,10 @@
                                             <div class="mt-2">
                                                 <span class="subscription-status inline-flex items-center text-xs" data-region-id="{{ $region->id }}">
                                                     @if($region->is_monitored)
-                                                        <svg class="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                                        </svg>
+                                                        <x-icon name="check-circle" class="w-3 h-3 mr-1 text-green-500" />
                                                         <span class="text-green-700 font-medium">Subscribed</span>
                                                     @else
-                                                        <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                                        </svg>
+                                                        <x-icon name="plus" class="w-3 h-3 mr-1 text-gray-400" />
                                                         <span class="text-gray-500">Not subscribed</span>
                                                     @endif
                                                 </span>
@@ -236,9 +217,7 @@
                         </div>
                     @else
                         <div class="text-center py-12">
-                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            </svg>
+                            <x-icon name="location" class="mx-auto h-12 w-12 text-gray-400 mb-4" />
                             <h3 class="text-lg font-medium text-gray-900 mb-2">No regions available</h3>
                             <p class="text-gray-600">There are no regions available for subscription in your organization yet.</p>
                         </div>
@@ -316,16 +295,12 @@
                 
                 if (isSubscribed) {
                     statusElement.innerHTML = `
-                        <svg class="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
+                        <x-icon name="check-circle" class="w-3 h-3 mr-1 text-green-500" />
                         <span class="text-green-700 font-medium">Subscribed</span>
                     `;
                 } else {
                     statusElement.innerHTML = `
-                        <svg class="w-3 h-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                        </svg>
+                        <x-icon name="plus" class="w-3 h-3 mr-1 text-gray-400" />
                         <span class="text-gray-500">Not subscribed</span>
                     `;
                 }

@@ -89,17 +89,13 @@
                         <div class="flex items-center justify-between pt-6 border-t border-gray-200">
                             <a href="{{ route('user.dashboard') }}" 
                                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                </svg>
+                                <x-icon name="arrow-left" class="w-4 h-4 mr-2" />
                                 Back to Dashboard
                             </a>
                             
                             <button type="submit" 
                                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
+                                <x-icon name="check" class="w-4 h-4 mr-2" />
                                 Save Settings
                             </button>
                         </div>
@@ -110,9 +106,7 @@
             <div class="bg-blue-50 rounded-lg p-6 mt-6">
                 <div class="flex">
                     <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+                        <x-icon name="info" class="h-5 w-5 text-blue-400" />
                     </div>
                     <div class="ml-3">
                         <h3 class="text-sm font-medium text-blue-800">About Notifications</h3>

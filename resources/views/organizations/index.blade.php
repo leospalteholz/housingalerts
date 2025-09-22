@@ -22,9 +22,7 @@
                         <div class="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
                             <div class="flex">
                                 <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                    </svg>
+                                    <x-icon name="error" class="h-5 w-5 text-red-400" />
                                 </div>
                                 <div class="ml-3">
                                     <h3 class="text-sm font-medium text-red-800">Unable to complete action</h3>
@@ -91,9 +89,7 @@
                                                     @if($organization->website_url)
                                                         <a href="{{ $organization->website_url }}" target="_blank" class="text-indigo-600 hover:text-indigo-900 flex items-center">
                                                             {{ Str::limit(str_replace(['http://', 'https://'], '', $organization->website_url), 25) }}
-                                                            <svg class="ml-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                            </svg>
+                                                            <x-icon name="external-link" class="ml-1 h-3 w-3" />
                                                         </a>
                                                     @else
                                                         <span class="text-gray-400">—</span>
@@ -128,9 +124,7 @@
                         </div>
                     @else
                         <div class="text-center py-12">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m0 0h2M7 7h10M7 11h4m6 0h4"/>
-                            </svg>
+                            <x-icon name="organization" class="mx-auto h-12 w-12 text-gray-400" />
                             <h3 class="mt-2 text-sm font-medium text-gray-900">No organizations</h3>
                             <p class="mt-1 text-sm text-gray-500">Get started by creating a new organization.</p>
                             <div class="mt-6">

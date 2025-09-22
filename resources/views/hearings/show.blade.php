@@ -131,9 +131,7 @@
                                    target="_blank" 
                                    class="w-8 h-8 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-full transition duration-200"
                                    title="Share on BlueSky">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2.5c-2.4 0-4.8.8-6.7 2.3C3.6 6.1 2.5 8.2 2.5 10.5c0 1.8.6 3.5 1.7 4.9.6.8 1.4 1.4 2.3 1.8.4.2.8.3 1.2.3.2 0 .4 0 .6-.1.8-.3 1.4-1 1.6-1.9.1-.4.1-.8 0-1.2-.2-.8-.7-1.4-1.4-1.7-.3-.1-.6-.2-.9-.2-.2 0-.4.1-.5.2-.1.1-.2.2-.2.4 0 .1.1.2.2.3.4.3.7.7.8 1.2.1.3.1.6 0 .9-.1.3-.3.5-.5.6-.1 0-.2.1-.3.1-.2 0-.4-.1-.6-.2-.5-.3-1-.7-1.3-1.2-.7-.9-1.1-2-1.1-3.1 0-1.7.8-3.3 2.1-4.4C7.8 3.6 9.9 2.5 12 2.5s4.2 1.1 5.8 2.8c1.3 1.1 2.1 2.7 2.1 4.4 0 1.1-.4 2.2-1.1 3.1-.3.5-.8.9-1.3 1.2-.2.1-.4.2-.6.2-.1 0-.2 0-.3-.1-.2-.1-.4-.3-.5-.6-.1-.3-.1-.6 0-.9.1-.5.4-.9.8-1.2.1-.1.2-.2.2-.3 0-.2-.1-.3-.2-.4-.1-.1-.3-.2-.5-.2-.3 0-.6.1-.9.2-.7.3-1.2.9-1.4 1.7-.1.4-.1.8 0 1.2.2.9.8 1.6 1.6 1.9.2.1.4.1.6.1.4 0 .8-.1 1.2-.3.9-.4 1.7-1 2.3-1.8 1.1-1.4 1.7-3.1 1.7-4.9 0-2.3-1.1-4.4-2.8-5.7C16.8 3.3 14.4 2.5 12 2.5z"/>
-                                    </svg>
+                                    <x-icon name="bluesky" class="w-4 h-4" />
                                 </a>
                                 
                                 <!-- Facebook -->
@@ -167,9 +165,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-white rounded-lg p-4">
                             <h4 class="font-semibold text-blue-900 mb-2 flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                </svg>
+                                <x-icon name="computer" class="w-5 h-5 mr-2" />
                                 Join Virtually
                             </h4>
                             <div class="text-gray-700 text-sm whitespace-pre-wrap">{!! $hearing->remote_instructions_linked !!}</div>
@@ -177,9 +173,7 @@
                         
                         <div class="bg-white rounded-lg p-4">
                             <h4 class="font-semibold text-green-900 mb-2 flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                </svg>
+                                <x-icon name="building" class="w-5 h-5 mr-2" />
                                 Attend In Person
                             </h4>
                             <div class="text-gray-700 text-sm whitespace-pre-wrap">{!! $hearing->inperson_instructions_linked !!}</div>
@@ -332,6 +326,7 @@
                     </div>
                 @else
                     <div class="text-center py-8">
+                        <x-icon name="user" class="mx-auto h-12 w-12 text-gray-400" />
                         <p class="text-gray-500 text-sm">No users are currently subscribed to notifications for this region/hearing type.</p>
                     </div>
                 @endif
@@ -434,9 +429,7 @@
                     </div>
                 @else
                     <div class="text-center py-8">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
+                        <x-icon name="mail" class="mx-auto h-12 w-12 text-gray-400" />
                         <h3 class="mt-2 text-sm font-medium text-gray-900">No notifications sent</h3>
                         <p class="mt-1 text-sm text-gray-500">
                             No email notifications have been sent for this hearing yet.
