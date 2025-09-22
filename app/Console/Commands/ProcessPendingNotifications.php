@@ -56,8 +56,9 @@ class ProcessPendingNotifications extends Command
         
         $this->line("Looking for hearings created before: {$cutoffTime}");
         
-        // Get all hearings that are old enough to send notifications for
-        $hearings = Hearing::where('created_at', '<=', $cutoffTime)
+        // Fetch all hearings that are in the future and were created before the cutoff time
+        $hearings = Hearing::where('start_datetime', '>=', Carbon::now())
+            ->where('created_at', '<=', $cutoffTime)
             ->with(['region'])
             ->get();
             
