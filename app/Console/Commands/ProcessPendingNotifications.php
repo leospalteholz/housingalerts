@@ -18,7 +18,7 @@ class ProcessPendingNotifications extends Command
      * @var string
      */
     protected $signature = 'notifications:process-pending';
-    protected $delayAfterHearingCreated = 5; // minutes
+    protected $delayAfterHearingCreated = 0; // minutes
 
     /**
      * The console command description.
