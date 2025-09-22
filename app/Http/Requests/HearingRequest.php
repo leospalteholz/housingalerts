@@ -43,7 +43,7 @@ class HearingRequest extends FormRequest
                 'units' => 'required|integer|min:1',
                 'title' => 'nullable|string|max:255',
             ]);
-        } else if ($this->type === 'policy') {
+        } elseif ($this->type === 'policy') {
             $rules = array_merge($rules, [
                 'title' => 'required|string|max:255',
                 'street_address' => 'nullable|string|max:255',

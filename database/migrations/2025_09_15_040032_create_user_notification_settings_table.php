@@ -18,7 +18,7 @@ return new class extends Migration
             $table->boolean('notify_policy_hearings')->default(true);
             $table->boolean('send_day_of_reminders')->default(false);
             $table->timestamps();
-            
+
             // Ensure one settings record per user
             $table->unique('user_id');
         });

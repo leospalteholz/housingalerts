@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Region;
 use App\Models\Hearing;
+use App\Models\Region;
+use App\Models\User;
 
 class UserDashboardController extends Controller
 {
@@ -15,16 +14,17 @@ class UserDashboardController extends Controller
         $user = auth()->user();
         $monitoredRegions = $user->regions()->with('organization')->get();
         $monitoredRegionIds = $monitoredRegions->pluck('id');
-        
+
         // Get all regions in the user's organization with monitoring status
         $allRegions = Region::where('organization_id', $user->organization_id)
             ->with('organization')
             ->get()
             ->map(function ($region) use ($monitoredRegionIds) {
                 $region->is_monitored = $monitoredRegionIds->contains($region->id);
+
                 return $region;
             });
-        
+
         // Get upcoming hearings in the user's monitored regions
         $upcomingHearings = collect();
         if ($monitoredRegions->count() > 0) {
@@ -35,7 +35,7 @@ class UserDashboardController extends Controller
                 ->with(['region', 'organization'])
                 ->get();
         }
-        
+
         return view('user.dashboard', compact('user', 'monitoredRegions', 'upcomingHearings', 'allRegions'));
     }
 }

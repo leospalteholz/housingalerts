@@ -5,10 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Organization;
 use App\Models\Region;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Auth\Events\Registered;
 
 class SignupController extends Controller
 {
@@ -18,6 +17,7 @@ class SignupController extends Controller
     public function showSignupForm()
     {
         $organizations = Organization::where('user_visible', true)->orderBy('name')->get();
+
         return view('auth.signup', compact('organizations'));
     }
 

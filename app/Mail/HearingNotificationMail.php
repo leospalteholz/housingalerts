@@ -2,14 +2,13 @@
 
 namespace App\Mail;
 
-use App\Models\User;
 use App\Models\Hearing;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
 
 class HearingNotificationMail extends Mailable
@@ -62,11 +61,11 @@ class HearingNotificationMail extends Mailable
     {
         // Generate ICS file content
         $icsContent = $this->hearing->generateIcsContent();
-        $filename = 'hearing-' . $this->hearing->id . '.ics';
-        
+        $filename = 'hearing-'.$this->hearing->id.'.ics';
+
         return [
             Attachment::fromData(fn () => $icsContent, $filename)
-                ->withMime('text/calendar')
+                ->withMime('text/calendar'),
         ];
     }
 
@@ -75,7 +74,7 @@ class HearingNotificationMail extends Mailable
      */
     private function getSubject(): string
     {
-        return match($this->template) {
+        return match ($this->template) {
             'created' => "New Hearing: {$this->hearing->title}",
             'day_of_reminder' => "Reminder: Hearing Today - {$this->hearing->title}",
             'week_reminder' => "Reminder: Hearing Next Week - {$this->hearing->title}",

@@ -15,7 +15,7 @@ class SuperuserMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->is_superuser) {
+        if (! auth()->check() || ! auth()->user()->is_superuser) {
             return redirect()->route('dashboard')->with('error', 'You do not have permission to access this area.');
         }
 

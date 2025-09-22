@@ -24,7 +24,7 @@ class AdminMiddleware
         if (auth()->check()) {
             return redirect()->route('dashboard')->with('error', 'You do not have permission to access this area.');
         }
-        
+
         // If not authenticated at all, redirect to login
         return redirect()->route('login');
     }

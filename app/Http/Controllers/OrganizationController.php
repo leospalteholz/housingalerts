@@ -10,6 +10,7 @@ class OrganizationController extends Controller
     public function index()
     {
         $organizations = Organization::all();
+
         return view('organizations.index', compact('organizations'));
     }
 
@@ -28,18 +29,21 @@ class OrganizationController extends Controller
             'about' => 'nullable|string|max:1000',
         ]);
         Organization::create($validated);
+
         return redirect()->route('organizations.index')->with('success', 'Organization created successfully!');
     }
 
     public function show($id)
     {
         $organization = Organization::findOrFail($id);
+
         return view('organizations.show', compact('organization'));
     }
 
     public function edit($id)
     {
         $organization = Organization::findOrFail($id);
+
         return view('organizations.edit', compact('organization'));
     }
 
@@ -48,12 +52,13 @@ class OrganizationController extends Controller
         $organization = Organization::findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:organizations,slug,' . $organization->id,
+            'slug' => 'required|string|max:255|unique:organizations,slug,'.$organization->id,
             'contact_email' => 'required|email',
             'website_url' => 'nullable|url|max:255',
             'about' => 'nullable|string|max:1000',
         ]);
         $organization->update($validated);
+
         return redirect()->route('organizations.index')->with('success', 'Organization updated successfully!');
     }
 
@@ -61,6 +66,7 @@ class OrganizationController extends Controller
     {
         $organization = Organization::findOrFail($id);
         $organization->delete();
+
         return redirect()->route('organizations.index')->with('success', 'Organization deleted successfully!');
     }
 }

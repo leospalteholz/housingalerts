@@ -8,18 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 class Organization extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = ['name', 'slug', 'contact-email', 'website_url', 'about', 'user_visible'];
 
-    public function users() {
+    public function users()
+    {
         return $this->hasMany(User::class);
     }
 
-    public function regions() {
+    public function regions()
+    {
         return $this->hasMany(Region::class);
     }
 
-    public function hearings() {
+    public function hearings()
+    {
         return $this->hasMany(Hearing::class);
     }
 }

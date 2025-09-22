@@ -1,13 +1,11 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\RegionController;
 use App\Http\Controllers\HearingController;
-use App\Http\Controllers\OrganizationController;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\NotificationSettingsController;
+use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RegionController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,15 +38,15 @@ Route::middleware(['auth'])->group(function () {
     // Main dashboard route that routes users to appropriate dashboard
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
         ->name('dashboard');
-    
+
     // Specific dashboard routes
     Route::get('/admin/dashboard', [App\Http\Controllers\AdminDashboardController::class, 'index'])
         ->middleware('admin')
         ->name('admin.dashboard');
-    
+
     Route::get('/user/dashboard', [App\Http\Controllers\UserDashboardController::class, 'index'])
         ->name('user.dashboard');
-    
+
     // Notification settings
     Route::get('/notification-settings', [NotificationSettingsController::class, 'show'])
         ->name('notification-settings');
@@ -72,11 +70,11 @@ Route::get('/hearings/{hearing}/calendar.ics', [HearingController::class, 'downl
 Route::middleware(['auth'])->group(function () {
     // Allow all users to view hearings list
     Route::get('/hearings', [HearingController::class, 'index'])->name('hearings.index');
-    
+
     // Allow all users to view regions list (for monitoring)
     Route::get('/regions', [RegionController::class, 'index'])->name('regions.index');
     Route::get('/regions/{region}', [RegionController::class, 'show'])->name('regions.show');
-    
+
     // Region subscription endpoints for regular users
     Route::post('/regions/{id}/subscribe', [RegionController::class, 'subscribe'])->name('regions.subscribe');
     Route::post('/regions/{id}/unsubscribe', [RegionController::class, 'unsubscribe'])->name('regions.unsubscribe');
@@ -90,6 +88,7 @@ Route::middleware('auth')->group(function () {
 
 // Signup routes (accessible to guests)
 use App\Http\Controllers\SignupController;
+
 Route::middleware(['web'])->group(function () {
     Route::get('/signup', [SignupController::class, 'showSignupForm'])->name('signup');
     Route::post('/signup', [SignupController::class, 'processSignup'])->name('signup.process');

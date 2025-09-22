@@ -17,19 +17,19 @@ class UserController extends Controller
             $users = \App\Models\User::with(['organization', 'regions'])->get();
         } else {
             $users = \App\Models\User::with(['organization', 'regions'])
-                          ->where('organization_id', auth()->user()->organization_id)
-                          ->get();
+                ->where('organization_id', auth()->user()->organization_id)
+                ->get();
         }
-        
+
         // Separate admins and regular users
         $admins = $users->filter(function ($user) {
             return $user->is_admin || $user->is_superuser;
         });
-        
+
         $regularUsers = $users->filter(function ($user) {
-            return !$user->is_admin && !$user->is_superuser;
+            return ! $user->is_admin && ! $user->is_superuser;
         });
-        
+
         return view('users.index', compact('admins', 'regularUsers'));
     }
 
@@ -48,7 +48,7 @@ class UserController extends Controller
                 ->orderBy('name')
                 ->get();
         }
-        
+
         return view('users.create', compact('organizations', 'regions'));
     }
 
@@ -68,7 +68,7 @@ class UserController extends Controller
         ]);
 
         // Set organization_id based on user role
-        if (!auth()->user()->is_superuser) {
+        if (! auth()->user()->is_superuser) {
             $validated['organization_id'] = auth()->user()->organization_id;
         }
 
@@ -88,7 +88,7 @@ class UserController extends Controller
         ]);
 
         // Attach regions if provided
-        if (!empty($validated['regions'])) {
+        if (! empty($validated['regions'])) {
             $user->regions()->sync($validated['regions']);
         }
 
@@ -101,6 +101,7 @@ class UserController extends Controller
     public function show($id)
     {
         $user = \App\Models\User::with('regions')->findOrFail($id);
+
         return view('users.show', compact('user'));
     }
 
@@ -110,6 +111,7 @@ class UserController extends Controller
     public function edit($id)
     {
         $user = \App\Models\User::findOrFail($id);
+
         return view('users.edit', compact('user'));
     }
 
@@ -138,6 +140,7 @@ class UserController extends Controller
     {
         $user = \App\Models\User::findOrFail($id);
         $user->delete();
+
         return redirect()->route('users.index')->with('success', 'User deleted successfully!');
     }
 }

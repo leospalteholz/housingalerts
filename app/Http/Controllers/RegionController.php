@@ -18,16 +18,17 @@ class RegionController extends Controller
             // All authenticated users can see regions within their organization
             $regions = \App\Models\Region::where('organization_id', auth()->user()->organization_id)->get();
         }
-        
+
         // For regular users, also get their monitored regions to show which ones they're following
-        if (!auth()->user()->is_admin) {
+        if (! auth()->user()->is_admin) {
             $monitoredRegionIds = auth()->user()->regions()->pluck('regions.id');
             $regions = $regions->map(function ($region) use ($monitoredRegionIds) {
                 $region->is_monitored = $monitoredRegionIds->contains($region->id);
+
                 return $region;
             });
         }
-        
+
         return view('regions.index', compact('regions'));
     }
 
@@ -51,7 +52,7 @@ class RegionController extends Controller
             'inperson_instructions' => 'nullable|string',
         ]);
 
-        $region = new \App\Models\Region();
+        $region = new \App\Models\Region;
         $region->name = $validated['name'];
         $region->comments_email = $validated['comments_email'];
         $region->remote_instructions = $validated['remote_instructions'];
@@ -68,7 +69,7 @@ class RegionController extends Controller
     public function show(string $id)
     {
         $region = \App\Models\Region::with(['organization', 'hearings'])->findOrFail($id);
-        
+
         // Check access permissions
         if (auth()->user()->is_superuser) {
             // Superusers can view any region
@@ -78,13 +79,13 @@ class RegionController extends Controller
                 abort(403, 'You do not have permission to view this region.');
             }
         }
-        
+
         // For regular users, check if they're monitoring this region
         $isMonitored = false;
-        if (!auth()->user()->is_admin) {
+        if (! auth()->user()->is_admin) {
             $isMonitored = auth()->user()->regions()->where('regions.id', $region->id)->exists();
         }
-        
+
         return view('regions.show', compact('region', 'isMonitored'));
     }
 
@@ -94,6 +95,7 @@ class RegionController extends Controller
     public function edit($id)
     {
         $region = \App\Models\Region::findOrFail($id);
+
         return view('regions.edit', compact('region'));
     }
 
@@ -122,14 +124,15 @@ class RegionController extends Controller
     public function destroy($id)
     {
         $region = \App\Models\Region::findOrFail($id);
-        
+
         // Check if region has any hearings
         if ($region->hearings()->count() > 0) {
             return redirect()->route('regions.index')
-                ->withErrors(['error' => 'Cannot delete region "' . $region->name . '" because it contains hearings. Please move or delete the hearings first.']);
+                ->withErrors(['error' => 'Cannot delete region "'.$region->name.'" because it contains hearings. Please move or delete the hearings first.']);
         }
-        
+
         $region->delete();
+
         return redirect()->route('regions.index')->with('success', 'Region deleted successfully!');
     }
 
@@ -142,49 +145,51 @@ class RegionController extends Controller
             \Log::info('Region subscription attempt:', [
                 'region_id' => $id,
                 'user_id' => auth()->id(),
-                'user_organization_id' => auth()->user()->organization_id
+                'user_organization_id' => auth()->user()->organization_id,
             ]);
-            
+
             $region = \App\Models\Region::findOrFail($id);
             $user = auth()->user();
-            
+
             \Log::info('Region found:', [
                 'region_name' => $region->name,
-                'region_organization_id' => $region->organization_id
+                'region_organization_id' => $region->organization_id,
             ]);
-            
+
             // Check if user can access this region (same organization)
-            if (!$user->is_superuser && $region->organization_id !== $user->organization_id) {
+            if (! $user->is_superuser && $region->organization_id !== $user->organization_id) {
                 \Log::warning('User tried to subscribe to region from different organization:', [
                     'user_org' => $user->organization_id,
-                    'region_org' => $region->organization_id
+                    'region_org' => $region->organization_id,
                 ]);
+
                 return response()->json(['error' => 'You can only subscribe to regions in your organization.'], 403);
             }
-            
+
             // Check if already subscribed
             $alreadySubscribed = $user->regions()->where('regions.id', $region->id)->exists();
             \Log::info('Subscription status check:', [
-                'already_subscribed' => $alreadySubscribed
+                'already_subscribed' => $alreadySubscribed,
             ]);
-            
+
             // Add user to region if not already subscribed
-            if (!$alreadySubscribed) {
+            if (! $alreadySubscribed) {
                 $user->regions()->attach($region->id);
                 \Log::info('User subscribed to region successfully');
             } else {
                 \Log::info('User was already subscribed to region');
             }
-            
-            return response()->json(['success' => true, 'message' => 'Successfully subscribed to ' . $region->name]);
+
+            return response()->json(['success' => true, 'message' => 'Successfully subscribed to '.$region->name]);
         } catch (\Exception $e) {
             \Log::error('Region subscription error:', [
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            return response()->json(['error' => 'An error occurred while subscribing: ' . $e->getMessage()], 500);
+
+            return response()->json(['error' => 'An error occurred while subscribing: '.$e->getMessage()], 500);
         }
     }
 
@@ -196,14 +201,15 @@ class RegionController extends Controller
         try {
             $region = \App\Models\Region::findOrFail($id);
             $user = auth()->user();
-            
+
             // Remove user from region
             $user->regions()->detach($region->id);
-            
-            return response()->json(['success' => true, 'message' => 'Successfully unsubscribed from ' . $region->name]);
+
+            return response()->json(['success' => true, 'message' => 'Successfully unsubscribed from '.$region->name]);
         } catch (\Exception $e) {
-            \Log::error('Region unsubscription error: ' . $e->getMessage());
-            return response()->json(['error' => 'An error occurred while unsubscribing: ' . $e->getMessage()], 500);
+            \Log::error('Region unsubscription error: '.$e->getMessage());
+
+            return response()->json(['error' => 'An error occurred while unsubscribing: '.$e->getMessage()], 500);
         }
     }
 }

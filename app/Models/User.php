@@ -55,11 +55,13 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new \App\Notifications\CustomVerifyEmail);
     }
 
-    public function organization() {
+    public function organization()
+    {
         return $this->belongsTo(Organization::class);
     }
 
-    public function regions() {
+    public function regions()
+    {
         return $this->belongsToMany(Region::class, 'user_region');
     }
 

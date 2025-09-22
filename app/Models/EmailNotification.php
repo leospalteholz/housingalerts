@@ -21,7 +21,7 @@ class EmailNotification extends Model
      */
     const UPDATED_AT = null;
 
-     /**
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

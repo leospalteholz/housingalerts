@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\UserNotificationSettings;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class NotificationSettingsController extends Controller
@@ -16,7 +15,7 @@ class NotificationSettingsController extends Controller
     {
         $user = auth()->user();
         $settings = $user->getNotificationSettings();
-        
+
         return view('notification-settings', compact('settings'));
     }
 

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('failure_reason')->nullable();
             $table->boolean('opted_in')->default(true);
             $table->timestamp('created_at')->nullable();
-            
+
             // Prevent duplicate notifications
             $table->unique(['user_id', 'hearing_id', 'notification_type'], 'unique_notification');
         });

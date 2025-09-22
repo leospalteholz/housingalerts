@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\EmailNotification;
-use App\Models\User;
 use App\Models\Hearing;
+use App\Models\User;
 use Carbon\Carbon;
 
 class NotificationService
@@ -18,17 +18,17 @@ class NotificationService
         $users = User::whereHas('regions', function ($query) use ($hearing) {
             $query->where('region_id', $hearing->region_id);
         })
-        ->where('hearing_created_notifications', true)
-        ->get();
-        
+            ->where('hearing_created_notifications', true)
+            ->get();
+
         $queuedCount = 0;
-        
+
         foreach ($users as $user) {
             // Check if we've already sent this notification
             if (EmailNotification::alreadySent($user->id, $hearing->id, 'hearing_created')) {
                 continue;
             }
-            
+
             // Queue the notification
             EmailNotification::create([
                 'user_id' => $user->id,
@@ -37,15 +37,15 @@ class NotificationService
                 'email_address' => $user->email,
                 'status' => 'queued',
                 'opted_in' => true,
-                'created_at' => Carbon::now()
+                'created_at' => Carbon::now(),
             ]);
-            
+
             $queuedCount++;
         }
-        
+
         return $queuedCount;
     }
-    
+
     /**
      * Queue day-of reminder notifications for all users in the hearing's region
      */
@@ -55,17 +55,17 @@ class NotificationService
         $users = User::whereHas('regions', function ($query) use ($hearing) {
             $query->where('region_id', $hearing->region_id);
         })
-        ->where('day_of_reminders', true)
-        ->get();
-        
+            ->where('day_of_reminders', true)
+            ->get();
+
         $queuedCount = 0;
-        
+
         foreach ($users as $user) {
             // Check if we've already sent this notification
             if (EmailNotification::alreadySent($user->id, $hearing->id, 'day_of_reminder')) {
                 continue;
             }
-            
+
             // Queue the notification
             EmailNotification::create([
                 'user_id' => $user->id,
@@ -74,15 +74,15 @@ class NotificationService
                 'email_address' => $user->email,
                 'status' => 'queued',
                 'opted_in' => true,
-                'created_at' => Carbon::now()
+                'created_at' => Carbon::now(),
             ]);
-            
+
             $queuedCount++;
         }
-        
+
         return $queuedCount;
     }
-    
+
     /**
      * Queue both types of notifications for a hearing
      */
@@ -90,11 +90,11 @@ class NotificationService
     {
         $hearingCreatedCount = $this->queueHearingCreatedNotifications($hearing);
         $dayOfReminderCount = $this->queueDayOfReminderNotifications($hearing);
-        
+
         return [
             'hearing_created' => $hearingCreatedCount,
             'day_of_reminder' => $dayOfReminderCount,
-            'total' => $hearingCreatedCount + $dayOfReminderCount
+            'total' => $hearingCreatedCount + $dayOfReminderCount,
         ];
     }
 }
