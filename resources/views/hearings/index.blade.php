@@ -4,9 +4,11 @@
             {{ __('Hearings') }}
         </h2>
     </x-slot>
-    <div class="max-w-6xl mx-auto py-8 space-y-8">
-        <!-- Upcoming Hearings -->
-        <div class="bg-white rounded shadow overflow-hidden">
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="space-y-6">
+                <!-- Upcoming Hearings -->
+                <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
             <div class="bg-green-50 px-6 py-4 border-b border-green-200">
                 <div class="flex justify-between items-center">
                     <div>
@@ -94,8 +96,8 @@
             </div>
         </div>
 
-        <!-- Past Hearings -->
-        <div class="bg-white rounded shadow overflow-hidden">
+                <!-- Past Hearings -->
+                <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-800">Past Hearings</h3>
                 <p class="text-sm text-gray-600">{{ $pastHearings->count() }} hearings completed</p>
@@ -172,6 +174,8 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
             </div>
         </div>
     </div>
