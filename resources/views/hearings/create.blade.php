@@ -107,14 +107,14 @@
             </div>
             <div class="mb-4">
                 <label for="start_time" class="block text-gray-700 font-semibold mb-2">Start Time</label>
-                <input type="time" id="start_time" name="start_time" value="{{ old('start_time') }}" step="900" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="time" id="start_time" name="start_time" value="{{ old('start_time') }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('start_time')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
             <div class="mb-4">
                 <label for="end_time" class="block text-gray-700 font-semibold mb-2">End Time</label>
-                <input type="time" id="end_time" name="end_time" value="{{ old('end_time') }}" step="900" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="time" id="end_time" name="end_time" value="{{ old('end_time') }}" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 @error('end_time')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
