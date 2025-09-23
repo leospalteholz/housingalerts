@@ -45,6 +45,23 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Success Messages -->
+            @if(session('success'))
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <x-icon name="check-circle" class="h-5 w-5 text-green-400" />
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700">
+                                {{ session('success') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            
             <!-- Email Verification Status -->
             @if(!auth()->user()->hasVerifiedEmail())
                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
@@ -62,6 +79,31 @@
                                     @csrf
                                     <button type="submit" class="text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded hover:bg-yellow-200 transition">
                                         Resend Verification Email
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Unsubscribed Status -->
+            @if(auth()->user()->unsubscribed_at)
+                <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <x-icon name="exclamation-triangle" class="h-5 w-5 text-red-400" />
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">
+                                <strong>You have unsubscribed from all notifications.</strong><br> 
+                                You won't receive any hearing notifications until you resubscribe.
+                            </p>
+                            <div class="mt-2">
+                                <form method="POST" action="{{ route('user.resubscribe') }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-sm bg-red-100 text-red-800 px-3 py-1 rounded hover:bg-red-200 transition">
+                                        Resubscribe to Notifications
                                     </button>
                                 </form>
                             </div>

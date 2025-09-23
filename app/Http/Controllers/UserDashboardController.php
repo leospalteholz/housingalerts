@@ -38,4 +38,16 @@ class UserDashboardController extends Controller
         
         return view('user.dashboard', compact('user', 'monitoredRegions', 'upcomingHearings', 'allRegions'));
     }
+
+    /**
+     * Resubscribe the user to notifications
+     */
+    public function resubscribe()
+    {
+        $user = auth()->user();
+        $user->unsubscribed_at = null;
+        $user->save();
+
+        return redirect()->route('user.dashboard')->with('success', 'You have been resubscribed to notifications.');
+    }
 }

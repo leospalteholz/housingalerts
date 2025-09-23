@@ -25,6 +25,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_superuser',
         'organization_id',
         'email_verified_at',
+        'unsubscribed_at',
     ];
 
     /**
@@ -44,6 +45,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'unsubscribed_at' => 'datetime',
         'password' => 'hashed',
     ];
 
