@@ -3,7 +3,42 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeCalendarButtons();
+    setupAutoInitialization();
 });
+
+function setupAutoInitialization() {
+    // Create a MutationObserver to watch for new calendar buttons
+    const observer = new MutationObserver(function(mutations) {
+        let shouldReinit = false;
+        
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        // Check if the added node contains calendar buttons
+                        if (node.querySelector && node.querySelector('.calendar-menu-button')) {
+                            shouldReinit = true;
+                        }
+                        // Check if the added node itself is a calendar button
+                        if (node.classList && node.classList.contains('calendar-menu-button')) {
+                            shouldReinit = true;
+                        }
+                    }
+                });
+            }
+        });
+        
+        if (shouldReinit) {
+            initializeCalendarButtons();
+        }
+    });
+    
+    // Start observing the entire document for changes
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
 
 function initializeCalendarButtons() {
     const calendarButtons = document.querySelectorAll('.calendar-menu-button');

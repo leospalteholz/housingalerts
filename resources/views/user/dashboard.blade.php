@@ -412,6 +412,7 @@
                     })
                     .then(html => {
                         hearingsContent.innerHTML = html;
+                        // Calendar buttons will auto-initialize via MutationObserver
                     })
                     .catch(error => {
                         console.error('Error reloading hearings:', error);
