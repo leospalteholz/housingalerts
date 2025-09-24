@@ -16,16 +16,24 @@ class CustomVerifyEmail extends VerifyEmailBase
     public function toMail($notifiable)
     {
         $verificationUrl = $this->verificationUrl($notifiable);
-
-        return (new MailMessage)
+        
+        $message = (new MailMessage)
             ->subject('Welcome to Housing Alerts - Please Verify Your Email')
             ->greeting('Welcome to Housing Alerts!')
             ->line('Thank you for signing up to receive housing alerts in your area.')
             ->line('You\'re helping to support housing in your community by staying informed about upcoming hearings and opportunities to provide input.')
             ->action('Verify Email Address', $verificationUrl)
-            ->line('Once verified, you\'ll start receiving timely notifications about housing hearings in the regions you selected.')
-            ->line('If you didn\'t create an account with Housing Alerts, please ignore this email.')
-            ->salutation('Thank you for supporting housing in your community!');
+            ->line('Once verified, you\'ll start receiving timely notifications about housing hearings in the regions you selected.');
+
+        // Add dashboard link for passwordless users
+        if ($notifiable->isPasswordless()) {
+            $message->line('**Save this link for future access to your preferences:**')
+                   ->line('🔗 **Your Personal Dashboard:** ' . $notifiable->getDashboardUrl())
+                   ->line('You can use this link anytime to update which regions you want housing alerts for.');
+        }
+
+        return $message->line('If you didn\'t create an account with Housing Alerts, please ignore this email.')
+                      ->salutation('Thank you for supporting housing in your community!');
     }
 
     /**

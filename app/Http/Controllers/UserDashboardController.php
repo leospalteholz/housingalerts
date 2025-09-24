@@ -35,8 +35,11 @@ class UserDashboardController extends Controller
                 ->with(['region', 'organization'])
                 ->get();
         }
+
+        // Get notification settings
+        $notificationSettings = $user->getNotificationSettings();
         
-        return view('user.dashboard', compact('user', 'monitoredRegions', 'upcomingHearings', 'allRegions'));
+        return view('user.dashboard', compact('user', 'monitoredRegions', 'upcomingHearings', 'allRegions', 'notificationSettings'));
     }
 
     /**
@@ -49,5 +52,51 @@ class UserDashboardController extends Controller
         $user->save();
 
         return redirect()->route('user.dashboard')->with('success', 'You have been resubscribed to notifications.');
+    }
+
+    /**
+     * Update notification preferences
+     */
+    public function updateNotificationPreferences(Request $request)
+    {
+        $request->validate([
+            'notify_development_hearings' => 'boolean',
+            'notify_policy_hearings' => 'boolean',
+        ]);
+
+        $user = auth()->user();
+        $settings = $user->getNotificationSettings();
+        
+        $settings->update([
+            'notify_development_hearings' => $request->has('notify_development_hearings'),
+            'notify_policy_hearings' => $request->has('notify_policy_hearings'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification preferences updated successfully!'
+        ]);
+    }
+
+    /**
+     * Get upcoming hearings for the current user (AJAX endpoint)
+     */
+    public function getUpcomingHearings()
+    {
+        $user = auth()->user();
+        $monitoredRegions = $user->regions()->with('organization')->get();
+        
+        // Get upcoming hearings in the user's monitored regions
+        $upcomingHearings = collect();
+        if ($monitoredRegions->count() > 0) {
+            $regionIds = $monitoredRegions->pluck('id');
+            $upcomingHearings = Hearing::whereIn('region_id', $regionIds)
+                ->where('start_datetime', '>=', now())
+                ->orderBy('start_datetime', 'asc')
+                ->with(['region', 'organization'])
+                ->get();
+        }
+
+        return view('user.partials.hearings-list', compact('upcomingHearings'))->render();
     }
 }

@@ -21,6 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'dashboard_token',
         'is_admin',
         'is_superuser',
         'organization_id',
@@ -35,6 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $hidden = [
         'password',
+        'dashboard_token',
         'remember_token',
     ];
 
@@ -87,5 +89,68 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getNotificationSettings(): UserNotificationSettings
     {
         return UserNotificationSettings::getOrCreateForUser($this);
+    }
+
+    /**
+     * Check if this is a passwordless regular user.
+     */
+    public function isPasswordless(): bool
+    {
+        return $this->password === null;
+    }
+
+    /**
+     * Check if this is an admin/superuser with password.
+     */
+    public function requiresPassword(): bool
+    {
+        return $this->is_admin || $this->is_superuser;
+    }
+
+    /**
+     * Generate a unique dashboard token for passwordless access.
+     */
+    public function generateDashboardToken(): string
+    {
+        do {
+            $token = bin2hex(random_bytes(32)); // 64 character hex string
+        } while (static::where('dashboard_token', $token)->exists());
+
+        $this->dashboard_token = $token;
+        $this->save();
+
+        return $token;
+    }
+
+    /**
+     * Get the dashboard URL for this user.
+     */
+    public function getDashboardUrl(): string
+    {
+        if (!$this->dashboard_token) {
+            $this->generateDashboardToken();
+        }
+
+        return route('dashboard.token', ['token' => $this->dashboard_token]);
+    }
+
+    /**
+     * Create or find a passwordless user by email.
+     */
+    public static function findOrCreatePasswordless(string $email, string $name = null): self
+    {
+        $user = static::where('email', $email)->first();
+
+        if (!$user) {
+            $user = static::create([
+                'email' => $email,
+                'name' => $name ?: explode('@', $email)[0], // Use email prefix as default name
+                'password' => null // Explicitly passwordless
+            ]);
+            
+            $user->generateDashboardToken();
+        }
+
+        return $user;
     }
 }

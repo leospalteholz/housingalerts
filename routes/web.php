@@ -25,6 +25,11 @@ Route::get('/', function () {
     return view('home');
 });
 
+// Passwordless authentication routes
+use App\Http\Controllers\PasswordlessAuthController;
+Route::post('/signup-passwordless', [PasswordlessAuthController::class, 'signup'])->name('signup.passwordless');
+Route::get('/dashboard/{token}', [PasswordlessAuthController::class, 'dashboard'])->name('dashboard.token');
+
 // Admin-only routes
 Route::middleware(['auth', 'admin'])->group(function () {
     // Region management routes
@@ -51,6 +56,12 @@ Route::middleware(['auth'])->group(function () {
     
     Route::post('/user/resubscribe', [App\Http\Controllers\UserDashboardController::class, 'resubscribe'])
         ->name('user.resubscribe');
+    
+    Route::post('/user/notification-preferences', [App\Http\Controllers\UserDashboardController::class, 'updateNotificationPreferences'])
+        ->name('user.notification-preferences');
+    
+    Route::get('/user/hearings', [App\Http\Controllers\UserDashboardController::class, 'getUpcomingHearings'])
+        ->name('user.hearings');
     
     // Notification settings
     Route::get('/notification-settings', [NotificationSettingsController::class, 'show'])

@@ -23,8 +23,7 @@
                         @auth
                             <a href="{{ url('/dashboard') }}" class="font-semibold text-gray-600 hover:text-gray-900 focus:outline-none focus:underline">Dashboard</a>
                         @else
-                            <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 focus:outline-none focus:underline">Log in</a>
-                            <a href="{{ route('signup') }}" class="ml-4 font-semibold bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">Sign up</a>
+                            <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 focus:outline-none focus:underline">Admin Login</a>
                         @endauth
                     </div>
                 </div>
@@ -32,11 +31,40 @@
             
             <main class="flex-grow">
                 <div class="container mx-auto px-4 py-12">
-                    <div class="text-center mb-12">
-                        <h1 class="text-4xl font-bold text-gray-900 mb-4">Stay Informed About Housing Hearings</h1>
-                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">It's hard for your councillors to support housing when all they hear is voices against.</p>
-                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">But we know with life and work it's nearly impossible to keep up with public hearings or opportunities to support housing in your community.</p>
-                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Housing Alerts allows you to receive timely notifications about new homes and housing issues in your area so you can take action, whether it's sending a quick supportive email (great!) or speaking in support at a council meeting (incredible!).</p>
+                    <div class="text-center mb-8">
+                        <h1 class="text-5xl font-bold text-gray-900 mb-6">Help Advocate for More Housing</h1>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-2">It's hard for your councillors to support housing when all they hear is negative voices, but we know it's nearly impossible to keep up with opportunities to support housing in your community.</p>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-6">Housing Alerts sends you emails about hearings and tells you exactly how you can make your voice heard for more housing.</p>
+                    </div>
+
+                    <!-- Simple Email Signup -->
+                    <div class="max-w-2xl mx-auto mb-12">
+                        <form action="{{ route('signup.passwordless') }}" method="POST" class="flex flex-col sm:flex-row gap-4 items-end">
+                            @csrf
+                            <div class="flex-1">
+                                <span class="block text-3xl font-bold text-gray-800 mb-2">Sign me up!</span>
+                                <input type="email" 
+                                       id="email" 
+                                       name="email" 
+                                       required 
+                                       placeholder="Enter your email address"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                                       value="{{ old('email') }}">
+                                @error('email')
+                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <button type="submit" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg whitespace-nowrap transition duration-200">
+                                Subscribe
+                            </button>
+                        </form>
+                        
+                        @if(session('success'))
+                            <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                                {{ session('success') }}
+                            </div>
+                        @endif
                     </div>
                     
                     <div class="bg-white shadow-md rounded-lg p-8 mb-12">
@@ -65,10 +93,6 @@
                                 <p class="text-gray-600">Receive timely emails when new homes could use your support!</p>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="text-center">
-                        <a href="{{ route('signup') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg">Sign Up Now</a>
                     </div>
                 </div>
             </main>

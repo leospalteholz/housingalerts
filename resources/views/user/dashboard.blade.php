@@ -7,43 +7,8 @@
                     Welcome {{ auth()->user()->name }}
                 </h1>
                 <p class="text-lg text-gray-600 mb-8">
-                    Thank you for signing up to help support housing in your community! Hearing tracking is provided by:
+                    Thank you for signing up to help support housing in your community!
                 </p>
-            </div>
-
-            <!-- Organization Information Card -->
-            <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                <div class="p-6">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center">
-                        {{ auth()->user()->organization->name }}
-                    </h2>
-                    
-                    @if(auth()->user()->organization->about)
-                        <div class="text-gray-700 leading-relaxed mb-6 text-center">
-                            {{ auth()->user()->organization->about }}
-                        </div>
-                    @endif
-
-                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                        <span class="text-sm text-gray-600">Want to learn more?</span>
-                        <div class="flex flex-wrap justify-center gap-4">
-                            @if(auth()->user()->organization->contact_email)
-                                <a href="mailto:{{ auth()->user()->organization->contact_email }}" 
-                                   class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition">
-                                    <x-icon name="mail" class="w-4 h-4 mr-2" />
-                                    Contact Us
-                                </a>
-                            @endif
-                            @if(auth()->user()->organization->website_url)
-                                <a href="{{ auth()->user()->organization->website_url }}" target="_blank"
-                                   class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition">
-                                    <x-icon name="external-link" class="w-4 h-4 mr-2" />
-                                    Visit Website
-                                </a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Success Messages -->
@@ -112,99 +77,13 @@
                 </div>
             @endif
 
-            <!-- Upcoming Hearings Section -->
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Upcoming Hearings in Your Regions</h2>
-                            <p class="text-sm text-gray-600 mt-1">Housing development and policy hearings you should know about</p>
-                        </div>
-                        <a href="{{ route('notification-settings') }}" 
-                           class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <x-icon name="cog" class="w-4 h-4 mr-2" />
-                            Configure notifications
-                        </a>
-                    </div>
-                </div>
-                @if($upcomingHearings->count() > 0)
-                    <div class="divide-y divide-gray-200">
-                        @foreach($upcomingHearings->take(5) as $hearing)
-                            <div class="px-6 py-4 hover:bg-gray-50 transition">
-                                <div class="flex justify-between items-start">
-                                    <div class="flex-1">
-                                        <h3 class="text-lg font-medium text-gray-900 mb-2">
-                                            {{ $hearing->display_title }}
-                                        </h3>
-                                        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
-                                            @if($hearing->start_date)
-                                                <div class="flex items-center">
-                                                    <x-icon name="calendar" class="w-4 h-4 mr-1" />
-                                                    {{ \Carbon\Carbon::parse($hearing->start_date)->format('M j, Y \a\t g:i A') }}
-                                                </div>
-                                            @endif
-                                            @if($hearing->region)
-                                                <div class="flex items-center">
-                                                    <x-icon name="location" class="w-4 h-4 mr-1" />
-                                                    {{ $hearing->region->name }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $hearing->isDevelopment() ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
-                                                {{ $hearing->isDevelopment() ? 'Development' : 'Policy' }}
-                                            </span>
-                                            @if($hearing->isDevelopment() && $hearing->units)
-                                                <span class="text-sm text-gray-600">{{ $hearing->units }} units</span>
-                                            @endif
-                                            @if($hearing->isDevelopment() && $hearing->rental !== null)
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $hearing->rental ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800' }}">
-                                                    {{ $hearing->rental ? 'Rental' : 'Condo' }}
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <div class="ml-4 flex gap-2">
-                                        <a href="{{ route('hearings.show', $hearing) }}" 
-                                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
-                                            View Details
-                                        </a>
-                                        
-                                        <!-- Add to Calendar Dropdown -->
-                                        <x-calendar-button :hearing="$hearing" compact="true" />
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                    @if($upcomingHearings->count() > 5)
-                        <div class="px-6 py-4 bg-gray-50 text-center">
-                            <a href="{{ route('hearings.index') }}" 
-                               class="text-blue-600 hover:text-blue-800 font-medium">
-                                View all {{ $upcomingHearings->count() }} upcoming hearings →
-                            </a>
-                        </div>
-                    @endif
-                @else
-                    <div class="px-6 py-12 text-center">
-                        <x-icon name="calendar" class="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">No upcoming hearings</h3>
-                        @if($monitoredRegions->count() > 0)
-                            <p class="text-gray-600 mb-4">There are no upcoming hearings in your monitored regions.</p>
-                        @else
-                            <p class="text-gray-600 mb-4">Subscribe to some regions below to see upcoming hearings here.</p>
-                        @endif
-                    </div>
-                @endif
-            </div>
-
             <!-- Region Subscription Management -->
             <div class="bg-white shadow rounded-lg">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Manage Your Region Subscriptions</h2>
-                            <p class="text-sm text-gray-600 mt-1">Select regions to monitor for housing developments and policy changes</p>
+                            <h2 class="text-xl font-semibold text-gray-900">Select the regions you're interested in</h2>
+                            <p class="text-sm text-gray-600 mt-1">You'll be notified about housing hearings in these regions.</p>
                         </div>
                     </div>
                 </div>
@@ -264,6 +143,93 @@
                             <p class="text-gray-600">There are no regions available for subscription in your organization yet.</p>
                         </div>
                     @endif
+
+                    <!-- Notification Preferences (always shown) -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="mb-4">
+                            <h2 class="text-xl font-semibold text-gray-900">Notification Preferences</h2>
+                            <p class="text-sm text-gray-600">Choose which types of hearings you want to be notified about</p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <input type="checkbox" 
+                                       id="notify_development_hearings"
+                                       class="notification-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" 
+                                       data-setting="notify_development_hearings"
+                                       {{ $notificationSettings->notify_development_hearings ? 'checked' : '' }}>
+                                <label for="notify_development_hearings" class="ml-3 text-sm text-gray-700">
+                                    <span class="font-medium">New developments</span>
+                                    <p class="text-xs text-gray-500">Get notified about new housing development proposals</p>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <input type="checkbox" 
+                                       id="notify_policy_hearings"
+                                       class="notification-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" 
+                                       data-setting="notify_policy_hearings"
+                                       {{ $notificationSettings->notify_policy_hearings ? 'checked' : '' }}>
+                                <label for="notify_policy_hearings" class="ml-3 text-sm text-gray-700">
+                                    <span class="font-medium">Important housing policy</span>
+                                    <p class="text-xs text-gray-500">Get notified about housing policy changes and discussions</p>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Hearings Section -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900">Upcoming Hearings in Your Regions</h2>
+                        <p class="text-sm text-gray-600 mt-1">Housing development and policy hearings you should know about</p>
+                    </div>
+                </div>
+                <div id="hearings-content">
+                    @include('user.partials.hearings-list')
+                </div>
+            </div>
+
+            
+            <div class="text-center">
+                <p class="text-sm text-gray-600">Hearing tracking is provided by:</p>
+            </div>
+            <!-- Organization Information Card -->
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                <div class="p-6">
+                    
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center">
+                        {{ auth()->user()->organization->name }}
+                    </h2>
+                    
+                    @if(auth()->user()->organization->about)
+                        <div class="text-gray-700 leading-relaxed mb-6 text-center">
+                            {{ auth()->user()->organization->about }}
+                        </div>
+                    @endif
+
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                        <span class="text-sm text-gray-600">Want to learn more?</span>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            @if(auth()->user()->organization->contact_email)
+                                <a href="mailto:{{ auth()->user()->organization->contact_email }}" 
+                                   class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition">
+                                    <x-icon name="mail" class="w-4 h-4 mr-2" />
+                                    Contact Us
+                                </a>
+                            @endif
+                            @if(auth()->user()->organization->website_url)
+                                <a href="{{ auth()->user()->organization->website_url }}" target="_blank"
+                                   class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition">
+                                    <x-icon name="external-link" class="w-4 h-4 mr-2" />
+                                    Visit Website
+                                </a>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -314,10 +280,79 @@
                             
                             // Show success message
                             showMessage(data.message, 'success');
+                            
+                            // Reload hearings section
+                            reloadHearingsSection();
                         } else {
                             // Revert checkbox if failed
                             this.checked = !isChecked;
                             showMessage(data.error || 'An error occurred', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        // Revert checkbox if failed
+                        this.checked = !isChecked;
+                        showMessage(`Error: ${error.message}`, 'error');
+                    })
+                    .finally(() => {
+                        // Re-enable checkbox
+                        this.disabled = false;
+                    });
+                });
+            });
+            
+            // Handle notification preferences
+            const notificationCheckboxes = document.querySelectorAll('.notification-checkbox');
+            
+            notificationCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const setting = this.dataset.setting;
+                    const isChecked = this.checked;
+                    
+                    // Disable checkbox during request
+                    this.disabled = true;
+                    
+                    const baseUrl = '{{ url('/') }}';
+                    const url = `${baseUrl}/user/notification-preferences`;
+                    
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    
+                    const formData = new FormData();
+                    formData.append('_token', csrfToken);
+                    
+                    // Add both settings to maintain their current state
+                    const developmentCheckbox = document.querySelector('[data-setting="notify_development_hearings"]');
+                    const policyCheckbox = document.querySelector('[data-setting="notify_policy_hearings"]');
+                    
+                    if (developmentCheckbox && developmentCheckbox.checked) {
+                        formData.append('notify_development_hearings', '1');
+                    }
+                    if (policyCheckbox && policyCheckbox.checked) {
+                        formData.append('notify_policy_hearings', '1');
+                    }
+                    
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            showMessage(data.message, 'success');
+                        } else {
+                            // Revert checkbox if failed
+                            this.checked = !isChecked;
+                            showMessage(data.error || 'An error occurred updating preferences', 'error');
                         }
                     })
                     .catch(error => {
@@ -345,6 +380,47 @@
                         <x-icon name="plus" class="w-3 h-3 mr-1 text-gray-400" />
                         <span class="text-gray-500">Not subscribed</span>
                     `;
+                }
+            }
+            
+            function reloadHearingsSection() {
+                const hearingsContent = document.getElementById('hearings-content');
+                
+                if (hearingsContent) {
+                    // Show loading state
+                    hearingsContent.innerHTML = `
+                        <div class="px-6 py-12 text-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                            <p class="text-gray-600">Updating hearings...</p>
+                        </div>
+                    `;
+                    
+                    // Fetch updated hearings
+                    const baseUrl = '{{ url('/') }}';
+                    fetch(`${baseUrl}/user/hearings`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        hearingsContent.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error reloading hearings:', error);
+                        hearingsContent.innerHTML = `
+                            <div class="px-6 py-12 text-center">
+                                <p class="text-red-600">Error loading hearings. Please refresh the page.</p>
+                            </div>
+                        `;
+                    });
                 }
             }
             

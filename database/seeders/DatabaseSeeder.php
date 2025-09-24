@@ -62,17 +62,6 @@ class DatabaseSeeder extends Seeder
                 'organization_id' => $hfl->id,
             ]
         );
-        \App\Models\User::updateOrCreate(
-            [ 'email' => 'user@housingalerts.ca' ],
-            [
-                'name' => 'Regular User',
-                'email' => 'user@housingalerts.ca',
-                'password' => bcrypt('password'),
-                'is_admin' => false,
-                'email_verified_at' => now(),
-                'organization_id' => $hfl->id,
-            ]
-        );
 
         $victoriaRegion = \App\Models\Region::updateOrCreate(
             [ 'name' => 'Victoria', 'organization_id' => $hfl->id ],
