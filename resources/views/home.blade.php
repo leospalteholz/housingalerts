@@ -32,7 +32,12 @@
             <main class="flex-grow">
                 <div class="container mx-auto px-4 py-12">
                     <div class="text-center mb-8">
-                        <h1 class="text-5xl font-bold text-gray-900 mb-6">Help Advocate for More Housing</h1>
+                        <h1 class="text-5xl font-bold text-gray-900 mb-6">
+                            Advocate for More Homes in 
+                            <span id="rotating-region" class="text-blue-600 inline-block min-w-[200px] text-left transition-all duration-500 ease-in-out transform">
+                                @if(count($regions) > 0){{ $regions[0] }}@else Your Area @endif
+                            </span>
+                        </h1>
                         <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-2">It's hard for your councillors to support housing when all they hear is negative voices, but we know it's nearly impossible to keep up with opportunities to support housing in your community.</p>
                         <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-6">Housing Alerts sends you emails about hearings and tells you exactly how you can make your voice heard for more housing.</p>
                     </div>
@@ -111,5 +116,38 @@
                 </div>
             </footer>
         </div>
+
+        <!-- Rotating Region Animation Script -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const regions = @json($regions);
+                const rotatingElement = document.getElementById('rotating-region');
+                
+                if (regions.length > 1 && rotatingElement) {
+                    let currentIndex = 0;
+                    
+                    function rotateRegion() {
+                        // Fade out
+                        rotatingElement.style.opacity = '0';
+                        rotatingElement.style.transform = 'translateY(-10px)';
+                        
+                        setTimeout(() => {
+                            // Change text
+                            currentIndex = (currentIndex + 1) % regions.length;
+                            rotatingElement.textContent = regions[currentIndex];
+                            
+                            // Fade in
+                            rotatingElement.style.opacity = '1';
+                            rotatingElement.style.transform = 'translateY(0px)';
+                        }, 250);
+                    }
+                    
+                    // Start rotating after 3 seconds, then every 3 seconds
+                    setTimeout(() => {
+                        setInterval(rotateRegion, 2500);
+                    }, 2500);
+                }
+            });
+        </script>
     </body>
 </html>

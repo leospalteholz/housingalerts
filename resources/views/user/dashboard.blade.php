@@ -83,7 +83,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <h2 class="text-xl font-semibold text-gray-900">Select the regions you're interested in</h2>
-                            <p class="text-sm text-gray-600 mt-1">You'll be notified about housing hearings in these regions.</p>
+                            <p class="text-sm text-gray-600 mt-1">You'll be notified about opportunities to support housing in these regions.</p>
                         </div>
                     </div>
                 </div>

@@ -22,7 +22,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('home');
+    // Get regions for the rotating header animation
+    $regions = \App\Models\Region::orderBy('name')->pluck('name')->toArray();
+    return view('home', compact('regions'));
 });
 
 // Passwordless authentication routes
