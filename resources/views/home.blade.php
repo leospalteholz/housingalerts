@@ -72,25 +72,26 @@
                         @endif
                     </div>
                     
-                    <div class="bg-white shadow-md rounded-lg p-8 mb-12">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div class="text-center">
+                    <div class="bg-white shadow-md rounded-lg p-8 mb-12 max-w-4xl mx-auto">
+                        <h2 class="text-center text-2xl font-bold mb-6">How it works</h2>
+                        <div class="flex flex-col sm:flex-row justify-center gap-8">
+                            <div class="text-center flex-1">
                                 <div class="bg-blue-100 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                                    <x-icon name="organization" class="h-10 w-10 text-blue-500" />
+                                    <x-icon name="mail" class="h-10 w-10 text-blue-500" />
                                 </div>
-                                <h3 class="text-xl font-semibold mb-2">Choose Your Organization</h3>
-                                <p class="text-gray-600">Select the organization relevant to your community.</p>
-                            </div>
+                                <h3 class="text-xl font-semibold mb-2">Sign up</h3>
+                                <p class="text-gray-600">We'll never email you about anything other than housing</p>
+                            </div>    
                             
-                            <div class="text-center">
+                        <div class="text-center flex-1">
                                 <div class="bg-green-100 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto mb-4">
                                     <x-icon name="location" class="h-10 w-10 text-green-500" />
                                 </div>
                                 <h3 class="text-xl font-semibold mb-2">Select Regions</h3>
-                                <p class="text-gray-600">Pick the specific regions you want to monitor for housing hearings.</p>
+                                <p class="text-gray-600">Pick the cities you want to monitor for housing hearings.</p>
                             </div>
                             
-                            <div class="text-center">
+                            <div class="text-center flex-1">
                                 <div class="bg-amber-100 rounded-full p-4 w-20 h-20 flex items-center justify-center mx-auto mb-4">
                                     <x-icon name="notification" class="h-10 w-10 text-amber-500" />
                                 </div>
@@ -142,7 +143,6 @@
                         }, 250);
                     }
                     
-                    // Start rotating after 3 seconds, then every 3 seconds
                     setTimeout(() => {
                         setInterval(rotateRegion, 2500);
                     }, 2500);
