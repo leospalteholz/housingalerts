@@ -404,7 +404,14 @@
                     })
                     .then(html => {
                         hearingsContent.innerHTML = html;
-                        // Calendar buttons will auto-initialize via MutationObserver
+                        
+                        // Explicit fallback: Ensure calendar buttons are initialized
+                        // This is especially important for new users who have no initial hearings
+                        setTimeout(() => {
+                            if (typeof initializeCalendarButtons === 'function') {
+                                initializeCalendarButtons();
+                            }
+                        }, 100);
                     })
                     .catch(error => {
                         console.error('Error reloading hearings:', error);
