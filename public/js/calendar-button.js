@@ -29,6 +29,7 @@ function setupAutoInitialization() {
         });
         
         if (shouldReinit) {
+            console.log('New calendar buttons detected, re-initializing...');
             initializeCalendarButtons();
         }
     });

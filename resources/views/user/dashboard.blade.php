@@ -79,7 +79,7 @@
 
             <!-- Region Subscription Management -->
             <div class="bg-white shadow rounded-lg">
-                <div class="px-6 py-4 border-b border-gray-200">
+                <div class="px-6 py-4">
                     <div class="flex justify-between items-center">
                         <div>
                             <h2 class="text-xl font-semibold text-gray-900">Select the regions you're interested in</h2>
@@ -138,7 +138,7 @@
                     @endif
 
                     <!-- Notification Preferences (always shown) -->
-                    <div class="mt-8 pt-6 border-t border-gray-200">
+                    <div class="mt-2 pt-6">
                         <div class="mb-4">
                             <h2 class="text-xl font-semibold text-gray-900">Notification Preferences</h2>
                         </div>
@@ -270,9 +270,6 @@
                             // Update status indicator
                             updateSubscriptionStatus(regionId, isChecked);
                             
-                            // Show success message
-                            showMessage(data.message, 'success');
-                            
                             // Reload hearings section
                             reloadHearingsSection();
                         } else {
@@ -338,10 +335,7 @@
                         return response.json();
                     })
                     .then(data => {
-                        if (data.success) {
-                            // Show success message
-                            showMessage(data.message, 'success');
-                        } else {
+                        if (!data.success) {
                             // Revert checkbox if failed
                             this.checked = !isChecked;
                             showMessage(data.error || 'An error occurred updating preferences', 'error');
