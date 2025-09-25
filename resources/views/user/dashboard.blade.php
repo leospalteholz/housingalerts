@@ -110,17 +110,6 @@
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center justify-between">
                                                 <h3 class="text-sm font-medium text-gray-900">{{ $region->name }}</h3>
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                                    {{ $region->hearings->count() }} hearings
-                                                </span>
-                                            </div>
-                                            <p class="text-sm text-gray-500 mt-1">{{ $region->organization->name }}</p>
-                                            @if($region->description)
-                                                <p class="text-xs text-gray-600 mt-2">{{ Str::limit($region->description, 120) }}</p>
-                                            @endif
-                                            
-                                            <!-- Subscription Status -->
-                                            <div class="mt-2">
                                                 <span class="subscription-status inline-flex items-center text-xs" data-region-id="{{ $region->id }}">
                                                     @if($region->is_monitored)
                                                         <x-icon name="check-circle" class="w-3 h-3 mr-1 text-green-500" />
@@ -131,6 +120,10 @@
                                                     @endif
                                                 </span>
                                             </div>
+                                            <p class="text-sm text-gray-500 mt-1">{{ $region->organization->name }}</p>
+                                            @if($region->description)
+                                                <p class="text-xs text-gray-600 mt-2">{{ Str::limit($region->description, 120) }}</p>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
