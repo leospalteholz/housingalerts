@@ -141,14 +141,13 @@
                     <div class="mt-8 pt-6 border-t border-gray-200">
                         <div class="mb-4">
                             <h2 class="text-xl font-semibold text-gray-900">Notification Preferences</h2>
-                            <p class="text-sm text-gray-600">Choose which types of hearings you want to be notified about</p>
                         </div>
                         
-                        <div class="space-y-3">
-                            <div class="flex items-center">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-start">
                                 <input type="checkbox" 
                                        id="notify_development_hearings"
-                                       class="notification-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" 
+                                       class="notification-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 mt-1" 
                                        data-setting="notify_development_hearings"
                                        {{ $notificationSettings->notify_development_hearings ? 'checked' : '' }}>
                                 <label for="notify_development_hearings" class="ml-3 text-sm text-gray-700">
@@ -157,10 +156,10 @@
                                 </label>
                             </div>
                             
-                            <div class="flex items-center">
+                            <div class="flex items-start">
                                 <input type="checkbox" 
                                        id="notify_policy_hearings"
-                                       class="notification-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" 
+                                       class="notification-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 mt-1" 
                                        data-setting="notify_policy_hearings"
                                        {{ $notificationSettings->notify_policy_hearings ? 'checked' : '' }}>
                                 <label for="notify_policy_hearings" class="ml-3 text-sm text-gray-700">
