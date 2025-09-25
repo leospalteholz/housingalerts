@@ -122,12 +122,7 @@
         }
         
         .description {
-            background-color: white;
-            padding: 16px;
-            border-radius: 8px;
-            border-left: 4px solid #2563eb;
             margin-top: 16px;
-            color: #4b5563;
             line-height: 1.6;
         }
         
@@ -305,8 +300,6 @@
         </div>
         
         <div class="content">
-            <p class="greeting">Hello {{ $user->name }},</p>
-
             @if($hearing->type === 'development')
                 <p class="intro-text">Housing is being proposed in {{ $hearing->region->name }} and it needs your help! Your support can make the difference in getting more homes built in your community.</p>
             @else
@@ -335,13 +328,13 @@
             </div>
 
             <div class="action-section">
-                <h2 class="action-title">Your Action Checklist</h2>
+                <h2 class="action-title">How you can help</h2>
                 
                 <div class="checklist">
                     <div class="checklist-item">
                         <div class="checkbox"></div>
                         <div class="checklist-content">
-                            <div class="checklist-label">📧 Send an email in support</div>
+                            <div class="checklist-label">Good: 📧 Send an email in support</div>
                             <p class="checklist-description">
                                 Email <a href="mailto:{{ $hearing->comments_email }}">{{ $hearing->comments_email }}</a> with your support. Even a simple message saying you support more housing makes a difference!
                             </p>
@@ -351,7 +344,7 @@
                     <div class="checklist-item">
                         <div class="checkbox"></div>
                         <div class="checklist-content">
-                            <div class="checklist-label">🗣️ Speak at the hearing</div>
+                            <div class="checklist-label">Incredible: 🗣️ Speak at the hearing</div>
                             <p class="checklist-description">
                                 Add this hearing to your calendar and plan to speak in support. You can participate over the phone or in person. Your personal story about housing matters!
                             </p>
@@ -361,7 +354,7 @@
                     <div class="checklist-item">
                         <div class="checkbox"></div>
                         <div class="checklist-content">
-                            <div class="checklist-label">📢 Share with your network</div>
+                            <div class="checklist-label">Cherry on top: 🍒 Share with your network</div>
                             <p class="checklist-description">
                                 Forward this email or share details about this hearing with friends, family, and colleagues. The more voices supporting housing, the better!
                             </p>
