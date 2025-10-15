@@ -100,10 +100,6 @@ class HearingVoteController extends Controller
             'vote_date' => 'required|date',
             'passed' => 'required|boolean',
             'notes' => 'nullable|string',
-            'votes_for' => 'nullable|array',
-            'votes_for.*' => 'exists:councillors,id',
-            'votes_against' => 'nullable|array',
-            'votes_against.*' => 'exists:councillors,id',
         ]);
         
         $hearing = Hearing::findOrFail($validated['hearing_id']);
@@ -121,25 +117,20 @@ class HearingVoteController extends Controller
             'notes' => $validated['notes'],
         ]);
         
-        // Create councillor votes for "for"
-        if (!empty($validated['votes_for'])) {
-            foreach ($validated['votes_for'] as $councillorId) {
-                CouncillorVote::create([
-                    'hearing_vote_id' => $hearingVote->id,
-                    'councillor_id' => $councillorId,
-                    'vote' => 'for',
-                ]);
-            }
-        }
-        
-        // Create councillor votes for "against"
-        if (!empty($validated['votes_against'])) {
-            foreach ($validated['votes_against'] as $councillorId) {
-                CouncillorVote::create([
-                    'hearing_vote_id' => $hearingVote->id,
-                    'councillor_id' => $councillorId,
-                    'vote' => 'against',
-                ]);
+        // Process individual councillor votes from radio buttons
+        foreach ($request->all() as $key => $value) {
+            // Look for fields that start with "vote_"
+            if (strpos($key, 'vote_') === 0 && !empty($value)) {
+                $councillorId = str_replace('vote_', '', $key);
+                
+                // Verify this is a valid councillor ID
+                if (is_numeric($councillorId)) {
+                    CouncillorVote::create([
+                        'hearing_vote_id' => $hearingVote->id,
+                        'councillor_id' => $councillorId,
+                        'vote' => $value, // 'for' or 'against'
+                    ]);
+                }
             }
         }
         
@@ -187,11 +178,7 @@ class HearingVoteController extends Controller
             ->orderBy('name')
             ->get();
         
-        // Get current votes
-        $votesFor = $hearingVote->councillorVotes->where('vote', 'for')->pluck('councillor_id')->toArray();
-        $votesAgainst = $hearingVote->councillorVotes->where('vote', 'against')->pluck('councillor_id')->toArray();
-        
-        return view('hearing-votes.edit', compact('hearingVote', 'councillors', 'votesFor', 'votesAgainst'));
+        return view('hearing-votes.edit', compact('hearingVote', 'councillors'));
     }
 
     /**
@@ -208,10 +195,6 @@ class HearingVoteController extends Controller
             'vote_date' => 'required|date',
             'passed' => 'required|boolean',
             'notes' => 'nullable|string',
-            'votes_for' => 'nullable|array',
-            'votes_for.*' => 'exists:councillors,id',
-            'votes_against' => 'nullable|array',
-            'votes_against.*' => 'exists:councillors,id',
         ]);
         
         // Update the hearing vote
@@ -224,25 +207,20 @@ class HearingVoteController extends Controller
         // Delete existing councillor votes
         $hearingVote->councillorVotes()->delete();
         
-        // Create new councillor votes for "for"
-        if (!empty($validated['votes_for'])) {
-            foreach ($validated['votes_for'] as $councillorId) {
-                CouncillorVote::create([
-                    'hearing_vote_id' => $hearingVote->id,
-                    'councillor_id' => $councillorId,
-                    'vote' => 'for',
-                ]);
-            }
-        }
-        
-        // Create new councillor votes for "against"
-        if (!empty($validated['votes_against'])) {
-            foreach ($validated['votes_against'] as $councillorId) {
-                CouncillorVote::create([
-                    'hearing_vote_id' => $hearingVote->id,
-                    'councillor_id' => $councillorId,
-                    'vote' => 'against',
-                ]);
+        // Process individual councillor votes from radio buttons
+        foreach ($request->all() as $key => $value) {
+            // Look for fields that start with "vote_"
+            if (strpos($key, 'vote_') === 0 && !empty($value)) {
+                $councillorId = str_replace('vote_', '', $key);
+                
+                // Verify this is a valid councillor ID
+                if (is_numeric($councillorId)) {
+                    CouncillorVote::create([
+                        'hearing_vote_id' => $hearingVote->id,
+                        'councillor_id' => $councillorId,
+                        'vote' => $value, // 'for' or 'against'
+                    ]);
+                }
             }
         }
         

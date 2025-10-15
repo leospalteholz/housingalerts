@@ -25,10 +25,6 @@
                                 <span class="font-medium text-gray-700">Hearing Date:</span>
                                 <span class="text-gray-900">{{ \Carbon\Carbon::parse($hearing->start_datetime)->format('M d, Y g:i A') }}</span>
                             </div>
-                            <div>
-                                <span class="font-medium text-gray-700">Applicant:</span>
-                                <span class="text-gray-900">{{ $hearing->applicant ?? 'N/A' }}</span>
-                            </div>
                         </div>
                     </div>
 
@@ -39,7 +35,7 @@
                         <!-- Vote Date -->
                         <div class="mb-4">
                             <label for="vote_date" class="block text-sm font-medium text-gray-700">
-                                Vote Date <span class="text-red-500">*</span>
+                                Vote Date
                             </label>
                             <input type="date" 
                                    name="vote_date" 
@@ -111,52 +107,65 @@
                                     <p class="text-sm mt-1">There are no councillors in {{ $hearing->region->name }} who were serving at the time of this hearing.</p>
                                 </div>
                             @else
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <!-- Votes For -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-green-700 mb-2">
-                                            <x-icon name="check" class="w-4 h-4 inline" /> Voted For
-                                        </label>
-                                        <div class="space-y-2 border border-green-200 rounded-lg p-4 bg-green-50">
+                                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Councillor</th>
+                                                <th class="px-4 py-3 text-center text-xs font-medium text-green-700 uppercase tracking-wider">
+                                                    <x-icon name="check" class="w-4 h-4 inline" /> For
+                                                </th>
+                                                <th class="px-4 py-3 text-center text-xs font-medium text-red-700 uppercase tracking-wider">
+                                                    <x-icon name="x" class="w-4 h-4 inline" /> Against
+                                                </th>
+                                                <th class="px-4 py-3 text-center text-xs font-medium text-yellow-700 uppercase tracking-wider">
+                                                    <x-icon name="minus" class="w-4 h-4 inline" /> Abstain
+                                                </th>
+                                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
+                                                    <x-icon name="user-x" class="w-4 h-4 inline" /> Absent
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
                                             @foreach ($councillors as $councillor)
-                                                <label class="flex items-center">
-                                                    <input type="checkbox" 
-                                                           name="votes_for[]" 
-                                                           value="{{ $councillor->id }}"
-                                                           {{ in_array($councillor->id, old('votes_for', [])) ? 'checked' : '' }}
-                                                           class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
-                                                    <span class="ml-2 text-sm text-gray-700">{{ $councillor->name }}</span>
-                                                </label>
+                                                <tr class="hover:bg-gray-50">
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                        {{ $councillor->name }}
+                                                    </td>
+                                                    <td class="px-4 py-4 whitespace-nowrap text-center">
+                                                        <input type="radio" 
+                                                               name="vote_{{ $councillor->id }}" 
+                                                               value="for"
+                                                               {{ old('vote_' . $councillor->id) == 'for' ? 'checked' : '' }}
+                                                               class="rounded-full border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                                                    </td>
+                                                    <td class="px-4 py-4 whitespace-nowrap text-center">
+                                                        <input type="radio" 
+                                                               name="vote_{{ $councillor->id }}" 
+                                                               value="against"
+                                                               {{ old('vote_' . $councillor->id) == 'against' ? 'checked' : '' }}
+                                                               class="rounded-full border-gray-300 text-red-600 shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50">
+                                                    </td>
+                                                    <td class="px-4 py-4 whitespace-nowrap text-center">
+                                                        <input type="radio" 
+                                                               name="vote_{{ $councillor->id }}" 
+                                                               value="abstain"
+                                                               {{ old('vote_' . $councillor->id) == 'abstain' ? 'checked' : '' }}
+                                                               class="rounded-full border-gray-300 text-yellow-600 shadow-sm focus:border-yellow-300 focus:ring focus:ring-yellow-200 focus:ring-opacity-50">
+                                                    </td>
+                                                    <td class="px-4 py-4 whitespace-nowrap text-center">
+                                                        <input type="radio" 
+                                                               name="vote_{{ $councillor->id }}" 
+                                                               value="absent"
+                                                               {{ old('vote_' . $councillor->id) == 'absent' ? 'checked' : '' }}
+                                                               class="rounded-full border-gray-300 text-gray-600 shadow-sm focus:border-gray-300 focus:ring focus:ring-gray-200 focus:ring-opacity-50">
+                                                    </td>
+                                                </tr>
                                             @endforeach
-                                        </div>
-                                        @error('votes_for')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Votes Against -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-red-700 mb-2">
-                                            <x-icon name="x" class="w-4 h-4 inline" /> Voted Against
-                                        </label>
-                                        <div class="space-y-2 border border-red-200 rounded-lg p-4 bg-red-50">
-                                            @foreach ($councillors as $councillor)
-                                                <label class="flex items-center">
-                                                    <input type="checkbox" 
-                                                           name="votes_against[]" 
-                                                           value="{{ $councillor->id }}"
-                                                           {{ in_array($councillor->id, old('votes_against', [])) ? 'checked' : '' }}
-                                                           class="rounded border-gray-300 text-red-600 shadow-sm focus:border-red-300 focus:ring focus:ring-red-200 focus:ring-opacity-50">
-                                                    <span class="ml-2 text-sm text-gray-700">{{ $councillor->name }}</span>
-                                                </label>
-                                            @endforeach
-                                        </div>
-                                        @error('votes_against')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
+                                        </tbody>
+                                    </table>
                                 </div>
-                                <p class="mt-2 text-xs text-gray-500">Select which councillors voted for or against this hearing. Councillors shown were serving in {{ $hearing->region->name }} at the time of this hearing.</p>
+                                <p class="mt-2 text-xs text-gray-500">Select how each councillor voted. You can leave blank if the vote is unknown.</p>
                             @endif
                         </div>
 
