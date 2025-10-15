@@ -25,4 +25,8 @@ class Region extends Model
     public function users() {
         return $this->belongsToMany(User::class, 'user_region');
     }
+
+    public function councillors() {
+        return $this->hasMany(Councillor::class);
+    }
 }

@@ -44,6 +44,10 @@ class Hearing extends Model
         return $this->belongsTo(Region::class);
     }
 
+    public function hearingVote() {
+        return $this->hasOne(HearingVote::class);
+    }
+
     // Accessor methods for form compatibility
     public function getStartDateAttribute()
     {

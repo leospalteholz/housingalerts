@@ -130,5 +130,120 @@ class DatabaseSeeder extends Seeder
                 'more_info_url' => 'https://saanich.ca/planning/456-quadra'
             ]
         );
+
+        // Create sample councillors for Victoria
+        $mayor = \App\Models\Councillor::updateOrCreate(
+            [ 'name' => 'Mayor Marianne Alto', 'region_id' => $victoriaRegion->id ],
+            [
+                'name' => 'Mayor Marianne Alto',
+                'region_id' => $victoriaRegion->id,
+                'elected_start' => '2022-10-15',
+                'elected_end' => '2026-10-15',
+            ]
+        );
+
+        $councillor1 = \App\Models\Councillor::updateOrCreate(
+            [ 'name' => 'Councillor Jane Smith', 'region_id' => $victoriaRegion->id ],
+            [
+                'name' => 'Councillor Jane Smith',
+                'region_id' => $victoriaRegion->id,
+                'elected_start' => '2022-10-15',
+                'elected_end' => '2026-10-15',
+            ]
+        );
+
+        $councillor2 = \App\Models\Councillor::updateOrCreate(
+            [ 'name' => 'Councillor Bob Johnson', 'region_id' => $victoriaRegion->id ],
+            [
+                'name' => 'Councillor Bob Johnson',
+                'region_id' => $victoriaRegion->id,
+                'elected_start' => '2022-10-15',
+                'elected_end' => '2026-10-15',
+            ]
+        );
+
+        // Create sample councillors for Saanich
+        $saanichMayor = \App\Models\Councillor::updateOrCreate(
+            [ 'name' => 'Mayor Dean Murdock', 'region_id' => $saanichRegion->id ],
+            [
+                'name' => 'Mayor Dean Murdock',
+                'region_id' => $saanichRegion->id,
+                'elected_start' => '2022-10-15',
+                'elected_end' => '2026-10-15',
+            ]
+        );
+
+        $saanichCouncillor1 = \App\Models\Councillor::updateOrCreate(
+            [ 'name' => 'Councillor Susan Lee', 'region_id' => $saanichRegion->id ],
+            [
+                'name' => 'Councillor Susan Lee',
+                'region_id' => $saanichRegion->id,
+                'elected_start' => '2022-10-15',
+                'elected_end' => '2026-10-15',
+            ]
+        );
+
+        // Create a sample vote result for a past hearing (we'll create a past hearing first)
+        $pastHearing = \App\Models\Hearing::updateOrCreate(
+            [ 'street_address' => '789 Fort Street', 'organization_id' => $hfl->id ],
+            [
+                'title' => '789 Fort Street',
+                'street_address' => '789 Fort Street',
+                'postal_code' => 'V8W 1H6',
+                'rental' => true,
+                'units' => 30,
+                'below_market_units' => 8,
+                'replaced_units' => 0,
+                'subject_to_vote' => true,
+                'description' => 'Approved rental development at 789 Fort Street. This project was approved with 30 rental units including 8 below market rate units.',
+                'remote_instructions' => 'Vote was conducted via Zoom.',
+                'inperson_instructions' => 'Council chambers at Victoria City Hall.',
+                'comments_email' => 'comments@victoria.ca',
+                'organization_id' => $hfl->id,
+                'region_id' => $victoriaRegion->id,
+                'start_datetime' => now()->subDays(15)->setTime(19, 0, 0),
+                'end_datetime' => now()->subDays(15)->setTime(21, 0, 0),
+                'more_info_url' => 'https://victoria.ca/hearings/789-fort'
+            ]
+        );
+
+        // Create the vote result
+        $voteResult = \App\Models\HearingVote::updateOrCreate(
+            [ 'hearing_id' => $pastHearing->id ],
+            [
+                'hearing_id' => $pastHearing->id,
+                'vote_date' => now()->subDays(15),
+                'passed' => true,
+                'notes' => 'Motion carried. Mayor and 2 councillors voted in favor. Strong support for affordable housing component.',
+            ]
+        );
+
+        // Record individual councillor votes
+        \App\Models\CouncillorVote::updateOrCreate(
+            [ 'hearing_vote_id' => $voteResult->id, 'councillor_id' => $mayor->id ],
+            [
+                'hearing_vote_id' => $voteResult->id,
+                'councillor_id' => $mayor->id,
+                'vote' => 'for',
+            ]
+        );
+
+        \App\Models\CouncillorVote::updateOrCreate(
+            [ 'hearing_vote_id' => $voteResult->id, 'councillor_id' => $councillor1->id ],
+            [
+                'hearing_vote_id' => $voteResult->id,
+                'councillor_id' => $councillor1->id,
+                'vote' => 'for',
+            ]
+        );
+
+        \App\Models\CouncillorVote::updateOrCreate(
+            [ 'hearing_vote_id' => $voteResult->id, 'councillor_id' => $councillor2->id ],
+            [
+                'hearing_vote_id' => $voteResult->id,
+                'councillor_id' => $councillor2->id,
+                'vote' => 'against',
+            ]
+        );
     }
 }
