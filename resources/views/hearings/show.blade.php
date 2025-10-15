@@ -50,6 +50,27 @@
                         <div class="flex-shrink-0">
                             <span class="text-gray-900">{{ $hearing->units }} new {{ $hearing->rental ? 'rental' : 'ownership' }} homes at {{ $hearing->street_address }}, {{ $hearing->region->name }}</span>
                         </div>
+                        @if($hearing->below_market_units > 0)
+                            <div class="flex-shrink-0">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    {{ $hearing->below_market_units }} below market units
+                                </span>
+                            </div>
+                        @endif
+                        @if($hearing->replaced_units > 0)
+                            <div class="flex-shrink-0">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    Replacing {{ $hearing->replaced_units }} existing units
+                                </span>
+                            </div>
+                        @endif
+                        @if($hearing->subject_to_vote)
+                            <div class="flex-shrink-0">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    Subject to vote
+                                </span>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endif

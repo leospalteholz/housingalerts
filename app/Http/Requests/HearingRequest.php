@@ -41,6 +41,9 @@ class HearingRequest extends FormRequest
                 'postal_code' => 'required|string|max:20',
                 'rental' => 'required|boolean',
                 'units' => 'required|integer|min:1',
+                'below_market_units' => 'required|integer|min:0',
+                'replaced_units' => 'nullable|integer|min:0',
+                'subject_to_vote' => 'required|boolean',
                 'title' => 'nullable|string|max:255',
             ]);
         } else if ($this->type === 'policy') {
@@ -50,6 +53,9 @@ class HearingRequest extends FormRequest
                 'postal_code' => 'nullable|string|max:20',
                 'rental' => 'nullable|boolean',
                 'units' => 'nullable|integer|min:1',
+                'below_market_units' => 'nullable|integer|min:0',
+                'replaced_units' => 'nullable|integer|min:0',
+                'subject_to_vote' => 'nullable|boolean',
             ]);
         }
 

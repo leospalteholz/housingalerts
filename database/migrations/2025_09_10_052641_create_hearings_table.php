@@ -21,6 +21,9 @@ return new class extends Migration
             $table->string('postal_code')->nullable(); // only for development hearings
             $table->boolean('rental')->nullable(); // only for development hearings
             $table->integer('units')->nullable(); // only for development hearings
+            $table->integer('below_market_units')->default(0); // number of below market units
+            $table->integer('replaced_units')->nullable(); // number of units being replaced
+            $table->boolean('subject_to_vote')->default(false); // whether subject to vote
             $table->text('description'); // details of the hearing
             $table->string('image_url')->nullable();
             $table->datetime('start_datetime');

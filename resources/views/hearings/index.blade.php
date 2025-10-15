@@ -61,6 +61,23 @@
                                                 <span class="ml-2 text-sm text-gray-600">{{ $hearing->units }} units</span>
                                             @endif
                                         </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            @if($hearing->below_market_units > 0)
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-green-100 text-green-700 mr-1">
+                                                    {{ $hearing->below_market_units }} BMR
+                                                </span>
+                                            @endif
+                                            @if($hearing->replaced_units > 0)
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-yellow-100 text-yellow-700 mr-1">
+                                                    {{ $hearing->replaced_units }} replaced
+                                                </span>
+                                            @endif
+                                            @if($hearing->subject_to_vote)
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-700">
+                                                    Vote
+                                                </span>
+                                            @endif
+                                        </div>
                                     @else
                                         <div class="text-sm text-gray-600">Policy Hearing</div>
                                     @endif
@@ -140,6 +157,23 @@
                                             @endif
                                             @if($hearing->units)
                                                 <span class="ml-2 text-sm text-gray-600">{{ $hearing->units }} units</span>
+                                            @endif
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            @if($hearing->below_market_units > 0)
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-green-100 text-green-600 mr-1">
+                                                    {{ $hearing->below_market_units }} BMR
+                                                </span>
+                                            @endif
+                                            @if($hearing->replaced_units > 0)
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-yellow-100 text-yellow-600 mr-1">
+                                                    {{ $hearing->replaced_units }} replaced
+                                                </span>
+                                            @endif
+                                            @if($hearing->subject_to_vote)
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-600">
+                                                    Vote
+                                                </span>
                                             @endif
                                         </div>
                                     @else

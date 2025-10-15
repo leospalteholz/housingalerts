@@ -33,6 +33,21 @@
                                     {{ $hearing->rental ? 'Rental' : 'Condo' }}
                                 </span>
                             @endif
+                            @if($hearing->isDevelopment() && $hearing->below_market_units > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                                    {{ $hearing->below_market_units }} BMR
+                                </span>
+                            @endif
+                            @if($hearing->isDevelopment() && $hearing->replaced_units > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-700">
+                                    {{ $hearing->replaced_units }} replaced
+                                </span>
+                            @endif
+                            @if($hearing->isDevelopment() && $hearing->subject_to_vote)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                                    Vote
+                                </span>
+                            @endif
                         </div>
                     </div>
                     <div class="ml-4 flex gap-2">

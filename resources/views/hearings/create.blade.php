@@ -95,6 +95,33 @@
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
+            <div class="mb-4">
+                <label for="below_market_units" class="block text-gray-700 font-semibold mb-2">Below Market Units</label>
+                <input type="number" id="below_market_units" name="below_market_units" value="{{ old('below_market_units', 0) }}" min="0" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-sm text-gray-600 mt-1">Number of below market rate units (affordable housing)</p>
+                @error('below_market_units')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+            <div class="mb-4">
+                <label for="replaced_units" class="block text-gray-700 font-semibold mb-2">Replaced Units</label>
+                <input type="number" id="replaced_units" name="replaced_units" value="{{ old('replaced_units') }}" min="0" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-sm text-gray-600 mt-1">Number of existing units being replaced by this development (if applicable)</p>
+                @error('replaced_units')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+            <div class="mb-4">
+                <label for="subject_to_vote" class="block text-gray-700 font-semibold mb-2">Subject to Vote</label>
+                <select id="subject_to_vote" name="subject_to_vote" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="0" {{ old('subject_to_vote', '0') == '0' ? 'selected' : '' }}>No</option>
+                    <option value="1" {{ old('subject_to_vote') == '1' ? 'selected' : '' }}>Yes</option>
+                </select>
+                <p class="text-sm text-gray-600 mt-1">Whether this hearing will include a formal vote</p>
+                @error('subject_to_vote')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
         </div> <!-- End development-fields -->
             
             <!-- Hearing Scheduling -->
@@ -215,6 +242,8 @@
                 document.getElementById('postal_code').required = true;
                 document.getElementById('rental').required = true;
                 document.getElementById('units').required = true;
+                document.getElementById('below_market_units').required = true;
+                document.getElementById('subject_to_vote').required = true;
                 document.getElementById('title').required = false;
             } else if (policyRadio.checked) {
                 policyOption.classList.add('border-blue-500', 'bg-blue-50');
@@ -232,6 +261,8 @@
                 document.getElementById('postal_code').required = false;
                 document.getElementById('rental').required = false;
                 document.getElementById('units').required = false;
+                document.getElementById('below_market_units').required = false;
+                document.getElementById('subject_to_vote').required = false;
             }
         }
         
