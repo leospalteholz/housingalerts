@@ -6,6 +6,7 @@ use App\Http\Controllers\RegionController;
 use App\Http\Controllers\HearingController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\CouncillorController;
+use App\Http\Controllers\HearingVoteController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\NotificationSettingsController;
@@ -81,6 +82,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     
     // Councillor management (accessible to all admins)
     Route::resource('councillors', CouncillorController::class);
+    
+    // Hearing votes management (accessible to all admins)
+    Route::resource('hearing-votes', HearingVoteController::class);
 });
 
 // Superuser-only routes
