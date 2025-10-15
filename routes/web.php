@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\HearingController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\CouncillorController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\NotificationSettingsController;
@@ -77,6 +78,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Allow admins to edit their own organization
     Route::get('/my-organization/edit', [OrganizationController::class, 'editOwn'])->name('organizations.edit-own');
     Route::put('/my-organization', [OrganizationController::class, 'updateOwn'])->name('organizations.update-own');
+    
+    // Councillor management (accessible to all admins)
+    Route::resource('councillors', CouncillorController::class);
 });
 
 // Superuser-only routes

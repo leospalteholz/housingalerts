@@ -216,6 +216,21 @@
                                 </div>
                             </a>
 
+                            <a href="{{ route('councillors.index') }}" class="group relative bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
+                                <div>
+                                    <span class="rounded-lg inline-flex p-3 bg-teal-50 text-teal-700 ring-4 ring-white">
+                                        <x-icon name="user" class="h-6 w-6" />
+                                    </span>
+                                </div>
+                                <div class="mt-4">
+                                    <h3 class="text-lg font-medium text-gray-900 group-hover:text-gray-700">
+                                        Manage Councillors
+                                        <span class="absolute inset-0" aria-hidden="true"></span>
+                                    </h3>
+                                    <p class="mt-2 text-sm text-gray-500">Track councillors and their voting records.</p>
+                                </div>
+                            </a>
+
                             
                         </div>
                     </div>
