@@ -63,4 +63,39 @@ class OrganizationController extends Controller
         $organization->delete();
         return redirect()->route('organizations.index')->with('success', 'Organization deleted successfully!');
     }
+
+    // Allow regular admins to edit their own organization
+    public function editOwn()
+    {
+        $organization = auth()->user()->organization;
+        
+        if (!$organization) {
+            abort(403, 'You are not associated with any organization.');
+        }
+        
+        return view('organizations.edit', compact('organization'));
+    }
+
+    public function updateOwn(Request $request)
+    {
+        $organization = auth()->user()->organization;
+        
+        if (!$organization) {
+            abort(403, 'You are not associated with any organization.');
+        }
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:organizations,slug,' . $organization->id,
+            'contact_email' => 'required|email',
+            'website_url' => 'nullable|url|max:255',
+            'about' => 'nullable|string|max:1000',
+            'areas_active' => 'nullable|string|max:255',
+            'user_visible' => 'boolean',
+        ]);
+        
+        $organization->update($validated);
+        
+        return redirect()->route('dashboard')->with('success', 'Organization updated successfully!');
+    }
 }

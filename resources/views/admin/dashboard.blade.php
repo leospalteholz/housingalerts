@@ -155,7 +155,7 @@
                                 </div>
                             </a>
                             @else 
-                            <a href="{{ route('organizations.edit', auth()->user()->organization_id) }}" class="group relative bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
+                            <a href="{{ route('organizations.edit-own') }}" class="group relative bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
                                 <div>
                                     <span class="rounded-lg inline-flex p-3 bg-gray-50 text-gray-700 ring-4 ring-white">
                                         <x-icon name="settings" class="h-6 w-6" />

@@ -72,9 +72,16 @@ Route::middleware(['auth'])->group(function () {
         ->name('notification-settings.update');
 });
 
+// Admin routes - for both superusers and regular admins
+Route::middleware(['auth', 'admin'])->group(function () {
+    // Allow admins to edit their own organization
+    Route::get('/my-organization/edit', [OrganizationController::class, 'editOwn'])->name('organizations.edit-own');
+    Route::put('/my-organization', [OrganizationController::class, 'updateOwn'])->name('organizations.update-own');
+});
+
 // Superuser-only routes
 Route::middleware(['auth', 'superuser'])->group(function () {
-    // Organization management (superuser only)
+    // Full organization management (superuser only)
     Route::resource('organizations', OrganizationController::class);
 });
 
