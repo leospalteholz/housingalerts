@@ -21,20 +21,20 @@
                         </x-nav-link>
                     @endif
                     @if(auth()->user() && auth()->user()->is_admin)
-                        <x-nav-link :href="route('regions.index')" :active="request()->routeIs('regions.*')">
-                            {{ __('Regions') }}
-                        </x-nav-link>
                         <x-nav-link :href="route('hearings.index')" :active="request()->routeIs('hearings.*')">
                             {{ __('Hearings') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('councillors.index')" :active="request()->routeIs('councillors.*')">
-                            {{ __('Councillors') }}
                         </x-nav-link>
                         <x-nav-link :href="route('hearing-votes.index')" :active="request()->routeIs('hearing-votes.*')">
                             {{ __('Votes') }}
                         </x-nav-link>
                         <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                             {{ __('Users') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('regions.index')" :active="request()->routeIs('regions.*')">
+                            {{ __('Regions') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('councillors.index')" :active="request()->routeIs('councillors.*')">
+                            {{ __('Councillors') }}
                         </x-nav-link>
                     @endif
                 </div>
@@ -100,20 +100,20 @@
                 </x-responsive-nav-link>
             @endif
             @if(auth()->user() && auth()->user()->is_admin)
-                <x-responsive-nav-link :href="route('regions.index')" :active="request()->routeIs('regions.*')">
-                    {{ __('Regions') }}
-                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('hearings.index')" :active="request()->routeIs('hearings.*')">
                     {{ __('Hearings') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('councillors.index')" :active="request()->routeIs('councillors.*')">
-                    {{ __('Councillors') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('hearing-votes.index')" :active="request()->routeIs('hearing-votes.*')">
                     {{ __('Votes') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                     {{ __('Users') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('regions.index')" :active="request()->routeIs('regions.*')">
+                    {{ __('Regions') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('councillors.index')" :active="request()->routeIs('councillors.*')">
+                    {{ __('Councillors') }}
                 </x-responsive-nav-link>
             @endif
         </div>
