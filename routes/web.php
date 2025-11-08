@@ -93,6 +93,12 @@ Route::middleware(['auth', 'superuser'])->group(function () {
     Route::resource('organizations', OrganizationController::class);
 });
 
+// Public embed/export routes (must be defined before parameterized hearing routes)
+Route::get('/hearings/export', [HearingController::class, 'export'])
+    ->name('hearings.export');
+Route::get('/hearings/embed', [HearingController::class, 'embed'])
+    ->name('hearings.embed');
+
 // Public routes - accessible to everyone
 // Individual hearing details and calendar functionality
 Route::get('/hearings/{hearing}', [HearingController::class, 'show'])->name('hearings.show');

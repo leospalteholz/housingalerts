@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests\HearingRequest;
 
 class HearingController extends Controller
@@ -12,21 +11,9 @@ class HearingController extends Controller
      */
     public function index()
     {
-        if (auth()->user()->is_superuser) {
-            // Superusers can see all hearings across organizations
-            $allHearings = \App\Models\Hearing::with(['organization', 'region'])->get();
-        } elseif (auth()->user()->is_admin) {
-            // Regular admins can only see hearings within their organization
-            $allHearings = \App\Models\Hearing::with(['organization', 'region'])
-                ->where('organization_id', auth()->user()->organization_id)
-                ->get();
-        } else {
-            // Regular users can only see hearings in their monitored regions
-            $monitoredRegionIds = auth()->user()->regions()->pluck('regions.id');
-            $allHearings = \App\Models\Hearing::with(['organization', 'region'])
-                ->whereIn('region_id', $monitoredRegionIds)
-                ->get();
-        }
+        $allHearings = $this->scopedHearingsQuery()
+            ->with(['organization', 'region'])
+            ->get();
         
         // Split hearings into upcoming and past based on start_datetime
         $today = now()->startOfDay();
@@ -39,6 +26,67 @@ class HearingController extends Controller
         })->sortByDesc('start_datetime');
         
         return view('hearings.index', compact('upcomingHearings', 'pastHearings'));
+    }
+
+    /**
+     * Export hearings and related vote data as CSV.
+     */
+    public function export()
+    {
+        $hearings = $this->fullHearingsQuery()
+            ->sortByDesc(function ($hearing) {
+                return $hearing->start_datetime ?: now()->subYears(10);
+            })
+            ->values();
+        $columns = $this->getExportColumns();
+
+        $filename = 'hearings-export-' . now()->format('Y-m-d-His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($hearings, $columns) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, $columns);
+
+            foreach ($hearings as $hearing) {
+                $rowData = $this->formatHearingRow($hearing);
+                $orderedRow = array_map(function ($column) use ($rowData) {
+                    return $rowData[$column] ?? '';
+                }, $columns);
+
+                fputcsv($handle, $orderedRow);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->streamDownload($callback, $filename, $headers);
+    }
+
+    /**
+     * Render a compact, embed-friendly hearings table.
+     */
+    public function embed()
+    {
+        $hearings = $this->fullHearingsQuery()->get();
+        $columns = $this->getEmbedColumns();
+
+        $rows = $hearings->map(function ($hearing) use ($columns) {
+            $rowData = $this->formatHearingRow($hearing);
+
+            return array_map(function ($column) use ($rowData) {
+                return $rowData[$column] ?? '';
+            }, $columns);
+        });
+
+        return view('hearings.embed', [
+            'columns' => $columns,
+            'rows' => $rows,
+            'recordCount' => $rows->count(),
+            'generatedAt' => now()->format('Y-m-d H:i:s T'),
+        ]);
     }
 
     /**
@@ -96,9 +144,9 @@ class HearingController extends Controller
         // Set datetime fields from form data
         $hearing->setDateTimeFromForm($startDate, $startTime, $endTime);
         
-        // Auto-generate title for development hearings to match the address
-        if ($hearing->type === 'development' && empty($hearing->title)) {
-            $hearing->title = "{$hearing->street_address}";
+        // Keep development hearing title aligned with the street address
+        if ($hearing->type === 'development') {
+            $hearing->title = $hearing->street_address;
         }
         
         // Force organization_id to match the user's organization unless superuser
@@ -208,6 +256,11 @@ class HearingController extends Controller
         unset($validated['start_date'], $validated['start_time'], $validated['end_time'], $validated['image']);
 
         $hearing->fill($validated);
+
+        // Keep development hearing title aligned with the street address
+        if ($hearing->type === 'development') {
+            $hearing->title = $hearing->street_address;
+        }
         
         // Set datetime fields from form data
         $hearing->setDateTimeFromForm($startDate, $startTime, $endTime);
@@ -227,11 +280,6 @@ class HearingController extends Controller
             }
         }
         
-        // Auto-generate title for development hearings if not provided
-        if ($hearing->type === 'development' && empty($hearing->title)) {
-            $hearing->title = "Hearing for {$hearing->street_address}";
-        }
-        
         $hearing->save();
 
         return redirect()->route('hearings.index')->with('success', 'Hearing updated successfully!');
@@ -249,6 +297,193 @@ class HearingController extends Controller
         
         $hearing->delete();
         return redirect()->route('hearings.index')->with('success', 'Hearing deleted successfully!');
+    }
+
+    /**
+     * Get a query builder scoped to the authenticated user's hearing access.
+     */
+    private function scopedHearingsQuery()
+    {
+        $user = auth()->user();
+        $query = \App\Models\Hearing::query();
+
+        if ($user->is_superuser) {
+            return $query;
+        }
+
+        if ($user->is_admin) {
+            return $query->where('organization_id', $user->organization_id);
+        }
+
+        $monitoredRegionIds = $user->regions()->pluck('regions.id');
+
+        return $query->whereIn('region_id', $monitoredRegionIds);
+    }
+
+    /**
+     * Base query for public exports and embeds.
+     */
+    private function fullHearingsQuery()
+    {
+        return \App\Models\Hearing::with([
+            'organization',
+            'region',
+            'hearingVote.councillorVotes.councillor',
+        ])->orderBy('start_datetime');
+    }
+
+    /**
+     * Provide the canonical list of export columns.
+     */
+    private function getExportColumns(): array
+    {
+        return [
+            'ID',
+            'Organization',
+            'Region',
+            'Type',
+            'Title',
+            'Street Address',
+            'Postal Code',
+            'Rental',
+            'Units',
+            'Below Market Units',
+            'Replaced Units',
+            'Subject To Vote',
+            'Description',
+            'Image URL',
+            'Start Datetime',
+            'End Datetime',
+            'More Info URL',
+            'Remote Instructions',
+            'In-Person Instructions',
+            'Comments Email',
+            'Created At',
+            'Updated At',
+            'Vote Date',
+            'Vote Result',
+            'Vote Passed',
+            'Vote Notes',
+            'Councillors In Favour',
+            'Councillors Against',
+            'Councillors Abstained',
+            'Councillors Absent',
+        ];
+    }
+
+    /**
+     * Column set used for iframe embed.
+     */
+    private function getEmbedColumns(): array
+    {
+        return [
+            'ID',
+            'Start Datetime',
+            'Region',
+            'Type',
+            'Title',
+            'Postal Code',
+            'Rental',
+            'Units',
+            'Below Market Units',
+            'Replaced Units',
+            'Subject To Vote',
+            'Vote Date',
+            'Vote Result',
+            'Vote Passed',
+            'Councillors In Favour',
+            'Councillors Against',
+            'Councillors Abstained',
+            'Councillors Absent',
+            'Vote Notes',
+        ];
+    }
+
+    /**
+     * Map a hearing model onto the export column set.
+     */
+    private function formatHearingRow(\App\Models\Hearing $hearing): array
+    {
+        $vote = $hearing->hearingVote;
+        $councillorVotes = $vote ? $vote->councillorVotes : collect();
+
+        $row = [
+            'ID' => $hearing->id,
+            'Organization' => optional($hearing->organization)->name,
+            'Region' => optional($hearing->region)->name,
+            'Type' => $hearing->type,
+            'Title' => $hearing->title,
+            'Street Address' => $hearing->street_address,
+            'Postal Code' => $hearing->postal_code,
+            'Rental' => $hearing->rental,
+            'Units' => $hearing->units,
+            'Below Market Units' => $hearing->below_market_units,
+            'Replaced Units' => $hearing->replaced_units,
+            'Subject To Vote' => $hearing->subject_to_vote,
+            'Description' => $hearing->description,
+            'Image URL' => $hearing->image_url,
+            'Start Datetime' => $hearing->start_datetime,
+            'End Datetime' => $hearing->end_datetime,
+            'More Info URL' => $hearing->more_info_url,
+            'Remote Instructions' => $hearing->remote_instructions,
+            'In-Person Instructions' => $hearing->inperson_instructions,
+            'Comments Email' => $hearing->comments_email,
+            'Created At' => $hearing->created_at,
+            'Updated At' => $hearing->updated_at,
+            'Vote Date' => $vote && $vote->vote_date ? $vote->vote_date->format('Y-m-d') : '',
+            'Vote Result' => $vote ? $vote->vote_result : '',
+            'Vote Passed' => $vote && !is_null($vote->passed) ? ($vote->passed ? 'Yes' : 'No') : '',
+            'Vote Notes' => $vote ? $vote->notes : '',
+            'Councillors In Favour' => $this->formatCouncillorList($councillorVotes, 'for'),
+            'Councillors Against' => $this->formatCouncillorList($councillorVotes, 'against'),
+            'Councillors Abstained' => $this->formatCouncillorList($councillorVotes, 'abstain'),
+            'Councillors Absent' => $this->formatCouncillorList($councillorVotes, 'absent'),
+        ];
+
+        foreach ($row as $key => $value) {
+            $row[$key] = $this->normalizeTabularValue($value);
+        }
+
+        return $row;
+    }
+
+    /**
+     * Build a semicolon-delimited councillor list for a given vote type.
+     */
+    private function formatCouncillorList($councillorVotes, string $type): string
+    {
+        return $councillorVotes
+            ->where('vote', $type)
+            ->map(function ($councillorVote) {
+                return optional($councillorVote->councillor)->name;
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->implode('; ');
+    }
+
+    /**
+     * Normalize tabular values to a single-line string output.
+     */
+    private function normalizeTabularValue($value): string
+    {
+        if (is_null($value)) {
+            return '';
+        }
+
+        if ($value instanceof \Carbon\CarbonInterface) {
+            return $value->format('Y-m-d H:i:s');
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'Yes' : 'No';
+        }
+
+        $string = (string) $value;
+        $string = preg_replace('/\s+/', ' ', $string ?? '');
+
+        return trim($string);
     }
 
     /**

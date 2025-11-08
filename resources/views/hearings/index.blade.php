@@ -15,10 +15,16 @@
                         <h3 class="text-lg font-semibold text-green-800">Upcoming Hearings</h3>
                         <p class="text-sm text-green-600">{{ $upcomingHearings->count() }} hearings scheduled</p>
                     </div>
-                    <a href="{{ route('hearings.create') }}" 
-                       class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                        Add New Hearing
-                    </a>
+                    <div class="flex items-center space-x-3">
+                        <a href="{{ route('hearings.export') }}"
+                           class="inline-flex items-center px-4 py-2 border border-green-600 rounded-md font-semibold text-xs text-green-700 uppercase tracking-widest bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            Export CSV
+                        </a>
+                        <a href="{{ route('hearings.create') }}" 
+                           class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            Add New Hearing
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="overflow-x-auto">

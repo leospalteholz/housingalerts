@@ -153,11 +153,11 @@ class Hearing extends Model
     // Helper method to get display title
     public function getDisplayTitleAttribute()
     {
-        if ($this->type === 'policy') {
-            return $this->title;
-        } else {
-            return $this->title ?: "Hearing for {$this->street_address}";
+        if ($this->type === 'development') {
+            return $this->street_address ?: ($this->title ?: 'Development Hearing');
         }
+
+        return $this->title ?: $this->street_address;
     }
 
     // Helper method to get combined date/time for display
