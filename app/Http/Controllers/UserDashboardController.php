@@ -31,6 +31,7 @@ class UserDashboardController extends Controller
             $regionIds = $monitoredRegions->pluck('id');
             $upcomingHearings = Hearing::whereIn('region_id', $regionIds)
                 ->where('start_datetime', '>=', now())
+                ->where('approved', true)
                 ->orderBy('start_datetime', 'asc')
                 ->with(['region', 'organization'])
                 ->get();
@@ -92,6 +93,7 @@ class UserDashboardController extends Controller
             $regionIds = $monitoredRegions->pluck('id');
             $upcomingHearings = Hearing::whereIn('region_id', $regionIds)
                 ->where('start_datetime', '>=', now())
+                ->where('approved', true)
                 ->orderBy('start_datetime', 'asc')
                 ->with(['region', 'organization'])
                 ->get();

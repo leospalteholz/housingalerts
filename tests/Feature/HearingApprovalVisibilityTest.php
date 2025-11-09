@@ -1,0 +1,109 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Hearing;
+use App\Models\Organization;
+use App\Models\Region;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Tests\TestCase;
+
+class HearingApprovalVisibilityTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private Organization $organization;
+    private Region $region;
+    private Hearing $approvedHearing;
+    private Hearing $pendingHearing;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->organization = Organization::create([
+            'name' => 'Test Org',
+            'slug' => Str::slug('Test Org'),
+            'contact_email' => 'contact@test.org',
+        ]);
+
+        $this->region = Region::create([
+            'organization_id' => $this->organization->id,
+            'name' => 'Test Region',
+        ]);
+
+        $this->approvedHearing = Hearing::create([
+            'organization_id' => $this->organization->id,
+            'region_id' => $this->region->id,
+            'type' => 'policy',
+            'title' => 'Approved Hearing',
+            'below_market_units' => 0,
+            'subject_to_vote' => true,
+            'approved' => true,
+            'description' => 'Approved hearing description',
+            'start_datetime' => now()->addDays(5),
+            'end_datetime' => now()->addDays(5)->addHour(),
+            'remote_instructions' => 'Remote instructions',
+            'inperson_instructions' => 'In-person instructions',
+            'comments_email' => 'comments@test.org',
+        ]);
+
+        $this->pendingHearing = Hearing::create([
+            'organization_id' => $this->organization->id,
+            'region_id' => $this->region->id,
+            'type' => 'policy',
+            'title' => 'Pending Hearing',
+            'below_market_units' => 0,
+            'subject_to_vote' => true,
+            'approved' => false,
+            'description' => 'Pending hearing description',
+            'start_datetime' => now()->addDays(6),
+            'end_datetime' => now()->addDays(6)->addHour(),
+            'remote_instructions' => 'Remote instructions',
+            'inperson_instructions' => 'In-person instructions',
+            'comments_email' => 'comments@test.org',
+        ]);
+    }
+
+    public function test_admin_can_see_pending_hearings(): void
+    {
+        $admin = User::factory()->create([
+            'organization_id' => $this->organization->id,
+            'is_admin' => true,
+            'is_superuser' => false,
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('hearings.index'));
+
+        $response->assertOk();
+        $response->assertSee('Approved Hearing');
+        $response->assertSee('Pending Hearing');
+    }
+
+    public function test_regular_user_only_sees_approved_hearings(): void
+    {
+        $user = User::factory()->create([
+            'organization_id' => $this->organization->id,
+            'is_admin' => false,
+            'is_superuser' => false,
+        ]);
+        $user->regions()->attach($this->region->id);
+
+        $response = $this->actingAs($user)->get(route('hearings.index'));
+
+        $response->assertOk();
+        $response->assertSee('Approved Hearing');
+        $response->assertDontSee('Pending Hearing');
+    }
+
+    public function test_public_embed_only_shows_approved_hearings(): void
+    {
+        $response = $this->get(route('hearings.embed'));
+
+        $response->assertOk();
+        $response->assertSee('Approved Hearing');
+        $response->assertDontSee('Pending Hearing');
+    }
+}

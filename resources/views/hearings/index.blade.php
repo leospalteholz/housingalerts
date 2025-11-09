@@ -46,6 +46,11 @@
                                     <div class="text-sm font-medium text-gray-900">
                                         {{ $hearing->display_title }}
                                     </div>
+                                    @unless($hearing->approved)
+                                        <span class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">
+                                            Pending Approval
+                                        </span>
+                                    @endunless
                                     @if($hearing->isDevelopment() && $hearing->postal_code)
                                         <div class="text-sm text-gray-500">{{ $hearing->postal_code }}</div>
                                     @endif
@@ -144,6 +149,11 @@
                                     <div class="text-sm font-medium text-gray-900">
                                         {{ $hearing->display_title }}
                                     </div>
+                                    @unless($hearing->approved)
+                                        <span class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">
+                                            Pending Approval
+                                        </span>
+                                    @endunless
                                     @if($hearing->isDevelopment() && $hearing->postal_code)
                                         <div class="text-sm text-gray-500">{{ $hearing->postal_code }}</div>
                                     @endif
