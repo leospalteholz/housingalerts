@@ -120,7 +120,7 @@ class DatabaseSeeder extends Seeder
                 'below_market_units' => 0,
                 'replaced_units' => 8,
                 'subject_to_vote' => false,
-                'approved' => true,
+                'approved' => false,
                 'description' => 'Development variance permit application for 24-unit condominium development on Quadra Street. Features sustainable design, rooftop gardens, and family-friendly amenities.',
                 'remote_instructions' => 'Remote participation not available for this hearing.',
                 'inperson_instructions' => 'In-person only at Saanich Municipal Hall, 770 Vernon Avenue. Doors open at 6:30 PM. Free parking available in municipal lot.',
