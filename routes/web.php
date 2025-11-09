@@ -104,22 +104,18 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Public embed/export routes (must be defined before parameterized hearing routes)
-Route::get('/hearings/export', [HearingController::class, 'export'])
-    ->name('hearings.export');
-Route::get('/hearings/embed', [HearingController::class, 'embed'])
-    ->name('hearings.embed');
 Route::get('/{organization:slug}/hearings/export', [HearingController::class, 'export'])
     ->name('organization.hearings.export');
 Route::get('/{organization:slug}/hearings/embed', [HearingController::class, 'embed'])
     ->name('organization.hearings.embed');
-Route::get('/regions/{region}/voting-embed', [RegionController::class, 'votingEmbed'])
+Route::get('/{organization:slug}/regions/{region}/voting-embed', [RegionController::class, 'votingEmbed'])
     ->name('regions.voting-embed');
 
 // Public routes - accessible to everyone
 // Individual hearing details and calendar functionality
-Route::get('/hearings/{hearing}', [HearingController::class, 'show'])->name('hearings.show');
-Route::get('/hearings/{hearing}/calendar/{provider}', [HearingController::class, 'addToCalendar'])->name('hearings.calendar');
-Route::get('/hearings/{hearing}/calendar.ics', [HearingController::class, 'downloadIcs'])->name('hearings.ics');
+Route::get('/{organization:slug}/hearings/{hearing}', [HearingController::class, 'show'])->name('hearings.show');
+Route::get('/{organization:slug}/hearings/{hearing}/calendar/{provider}', [HearingController::class, 'addToCalendar'])->name('hearings.calendar');
+Route::get('/{organization:slug}/hearings/{hearing}/calendar.ics', [HearingController::class, 'downloadIcs'])->name('hearings.ics');
 
 // Signup routes (accessible to guests)
 use App\Http\Controllers\SignupController;
