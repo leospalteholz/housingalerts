@@ -40,6 +40,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('regions', RegionController::class);
     // Hearing management routes (create, edit, update, delete) - MUST be before public hearing routes
     Route::resource('hearings', HearingController::class)->except(['index', 'show']);
+    Route::patch('hearings/{hearing}/approve', [HearingController::class, 'approve'])->name('hearings.approve');
     // User management routes
     Route::resource('users', UserController::class);
 });

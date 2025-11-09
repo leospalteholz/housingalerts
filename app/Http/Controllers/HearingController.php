@@ -14,18 +14,32 @@ class HearingController extends Controller
         $allHearings = $this->scopedHearingsQuery()
             ->with(['organization', 'region'])
             ->get();
+
+        $pendingHearings = collect();
+
+        if (auth()->user()->is_admin || auth()->user()->is_superuser) {
+            $pendingHearings = $allHearings
+                ->filter(function ($hearing) {
+                    return !$hearing->approved;
+                })
+                ->sortBy('start_datetime');
+        }
+
+        $approvedHearings = $allHearings->filter(function ($hearing) {
+            return $hearing->approved;
+        });
         
         // Split hearings into upcoming and past based on start_datetime
         $today = now()->startOfDay();
-        $upcomingHearings = $allHearings->filter(function ($hearing) use ($today) {
+        $upcomingHearings = $approvedHearings->filter(function ($hearing) use ($today) {
             return $hearing->start_datetime && $hearing->start_datetime->gte($today);
         })->sortBy('start_datetime');
         
-        $pastHearings = $allHearings->filter(function ($hearing) use ($today) {
+        $pastHearings = $approvedHearings->filter(function ($hearing) use ($today) {
             return $hearing->start_datetime && $hearing->start_datetime->lt($today);
         })->sortByDesc('start_datetime');
         
-        return view('hearings.index', compact('upcomingHearings', 'pastHearings'));
+        return view('hearings.index', compact('pendingHearings', 'upcomingHearings', 'pastHearings'));
     }
 
     /**
@@ -283,6 +297,26 @@ class HearingController extends Controller
         $hearing->save();
 
         return redirect()->route('hearings.index')->with('success', 'Hearing updated successfully!');
+    }
+
+    /**
+     * Approve a pending hearing.
+     */
+    public function approve($id)
+    {
+        $hearing = \App\Models\Hearing::findOrFail($id);
+        $user = auth()->user();
+
+        if (!$user->is_superuser && $hearing->organization_id !== $user->organization_id) {
+            abort(403);
+        }
+
+        if (!$hearing->approved) {
+            $hearing->approved = true;
+            $hearing->save();
+        }
+
+        return redirect()->route('hearings.index')->with('success', 'Hearing approved successfully!');
     }
 
     /**

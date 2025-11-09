@@ -1,29 +1,105 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Hearings') }}
-        </h2>
+        <div class="flex items-center justify-between gap-4">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Hearings') }}
+            </h2>
+            <div class="flex items-center space-x-3">
+                <a href="{{ route('hearings.export') }}"
+                   class="inline-flex items-center px-4 py-2 border border-green-600 rounded-md font-semibold text-xs text-green-700 uppercase tracking-widest bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    Export CSV
+                </a>
+                @if(auth()->user()->is_admin || auth()->user()->is_superuser)
+                    <a href="{{ route('hearings.create') }}"
+                       class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        Add New Hearing
+                    </a>
+                @endif
+            </div>
+        </div>
     </x-slot>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="space-y-6">
+                @if(auth()->user()->is_admin || auth()->user()->is_superuser)
+                    <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
+                        <div class="bg-yellow-50 px-6 py-4 border-b border-yellow-200 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-yellow-900">Pending Approval</h3>
+                                <p class="text-sm text-yellow-700">{{ $pendingHearings->count() }} hearing{{ $pendingHearings->count() === 1 ? '' : 's' }} awaiting review</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title/Address</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Region</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @forelse ($pendingHearings as $hearing)
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ $hearing->display_title }}
+                                                </div>
+                                                @if($hearing->isDevelopment() && $hearing->postal_code)
+                                                    <div class="text-sm text-gray-500">{{ $hearing->postal_code }}</div>
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $hearing->isDevelopment() ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                                    {{ $hearing->isDevelopment() ? 'Development' : 'Policy' }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                @if($hearing->region)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        {{ $hearing->region->name }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-gray-500">No region</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                @if($hearing->start_date)
+                                                    {{ \Carbon\Carbon::parse($hearing->start_date)->format('M j, Y') }}
+                                                @else
+                                                    &mdash;
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
+                                                <a href="{{ route('hearings.show', $hearing) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
+                                                <form method="POST" action="{{ route('hearings.approve', $hearing) }}">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-1 px-3 rounded text-sm">
+                                                        Approve
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-4 text-gray-500 text-center">No hearings are pending approval.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Upcoming Hearings -->
                 <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
             <div class="bg-green-50 px-6 py-4 border-b border-green-200">
-                <div class="flex justify-between items-center">
                     <div>
                         <h3 class="text-lg font-semibold text-green-800">Upcoming Hearings</h3>
                         <p class="text-sm text-green-600">{{ $upcomingHearings->count() }} hearings scheduled</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <a href="{{ route('hearings.export') }}"
-                           class="inline-flex items-center px-4 py-2 border border-green-600 rounded-md font-semibold text-xs text-green-700 uppercase tracking-widest bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            Export CSV
-                        </a>
-                        <a href="{{ route('hearings.create') }}" 
-                           class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            Add New Hearing
-                        </a>
                     </div>
                 </div>
             </div>

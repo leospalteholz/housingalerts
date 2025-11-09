@@ -78,8 +78,69 @@ class HearingApprovalVisibilityTest extends TestCase
         $response = $this->actingAs($admin)->get(route('hearings.index'));
 
         $response->assertOk();
+        $response->assertSee('Pending Approval');
         $response->assertSee('Approved Hearing');
         $response->assertSee('Pending Hearing');
+        $response->assertSee('Approve');
+    }
+
+    public function test_admin_can_approve_pending_hearing(): void
+    {
+        $admin = User::factory()->create([
+            'organization_id' => $this->organization->id,
+            'is_admin' => true,
+            'is_superuser' => false,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['_token' => 'test-token'])
+            ->patch(route('hearings.approve', $this->pendingHearing), ['_token' => 'test-token']);
+
+        $response->assertRedirect(route('hearings.index'));
+        $this->assertTrue($this->pendingHearing->fresh()->approved);
+    }
+
+    public function test_admin_cannot_approve_hearing_from_other_organization(): void
+    {
+        $otherOrganization = Organization::create([
+            'name' => 'Other Org',
+            'slug' => Str::slug('Other Org'),
+            'contact_email' => 'contact@other.org',
+        ]);
+
+        $otherRegion = Region::create([
+            'organization_id' => $otherOrganization->id,
+            'name' => 'Other Region',
+        ]);
+
+        $otherHearing = Hearing::create([
+            'organization_id' => $otherOrganization->id,
+            'region_id' => $otherRegion->id,
+            'type' => 'policy',
+            'title' => 'Other Hearing',
+            'below_market_units' => 0,
+            'subject_to_vote' => true,
+            'approved' => false,
+            'description' => 'Other description',
+            'start_datetime' => now()->addDays(3),
+            'end_datetime' => now()->addDays(3)->addHour(),
+            'remote_instructions' => 'Remote instructions',
+            'inperson_instructions' => 'In-person instructions',
+            'comments_email' => 'comments@other.org',
+        ]);
+
+        $admin = User::factory()->create([
+            'organization_id' => $this->organization->id,
+            'is_admin' => true,
+            'is_superuser' => false,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['_token' => 'test-token'])
+            ->patch(route('hearings.approve', $otherHearing), ['_token' => 'test-token']);
+
+        $response->assertForbidden();
+        $this->assertFalse($otherHearing->fresh()->approved);
     }
 
     public function test_regular_user_only_sees_approved_hearings(): void
