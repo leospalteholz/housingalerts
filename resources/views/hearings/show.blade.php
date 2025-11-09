@@ -6,7 +6,7 @@
         <meta property="og:type" content="article">
         <meta property="og:title" content="{{ $hearing->title }}">
         <meta property="og:description" content="{{ Str::limit(strip_tags($hearing->description), 150) }}">
-        <meta property="og:url" content="{{ route('hearings.show', $hearing) }}">
+    <meta property="og:url" content="{{ orgRoute('hearings.show', ['hearing' => $hearing]) }}">
         <meta property="og:site_name" content="{{ config('app.name') }}">
         @if($hearing->image_url)
             <meta property="og:image" content="{{ $hearing->image_url }}">

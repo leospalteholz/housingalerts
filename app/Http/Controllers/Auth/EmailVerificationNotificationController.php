@@ -18,8 +18,16 @@ class EmailVerificationNotificationController extends Controller
             return redirect()->intended(RouteServiceProvider::homeRoute($request->user()));
         }
 
-        $request->user()->sendEmailVerificationNotification();
+        try {
+            $request->user()->sendEmailVerificationNotification();
 
-        return back()->with('status', 'verification-link-sent');
+            return back()->with('status', 'verification-link-sent');
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            $errorSummary = trim(($exception->getCode() ? $exception->getCode() . ': ' : '') . $exception->getMessage());
+
+            return back()->with('error', 'We could not send the verification email right now. Please try again later. (' . $errorSummary . ')');
+        }
     }
 }

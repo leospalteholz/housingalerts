@@ -131,7 +131,7 @@
                                 @foreach($councillor->councillorVotes as $vote)
                                     <tr>
                                         <td class="px-6 py-4">
-                                            <a href="{{ route('hearings.show', $vote->hearingVote->hearing) }}" 
+                                            <a href="{{ orgRoute('hearings.show', ['hearing' => $vote->hearingVote->hearing]) }}" 
                                                class="text-blue-600 hover:text-blue-800 hover:underline">
                                                 {{ $vote->hearingVote->hearing->display_title }}
                                             </a>

@@ -43,6 +43,12 @@
                             {{ __('A new verification link has been sent to your email address.') }}
                         </p>
                     @endif
+
+                    @if (session('error'))
+                        <p class="mt-2 font-medium text-sm text-red-600">
+                            {{ session('error') }}
+                        </p>
+                    @endif
                 </div>
             @endif
         </div>

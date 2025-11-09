@@ -107,7 +107,7 @@
                 <div class="container mx-auto px-4">
                     <div class="flex flex-col md:flex-row justify-between items-center">
                         <div class="mb-4 md:mb-0">
-                            <p class="text-gray-600">&copy; {{ date('Y') }} Housing Alerts. All rights reserved.</p>
+                            <p class="text-gray-600">Housing Alerts is brought to you by <a href="https://homesforliving.ca" class="text-blue-500 hover:underline">Homes for Living</a></p>
                         </div>
                         <div>
                             <a href="#" class="text-gray-600 hover:text-gray-900 mr-4">Privacy Policy</a>

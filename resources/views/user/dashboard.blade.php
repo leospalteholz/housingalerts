@@ -26,6 +26,21 @@
                     </div>
                 </div>
             @endif
+
+            @if(session('error'))
+                <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <x-icon name="exclamation-triangle" class="h-5 w-5 text-red-400" />
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">
+                                {{ session('error') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
             
             <!-- Email Verification Status -->
             @if(!auth()->user()->hasVerifiedEmail())

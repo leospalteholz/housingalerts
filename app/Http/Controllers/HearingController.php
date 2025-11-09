@@ -183,11 +183,13 @@ class HearingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Organization $organization, Hearing $hearing)
     {
-        $hearing = \App\Models\Hearing::with(['region', 'organization'])->findOrFail($id);
+        $this->ensureHearingBelongsToOrganization($hearing, $organization);
+
+        $hearing->load(['region', 'organization']);
         
-        // Public hearing view - no access restrictions needed
+        // Public hearing view - no additional access restrictions needed
         
         // Get list of users subscribed to receive notifications for this hearing (only for authenticated admins)
         $subscribedUsers = collect();
@@ -535,8 +537,10 @@ class HearingController extends Controller
     /**
      * Add hearing to calendar - redirect to calendar service
      */
-    public function addToCalendar(\App\Models\Hearing $hearing, $provider)
+    public function addToCalendar(Organization $organization, Hearing $hearing, $provider)
     {
+        $this->ensureHearingBelongsToOrganization($hearing, $organization);
+
         $url = $this->generateCalendarUrl($hearing, $provider);
         return redirect($url);
     }
@@ -544,8 +548,10 @@ class HearingController extends Controller
     /**
      * Download ICS file for hearing
      */
-    public function downloadIcs(\App\Models\Hearing $hearing)
+    public function downloadIcs(Organization $organization, Hearing $hearing)
     {
+        $this->ensureHearingBelongsToOrganization($hearing, $organization);
+
         $icsContent = $this->generateIcsContent($hearing);
         $filename = 'hearing-' . $hearing->id . '.ics';
         

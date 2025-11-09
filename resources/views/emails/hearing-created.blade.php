@@ -364,7 +364,7 @@
             </div>
             
             <div style="text-align: center;">
-                <a href="{{ route('hearings.show', $hearing) }}" class="cta-button">
+                <a href="{{ route('hearings.show', ['organization' => $hearing->organization->slug, 'hearing' => $hearing]) }}" class="cta-button">
                     View hearing details
                 </a>
             </div>

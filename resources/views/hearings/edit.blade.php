@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
     <div class="max-w-md mx-auto py-8">
-    <form method="POST" action="{{ orgRoute('hearings.update', $hearing) }}" enctype="multipart/form-data" class="bg-white rounded shadow p-6">
+    <form method="POST" action="{{ orgRoute('hearings.update', ['hearing' => $hearing]) }}" enctype="multipart/form-data" class="bg-white rounded shadow p-6">
             @csrf
             @method('PUT')
             
@@ -221,7 +221,7 @@
         </form>
 
         <!-- Delete Button (separate form) -->
-    <form action="{{ orgRoute('hearings.destroy', $hearing) }}" method="POST" class="mt-4" onsubmit="return confirm('Are you sure you want to delete this hearing? This action cannot be undone.');">
+    <form action="{{ orgRoute('hearings.destroy', ['hearing' => $hearing]) }}" method="POST" class="mt-4" onsubmit="return confirm('Are you sure you want to delete this hearing? This action cannot be undone.');">
             @csrf
             @method('DELETE')
             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded w-full">

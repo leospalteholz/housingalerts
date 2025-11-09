@@ -51,7 +51,7 @@
                         </div>
                     </div>
                     <div class="ml-4 flex gap-2">
-                        <a href="{{ route('hearings.show', $hearing) }}" 
+                        <a href="{{ orgRoute('hearings.show', ['hearing' => $hearing]) }}" 
                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
                             View Details
                         </a>

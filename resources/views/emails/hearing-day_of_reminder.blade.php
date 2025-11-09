@@ -122,7 +122,7 @@
         </div>
         
         <div style="text-align: center;">
-            <a href="{{ route('hearings.show', $hearing) }}" class="button">
+            <a href="{{ route('hearings.show', ['organization' => $hearing->organization->slug, 'hearing' => $hearing]) }}" class="button">
                 View Full Details
             </a>
             
