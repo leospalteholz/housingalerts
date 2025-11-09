@@ -1,14 +1,17 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Users') }}
-        </h2>
+        <div class="flex items-center justify-between gap-4">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Users') }}
+            </h2>
+            <a href="{{ route('users.create') }}" class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs uppercase tracking-widest py-2 px-4 rounded shadow transition duration-150 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                + Add User
+            </a>
+        </div>
     </x-slot>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="space-y-6">
-                <a href="{{ route('users.create') }}" class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition duration-150 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400">+ Add User</a>
-        
                 <!-- Admins Section -->
                 <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
                     <div class="bg-purple-50 px-6 py-4 border-b border-purple-200">

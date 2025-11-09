@@ -99,6 +99,8 @@ Route::get('/hearings/export', [HearingController::class, 'export'])
     ->name('hearings.export');
 Route::get('/hearings/embed', [HearingController::class, 'embed'])
     ->name('hearings.embed');
+Route::get('/regions/{region}/voting-embed', [RegionController::class, 'votingEmbed'])
+    ->name('regions.voting-embed');
 
 // Public routes - accessible to everyone
 // Individual hearing details and calendar functionality

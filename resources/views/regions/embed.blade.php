@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hearings Table</title>
+    <title>Region Vote Breakdown</title>
     <style>
         *, *::before, *::after {
             box-sizing: border-box;
@@ -23,6 +23,27 @@
             flex-direction: column;
         }
 
+        .header-bar {
+            flex: 0 0 auto;
+            padding: 12px 16px;
+            background: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .header-bar h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header-bar span {
+            font-size: 12px;
+            color: rgba(248, 250, 252, 0.75);
+        }
+
         .table-container {
             flex: 1 1 auto;
             overflow: auto;
@@ -31,7 +52,7 @@
         table {
             border-collapse: collapse;
             width: 100%;
-            min-width: 1200px;
+            min-width: 900px;
         }
 
         thead th {
@@ -70,7 +91,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 14px;
+            padding: 10px 16px;
             background: #f8fafc;
             border-top: 1px solid #cbd5f5;
             font-size: 13px;
@@ -79,24 +100,6 @@
 
         .bottom-bar strong {
             color: #0f172a;
-        }
-
-        .csv-button {
-            display: inline-flex;
-            align-items: center;
-            background: #2563eb;
-            color: #ffffff;
-            padding: 6px 12px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 13px;
-            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
-            transition: background 0.2s ease;
-        }
-
-        .csv-button:hover {
-            background: #1d4ed8;
         }
 
         .empty-state {
@@ -109,7 +112,7 @@
 </head>
 <body>
     <div class="table-container">
-    <table id="hearings-table" data-sortable-table>
+    <table id="councillor-table" data-sortable-table>
             <thead>
                 <tr>
                     @foreach ($columns as $column)
@@ -126,15 +129,15 @@
                     </tr>
                 @empty
                     <tr>
-                        <td class="empty-state" colspan="{{ count($columns) }}">No hearings available.</td>
+                        <td class="empty-state" colspan="{{ count($columns) }}">No councillor vote data available yet.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
     <div class="bottom-bar">
-        <span><strong>{{ number_format($recordCount) }}</strong> hearings • Updated {{ $generatedAt }}</span>
-        <a class="csv-button" href="{{ route('hearings.export') }}" target="_blank" rel="noopener">Export CSV</a>
+        <span><strong>{{ number_format($recordCount) }}</strong> councillor{{ $recordCount === 1 ? '' : 's' }}</span>
+        <span>Updated {{ $generatedAt }}</span>
     </div>
     @vite('resources/js/embed-tables.js')
 </body>

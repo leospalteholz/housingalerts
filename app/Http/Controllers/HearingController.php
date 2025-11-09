@@ -414,9 +414,9 @@ class HearingController extends Controller
     {
         return [
             'Start Datetime',
-            'Region',
             'Title',
             'Postal Code',
+            'Region',
             'Rental',
             'Units',
             'Below Market Units',

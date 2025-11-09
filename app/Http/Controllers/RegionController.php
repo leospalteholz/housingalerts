@@ -89,6 +89,94 @@ class RegionController extends Controller
     }
 
     /**
+     * Render an embeddable councillor vote breakdown for a region.
+     */
+    public function votingEmbed(\App\Models\Region $region)
+    {
+        $region->load('organization');
+
+        $councillors = $region->councillors()->orderBy('name')->get();
+
+        $votesByCouncillor = \App\Models\CouncillorVote::with(['hearingVote.hearing' => function ($query) use ($region) {
+            $query->where('region_id', $region->id)
+                ->where('approved', true);
+        }])
+            ->whereIn('councillor_id', $councillors->pluck('id'))
+            ->whereHas('hearingVote.hearing', function ($query) use ($region) {
+                $query->where('region_id', $region->id)
+                    ->where('approved', true);
+            })
+            ->get()
+            ->groupBy('councillor_id');
+
+        $columns = [
+            'Councillor Name',
+            '% Support',
+            'Homes Supported',
+            'Homes Opposed',
+            'Rentals Opposed',
+            'Below Market Opposed',
+        ];
+
+        $rows = $councillors->map(function ($councillor) use ($votesByCouncillor) {
+            $votes = $votesByCouncillor->get($councillor->id, collect());
+
+            $homesSupported = 0;
+            $homesOpposed = 0;
+            $rentalsOpposed = 0;
+            $belowMarketOpposed = 0;
+            $participatedUnits = 0;
+
+            foreach ($votes as $vote) {
+                $hearing = optional($vote->hearingVote)->hearing;
+
+                if (!$hearing) {
+                    continue;
+                }
+
+                $units = (int) ($hearing->units ?? 0);
+                $belowMarketUnits = (int) ($hearing->below_market_units ?? 0);
+                $isRental = (bool) $hearing->rental;
+
+                if ($vote->vote === 'for') {
+                    $homesSupported += $units;
+                    $participatedUnits += $units;
+                } elseif ($vote->vote === 'against') {
+                    $homesOpposed += $units;
+                    $participatedUnits += $units;
+
+                    if ($isRental) {
+                        $rentalsOpposed += $units;
+                    }
+
+                    $belowMarketOpposed += $belowMarketUnits;
+                }
+            }
+
+            $supportPercent = $participatedUnits > 0
+                ? number_format(round(($homesSupported / $participatedUnits) * 100, 1), 1)
+                : null;
+
+            return [
+                $councillor->name,
+                $supportPercent !== null ? $supportPercent . '%' : '—',
+                number_format($homesSupported),
+                number_format($homesOpposed),
+                number_format($rentalsOpposed),
+                number_format($belowMarketOpposed),
+            ];
+        })->values();
+
+        return view('regions.embed', [
+            'region' => $region,
+            'columns' => $columns,
+            'rows' => $rows,
+            'recordCount' => $rows->count(),
+            'generatedAt' => now()->format('Y-m-d H:i:s T'),
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit($id)
