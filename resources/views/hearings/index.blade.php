@@ -96,15 +96,14 @@
 
                 <!-- Upcoming Hearings -->
                 <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
-            <div class="bg-green-50 px-6 py-4 border-b border-green-200">
-                    <div>
-                        <h3 class="text-lg font-semibold text-green-800">Upcoming Hearings</h3>
-                        <p class="text-sm text-green-600">{{ $upcomingHearings->count() }} hearings scheduled</p>
+                    <div class="bg-green-50 px-6 py-4 border-b border-green-200">
+                        <div>
+                            <h3 class="text-lg font-semibold text-green-800">Upcoming Hearings</h3>
+                            <p class="text-sm text-green-600">{{ $upcomingHearings->count() }} hearings scheduled</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title/Address</th>
@@ -195,19 +194,18 @@
                                 <td colspan="6" class="px-6 py-4 text-gray-500 text-center">No upcoming hearings found.</td>
                             </tr>
                         @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                        </table>
+                    </div>
+                </div>
 
                 <!-- Past Hearings -->
                 <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-800">Past Hearings</h3>
-                <p class="text-sm text-gray-600">{{ $pastHearings->count() }} hearings completed</p>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-800">Past Hearings</h3>
+                        <p class="text-sm text-gray-600">{{ $pastHearings->count() }} hearings completed</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title/Address</th>
@@ -298,10 +296,9 @@
                                 <td colspan="6" class="px-6 py-4 text-gray-500 text-center">No past hearings found.</td>
                             </tr>
                         @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
