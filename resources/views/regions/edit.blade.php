@@ -20,7 +20,7 @@
                         <!-- Region Name -->
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                Region Name <span class="text-red-500">*</span>
+                                Region Name
                             </label>
                             <input type="text" 
                                    id="name" 

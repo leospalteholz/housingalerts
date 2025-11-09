@@ -99,9 +99,9 @@
                                     <div class="flex items-start space-x-3">
                                         <div class="flex-shrink-0 mt-1">
                                             <label class="inline-flex items-center">
-                                                <input type="checkbox" 
-                                                       class="region-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" 
-                                                       data-region-id="{{ $region->id }}"
+                              <input type="checkbox" 
+                                  class="region-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" 
+                                  data-region-slug="{{ $region->slug }}"
                                                        data-region-name="{{ $region->name }}"
                                                        {{ $region->is_monitored ? 'checked' : '' }}>
                                                 <span class="sr-only">Subscribe to {{ $region->name }}</span>
@@ -110,7 +110,7 @@
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center justify-between">
                                                 <h3 class="text-sm font-medium text-gray-900">{{ $region->name }}</h3>
-                                                <span class="subscription-status inline-flex items-center text-xs" data-region-id="{{ $region->id }}">
+                                                <span class="subscription-status inline-flex items-center text-xs" data-region-slug="{{ $region->slug }}">
                                                     @if($region->is_monitored)
                                                         <x-icon name="check-circle" class="w-3 h-3 mr-1 text-green-500" />
                                                         <span class="text-green-700 font-medium">Subscribed</span>
@@ -235,7 +235,7 @@
             
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
-                    const regionId = this.dataset.regionId;
+                    const regionSlug = this.dataset.regionSlug;
                     const regionName = this.dataset.regionName;
                     const isChecked = this.checked;
                     
@@ -244,8 +244,8 @@
                     
                     const baseUrl = '{{ url('/') }}';
                     const url = isChecked 
-                        ? `${baseUrl}/regions/${regionId}/subscribe`
-                        : `${baseUrl}/regions/${regionId}/unsubscribe`;
+                        ? `${baseUrl}/regions/${regionSlug}/subscribe`
+                        : `${baseUrl}/regions/${regionSlug}/unsubscribe`;
                     
                     const method = 'POST'; // Use POST for both subscribe and unsubscribe
                     
@@ -268,7 +268,7 @@
                     .then(data => {
                         if (data.success) {
                             // Update status indicator
-                            updateSubscriptionStatus(regionId, isChecked);
+                            updateSubscriptionStatus(regionSlug, isChecked);
                             
                             // Reload hearings section
                             reloadHearingsSection();
@@ -353,8 +353,12 @@
                 });
             });
             
-            function updateSubscriptionStatus(regionId, isSubscribed) {
-                const statusElement = document.querySelector(`[data-region-id="${regionId}"].subscription-status`);
+            function updateSubscriptionStatus(regionSlug, isSubscribed) {
+                const statusElement = document.querySelector(`[data-region-slug="${regionSlug}"].subscription-status`);
+
+                if (!statusElement) {
+                    return;
+                }
                 
                 if (isSubscribed) {
                     statusElement.innerHTML = `

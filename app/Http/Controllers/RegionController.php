@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Region;
 use Illuminate\Http\Request;
 
 class RegionController extends Controller
@@ -13,10 +14,10 @@ class RegionController extends Controller
     {
         if (auth()->user()->is_superuser) {
             // Superusers can see all regions across organizations
-            $regions = \App\Models\Region::with('organization')->get();
+            $regions = Region::with('organization')->get();
         } else {
             // All authenticated users can see regions within their organization
-            $regions = \App\Models\Region::where('organization_id', auth()->user()->organization_id)->get();
+            $regions = Region::where('organization_id', auth()->user()->organization_id)->get();
         }
         
         // For regular users, also get their monitored regions to show which ones they're following
@@ -51,11 +52,11 @@ class RegionController extends Controller
             'inperson_instructions' => 'nullable|string',
         ]);
 
-        $region = new \App\Models\Region();
+        $region = new Region();
         $region->name = $validated['name'];
-        $region->comments_email = $validated['comments_email'];
-        $region->remote_instructions = $validated['remote_instructions'];
-        $region->inperson_instructions = $validated['inperson_instructions'];
+        $region->comments_email = $validated['comments_email'] ?? null;
+        $region->remote_instructions = $validated['remote_instructions'] ?? null;
+        $region->inperson_instructions = $validated['inperson_instructions'] ?? null;
         $region->organization_id = auth()->user()->organization_id;
         $region->save();
 
@@ -65,9 +66,9 @@ class RegionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Region $region)
     {
-        $region = \App\Models\Region::with(['organization', 'hearings'])->findOrFail($id);
+        $region->load(['organization', 'hearings']);
         
         // Check access permissions
         if (auth()->user()->is_superuser) {
@@ -91,7 +92,7 @@ class RegionController extends Controller
     /**
      * Render an embeddable councillor vote breakdown for a region.
      */
-    public function votingEmbed(\App\Models\Region $region)
+    public function votingEmbed(Region $region)
     {
         $region->load('organization');
 
@@ -179,16 +180,15 @@ class RegionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(Region $region)
     {
-        $region = \App\Models\Region::findOrFail($id);
         return view('regions.edit', compact('region'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Region $region)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -197,7 +197,6 @@ class RegionController extends Controller
             'inperson_instructions' => 'nullable|string',
         ]);
 
-        $region = \App\Models\Region::findOrFail($id);
         $region->fill($validated);
         $region->save();
 
@@ -207,10 +206,8 @@ class RegionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Region $region)
     {
-        $region = \App\Models\Region::findOrFail($id);
-        
         // Check if region has any hearings
         if ($region->hearings()->count() > 0) {
             return redirect()->route('regions.index')
@@ -224,16 +221,16 @@ class RegionController extends Controller
     /**
      * Subscribe user to a region
      */
-    public function subscribe($id)
+    public function subscribe(Region $region)
     {
         try {
             \Log::info('Region subscription attempt:', [
-                'region_id' => $id,
+                'region_id' => $region->id,
+                'region_slug' => $region->slug,
                 'user_id' => auth()->id(),
                 'user_organization_id' => auth()->user()->organization_id
             ]);
-            
-            $region = \App\Models\Region::findOrFail($id);
+
             $user = auth()->user();
             
             \Log::info('Region found:', [
@@ -279,10 +276,9 @@ class RegionController extends Controller
     /**
      * Unsubscribe user from a region
      */
-    public function unsubscribe($id)
+    public function unsubscribe(Region $region)
     {
         try {
-            $region = \App\Models\Region::findOrFail($id);
             $user = auth()->user();
             
             // Remove user from region

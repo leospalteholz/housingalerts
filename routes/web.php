@@ -118,8 +118,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/regions/{region}', [RegionController::class, 'show'])->name('regions.show');
     
     // Region subscription endpoints for regular users
-    Route::post('/regions/{id}/subscribe', [RegionController::class, 'subscribe'])->name('regions.subscribe');
-    Route::post('/regions/{id}/unsubscribe', [RegionController::class, 'unsubscribe'])->name('regions.unsubscribe');
+    Route::post('/regions/{region}/subscribe', [RegionController::class, 'subscribe'])->name('regions.subscribe');
+    Route::post('/regions/{region}/unsubscribe', [RegionController::class, 'unsubscribe'])->name('regions.unsubscribe');
 });
 
 Route::middleware('auth')->group(function () {
