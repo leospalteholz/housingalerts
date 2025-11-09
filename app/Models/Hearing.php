@@ -19,6 +19,7 @@ class Hearing extends Model
         'below_market_units',
         'replaced_units',
         'subject_to_vote',
+    'approved',
         'description',
         'image_url',
         'start_datetime',
@@ -34,6 +35,7 @@ class Hearing extends Model
         'end_datetime' => 'datetime',
         'rental' => 'boolean',
         'subject_to_vote' => 'boolean',
+    'approved' => 'boolean',
     ];
 
     public function organization() {

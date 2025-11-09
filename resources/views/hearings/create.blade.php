@@ -207,6 +207,18 @@
                 </div>
             </div>
             
+            <div class="mb-6">
+                <input type="hidden" name="approved" value="0">
+                <label class="inline-flex items-center text-gray-700 font-semibold">
+                    <input type="checkbox" name="approved" value="1" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" {{ old('approved', '1') ? 'checked' : '' }}>
+                    <span class="ml-2">Approved</span>
+                </label>
+                <p class="text-sm text-gray-600 mt-1">Approved hearings appear immediately in public lists.</p>
+                @error('approved')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div class="mb-4 text-sm text-gray-600">
                 <span class="text-red-500">*</span> Required fields
             </div>

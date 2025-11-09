@@ -33,11 +33,7 @@ class HearingController extends Controller
      */
     public function export()
     {
-        $hearings = $this->fullHearingsQuery()
-            ->sortByDesc(function ($hearing) {
-                return $hearing->start_datetime ?: now()->subYears(10);
-            })
-            ->values();
+        $hearings = $this->fullHearingsQuery()->get();
         $columns = $this->getExportColumns();
 
         $filename = 'hearings-export-' . now()->format('Y-m-d-His') . '.csv';
@@ -148,6 +144,8 @@ class HearingController extends Controller
         if ($hearing->type === 'development') {
             $hearing->title = $hearing->street_address;
         }
+
+        $hearing->approved = $request->boolean('approved', auth()->user()->is_admin || auth()->user()->is_superuser);
         
         // Force organization_id to match the user's organization unless superuser
         if (!auth()->user()->is_superuser && $request->has('organization_id')) {
@@ -261,6 +259,8 @@ class HearingController extends Controller
         if ($hearing->type === 'development') {
             $hearing->title = $hearing->street_address;
         }
+
+        $hearing->approved = $request->boolean('approved', $hearing->approved);
         
         // Set datetime fields from form data
         $hearing->setDateTimeFromForm($startDate, $startTime, $endTime);
@@ -317,7 +317,8 @@ class HearingController extends Controller
 
         $monitoredRegionIds = $user->regions()->pluck('regions.id');
 
-        return $query->whereIn('region_id', $monitoredRegionIds);
+        return $query->whereIn('region_id', $monitoredRegionIds)
+            ->where('approved', true);
     }
 
     /**
@@ -329,7 +330,8 @@ class HearingController extends Controller
             'organization',
             'region',
             'hearingVote.councillorVotes.councillor',
-        ])->orderBy('start_datetime');
+        ])->where('approved', true)
+            ->orderByDesc('start_datetime');
     }
 
     /**
@@ -377,10 +379,8 @@ class HearingController extends Controller
     private function getEmbedColumns(): array
     {
         return [
-            'ID',
             'Start Datetime',
             'Region',
-            'Type',
             'Title',
             'Postal Code',
             'Rental',

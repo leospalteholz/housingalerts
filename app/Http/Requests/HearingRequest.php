@@ -32,6 +32,7 @@ class HearingRequest extends FormRequest
             'region_id' => 'nullable|exists:regions,id',
             'image' => 'nullable|image|mimes:jpeg,jpg,webp|max:2048', // 2MB max, JPEG and WebP only
             'more_info_url' => 'nullable|url',
+            'approved' => 'nullable|boolean',
         ];
 
         // Add conditional validation based on hearing type

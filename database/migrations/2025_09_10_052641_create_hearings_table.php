@@ -24,6 +24,7 @@ return new class extends Migration
             $table->integer('below_market_units')->default(0); // number of below market units
             $table->integer('replaced_units')->nullable(); // number of units being replaced
             $table->boolean('subject_to_vote')->default(false); // whether subject to vote
+            $table->boolean('approved')->default(false); // whether reviewed/approved by admin
             $table->text('description'); // details of the hearing
             $table->string('image_url')->nullable();
             $table->datetime('start_datetime');

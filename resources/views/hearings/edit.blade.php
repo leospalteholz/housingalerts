@@ -210,6 +210,13 @@
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Update</button>
                     <a href="{{ route('hearings.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">Cancel</a>
                 </div>
+                <div class="flex items-center space-x-2">
+                    <input type="hidden" name="approved" value="0">
+                <label class="inline-flex items-center text-gray-700 font-semibold">
+                    <input type="checkbox" name="approved" value="1" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" {{ old('approved', $hearing->approved ? '1' : null) ? 'checked' : '' }}>
+                    <span class="ml-2">Approved</span>
+                </label>
+                </div>
             </div>
         </form>
 
