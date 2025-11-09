@@ -13,7 +13,7 @@
                         <h3 class="text-lg font-medium text-gray-900">Create New Region</h3>
                     </div>
 
-                    <form method="POST" action="{{ route('regions.store') }}" class="space-y-6">
+                    <form method="POST" action="{{ orgRoute('regions.store') }}" class="space-y-6">
                         @csrf
                         
                         <!-- Region Name -->
@@ -84,7 +84,7 @@
 
                         <!-- Action Buttons -->
                         <div class="flex justify-between pt-6">
-                            <a href="{{ route('regions.index') }}" 
+                            <a href="{{ orgRoute('regions.index') }}" 
                                class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-400 focus:bg-gray-400 active:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Cancel
                             </a>

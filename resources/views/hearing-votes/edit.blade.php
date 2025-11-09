@@ -32,7 +32,7 @@
                         </div>
                     </div>
 
-                    <form method="POST" action="{{ route('hearing-votes.update', $hearingVote) }}">
+                    <form method="POST" action="{{ orgRoute('hearing-votes.update', ['hearing_vote' => $hearingVote]) }}">
                         @csrf
                         @method('PUT')
 
@@ -179,7 +179,7 @@
 
                         <!-- Action Buttons -->
                         <div class="flex items-center justify-between">
-                            <a href="{{ route('hearing-votes.index') }}" 
+                            <a href="{{ orgRoute('hearing-votes.index') }}" 
                                class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Cancel
                             </a>
@@ -192,7 +192,7 @@
                     </form>
 
                     <!-- Delete Form -->
-                    <form method="POST" action="{{ route('hearing-votes.destroy', $hearingVote) }}" 
+                    <form method="POST" action="{{ orgRoute('hearing-votes.destroy', ['hearing_vote' => $hearingVote]) }}" 
                           onsubmit="return confirm('Are you sure you want to delete this vote? This action cannot be undone.');" 
                           class="mt-6 pt-6 border-t border-gray-200">
                         @csrf

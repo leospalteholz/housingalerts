@@ -232,6 +232,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             const checkboxes = document.querySelectorAll('.region-checkbox');
             const messageDiv = document.getElementById('subscription-message');
+            const baseUrl = '{{ url('/') }}';
+            const organizationSlug = @js($organization->slug);
             
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
@@ -242,10 +244,9 @@
                     // Disable checkbox during request
                     this.disabled = true;
                     
-                    const baseUrl = '{{ url('/') }}';
                     const url = isChecked 
-                        ? `${baseUrl}/regions/${regionSlug}/subscribe`
-                        : `${baseUrl}/regions/${regionSlug}/unsubscribe`;
+                        ? `${baseUrl}/${organizationSlug}/regions/${regionSlug}/subscribe`
+                        : `${baseUrl}/${organizationSlug}/regions/${regionSlug}/unsubscribe`;
                     
                     const method = 'POST'; // Use POST for both subscribe and unsubscribe
                     
@@ -301,8 +302,7 @@
                     // Disable checkbox during request
                     this.disabled = true;
                     
-                    const baseUrl = '{{ url('/') }}';
-                    const url = `${baseUrl}/user/notification-preferences`;
+                    const url = `${baseUrl}/${organizationSlug}/user/notification-preferences`;
                     
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                     
@@ -386,8 +386,7 @@
                     `;
                     
                     // Fetch updated hearings
-                    const baseUrl = '{{ url('/') }}';
-                    fetch(`${baseUrl}/user/hearings`, {
+                    fetch(`${baseUrl}/${organizationSlug}/user/hearings`, {
                         method: 'GET',
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',

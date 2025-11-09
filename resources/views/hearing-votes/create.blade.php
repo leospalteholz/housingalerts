@@ -28,7 +28,7 @@
                         </div>
                     </div>
 
-                    <form method="POST" action="{{ route('hearing-votes.store') }}">
+                    <form method="POST" action="{{ orgRoute('hearing-votes.store') }}">
                         @csrf
                         <input type="hidden" name="hearing_id" value="{{ $hearing->id }}">
 
@@ -171,7 +171,7 @@
 
                         <!-- Action Buttons -->
                         <div class="flex items-center justify-between">
-                            <a href="{{ route('hearing-votes.index') }}" 
+                            <a href="{{ orgRoute('hearing-votes.index') }}" 
                                class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Cancel
                             </a>

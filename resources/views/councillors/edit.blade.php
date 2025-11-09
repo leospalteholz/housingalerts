@@ -6,7 +6,7 @@
     </x-slot>
     
     <div class="max-w-md mx-auto py-8">
-        <form method="POST" action="{{ route('councillors.update', $councillor) }}" class="bg-white rounded shadow p-6">
+    <form method="POST" action="{{ orgRoute('councillors.update', ['councillor' => $councillor]) }}" class="bg-white rounded shadow p-6">
             @csrf
             @method('PUT')
             
@@ -73,11 +73,11 @@
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
                     Update Councillor
                 </button>
-                <a href="{{ route('councillors.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
+                <a href="{{ orgRoute('councillors.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
                     Cancel
                 </a>
                 
-                <form method="POST" action="{{ route('councillors.destroy', $councillor) }}" onsubmit="return confirm('Are you sure you want to delete this councillor? This action cannot be undone.');" class="ml-auto">
+                <form method="POST" action="{{ orgRoute('councillors.destroy', ['councillor' => $councillor]) }}" onsubmit="return confirm('Are you sure you want to delete this councillor? This action cannot be undone.');" class="ml-auto">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded">

@@ -13,7 +13,7 @@
                         <h3 class="text-lg font-medium text-gray-900">Edit Region</h3>
                     </div>
 
-                    <form method="POST" action="{{ route('regions.update', $region) }}" class="space-y-6">
+                    <form method="POST" action="{{ orgRoute('regions.update', $region) }}" class="space-y-6">
                         @csrf
                         @method('PUT')
                         
@@ -84,7 +84,7 @@
 
                         <!-- Action Buttons -->
                         <div class="flex justify-between pt-6">
-                            <a href="{{ route('regions.index') }}" 
+                            <a href="{{ orgRoute('regions.index') }}" 
                                class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-400 focus:bg-gray-400 active:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Cancel
                             </a>
@@ -102,7 +102,7 @@
                             <p class="text-sm text-red-600 mb-3">
                                 Delete this region. Note: Regions with existing hearings cannot be deleted.
                             </p>
-                            <form action="{{ route('regions.destroy', $region) }}" 
+                            <form action="{{ orgRoute('regions.destroy', $region) }}" 
                                   method="POST" 
                                   onsubmit="return confirm('Are you sure you want to delete this region?')"
                                   class="inline">

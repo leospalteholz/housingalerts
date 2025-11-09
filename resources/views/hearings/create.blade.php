@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
     <div class="max-w-md mx-auto py-8">
-        <form method="POST" action="{{ route('hearings.store') }}" enctype="multipart/form-data" class="bg-white rounded shadow p-6">
+    <form method="POST" action="{{ orgRoute('hearings.store') }}" enctype="multipart/form-data" class="bg-white rounded shadow p-6">
             @csrf
             
             <!-- Hearing Type Selection -->
@@ -224,7 +224,7 @@
             </div>
             
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Create</button>
-            <a href="{{ route('hearings.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">Cancel</a>
+            <a href="{{ orgRoute('hearings.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">Cancel</a>
         </form>
     </div>
 

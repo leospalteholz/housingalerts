@@ -13,11 +13,16 @@ class UserDashboardController extends Controller
     {
         // For regular users, show their monitored regions and upcoming hearings
         $user = auth()->user();
-        $monitoredRegions = $user->regions()->with('organization')->get();
+        $organization = $this->currentOrganizationOrFail();
+
+        $monitoredRegions = $user->regions()
+            ->where('regions.organization_id', $organization->id)
+            ->with('organization')
+            ->get();
         $monitoredRegionIds = $monitoredRegions->pluck('id');
         
         // Get all regions in the user's organization with monitoring status
-        $allRegions = Region::where('organization_id', $user->organization_id)
+        $allRegions = Region::where('organization_id', $organization->id)
             ->with('organization')
             ->get()
             ->map(function ($region) use ($monitoredRegionIds) {
@@ -40,7 +45,7 @@ class UserDashboardController extends Controller
         // Get notification settings
         $notificationSettings = $user->getNotificationSettings();
         
-        return view('user.dashboard', compact('user', 'monitoredRegions', 'upcomingHearings', 'allRegions', 'notificationSettings'));
+    return view('user.dashboard', compact('user', 'monitoredRegions', 'upcomingHearings', 'allRegions', 'notificationSettings', 'organization'));
     }
 
     /**
@@ -52,7 +57,7 @@ class UserDashboardController extends Controller
         $user->unsubscribed_at = null;
         $user->save();
 
-        return redirect()->route('user.dashboard')->with('success', 'You have been resubscribed to notifications.');
+    return redirect($this->orgRoute('user.dashboard'))->with('success', 'You have been resubscribed to notifications.');
     }
 
     /**
@@ -85,7 +90,11 @@ class UserDashboardController extends Controller
     public function getUpcomingHearings()
     {
         $user = auth()->user();
-        $monitoredRegions = $user->regions()->with('organization')->get();
+        $organization = $this->currentOrganizationOrFail();
+        $monitoredRegions = $user->regions()
+            ->where('regions.organization_id', $organization->id)
+            ->with('organization')
+            ->get();
         
         // Get upcoming hearings in the user's monitored regions
         $upcomingHearings = collect();
@@ -99,6 +108,6 @@ class UserDashboardController extends Controller
                 ->get();
         }
 
-        return view('user.partials.hearings-list', compact('upcomingHearings'))->render();
+        return view('user.partials.hearings-list', compact('upcomingHearings', 'organization'))->render();
     }
 }

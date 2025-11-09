@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Organization;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Verified;
@@ -16,8 +17,14 @@ class EmailVerificationTest extends TestCase
 
     public function test_email_verification_screen_can_be_rendered(): void
     {
+        $organization = Organization::create([
+            'name' => 'Verification Org',
+            'slug' => 'verification-org',
+        ]);
+
         $user = User::factory()->create([
             'email_verified_at' => null,
+            'organization_id' => $organization->id,
         ]);
 
         $response = $this->actingAs($user)->get('/verify-email');
@@ -27,8 +34,14 @@ class EmailVerificationTest extends TestCase
 
     public function test_email_can_be_verified(): void
     {
+        $organization = Organization::create([
+            'name' => 'Verify Org',
+            'slug' => 'verify-org',
+        ]);
+
         $user = User::factory()->create([
             'email_verified_at' => null,
+            'organization_id' => $organization->id,
         ]);
 
         Event::fake();
@@ -43,13 +56,19 @@ class EmailVerificationTest extends TestCase
 
         Event::assertDispatched(Verified::class);
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
-        $response->assertRedirect(RouteServiceProvider::HOME.'?verified=1');
+    $response->assertRedirect(RouteServiceProvider::homeRoute($user, ['verified' => 1]));
     }
 
     public function test_email_is_not_verified_with_invalid_hash(): void
     {
+        $organization = Organization::create([
+            'name' => 'Invalid Hash Org',
+            'slug' => 'invalid-hash-org',
+        ]);
+
         $user = User::factory()->create([
             'email_verified_at' => null,
+            'organization_id' => $organization->id,
         ]);
 
         $verificationUrl = URL::temporarySignedRoute(

@@ -5,7 +5,7 @@
                 {{ auth()->user()->organization->name }} Dashboard
             </h2>
             @if(!auth()->user()->is_superuser)
-                <a href="{{ route('organizations.edit-own') }}" 
+                <a href="{{ orgRoute('organizations.edit-own') }}" 
                    class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <x-icon name="settings" class="h-4 w-4 mr-2" />
                     Organization Settings
@@ -24,7 +24,7 @@
                     <div class="px-6 py-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Hearings -->
-                            <a href="{{ route('hearings.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
+                            <a href="{{ orgRoute('hearings.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
                                 <div class="flex items-start justify-between">
                                     <div class="flex items-start">
                                         <span class="rounded-lg inline-flex p-2 bg-orange-50 text-orange-700 ring-4 ring-white flex-shrink-0">
@@ -43,7 +43,7 @@
                             </a>
 
                             <!-- Votes -->
-                            <a href="{{ route('hearing-votes.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
+                            <a href="{{ orgRoute('hearing-votes.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
                                 <div class="flex items-start justify-between">
                                     <div class="flex items-start">
                                         <span class="rounded-lg inline-flex p-2 bg-indigo-50 text-indigo-700 ring-4 ring-white flex-shrink-0">
@@ -62,7 +62,7 @@
                             </a>
 
                             <!-- Users -->
-                            <a href="{{ route('users.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
+                            <a href="{{ orgRoute('users.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
                                 <div class="flex items-start justify-between">
                                     <div class="flex items-start">
                                         <span class="rounded-lg inline-flex p-2 bg-green-50 text-green-700 ring-4 ring-white flex-shrink-0">
@@ -81,7 +81,7 @@
                             </a>
 
                             <!-- Regions -->
-                            <a href="{{ route('regions.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
+                            <a href="{{ orgRoute('regions.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
                                 <div class="flex items-start justify-between">
                                     <div class="flex items-start">
                                         <span class="rounded-lg inline-flex p-2 bg-purple-50 text-purple-700 ring-4 ring-white flex-shrink-0">
@@ -100,7 +100,7 @@
                             </a>
 
                             <!-- Councillors -->
-                            <a href="{{ route('councillors.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
+                            <a href="{{ orgRoute('councillors.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
                                 <div class="flex items-start justify-between">
                                     <div class="flex items-start">
                                         <span class="rounded-lg inline-flex p-2 bg-teal-50 text-teal-700 ring-4 ring-white flex-shrink-0">

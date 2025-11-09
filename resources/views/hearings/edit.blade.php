@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
     <div class="max-w-md mx-auto py-8">
-        <form method="POST" action="{{ route('hearings.update', $hearing) }}" enctype="multipart/form-data" class="bg-white rounded shadow p-6">
+    <form method="POST" action="{{ orgRoute('hearings.update', $hearing) }}" enctype="multipart/form-data" class="bg-white rounded shadow p-6">
             @csrf
             @method('PUT')
             
@@ -208,7 +208,7 @@
             <div class="flex justify-between items-center">
                 <div class="space-x-2">
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Update</button>
-                    <a href="{{ route('hearings.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">Cancel</a>
+                    <a href="{{ orgRoute('hearings.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">Cancel</a>
                 </div>
                 <div class="flex items-center space-x-2">
                     <input type="hidden" name="approved" value="0">
@@ -221,7 +221,7 @@
         </form>
 
         <!-- Delete Button (separate form) -->
-        <form action="{{ route('hearings.destroy', $hearing) }}" method="POST" class="mt-4" onsubmit="return confirm('Are you sure you want to delete this hearing? This action cannot be undone.');">
+    <form action="{{ orgRoute('hearings.destroy', $hearing) }}" method="POST" class="mt-4" onsubmit="return confirm('Are you sure you want to delete this hearing? This action cannot be undone.');">
             @csrf
             @method('DELETE')
             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded w-full">

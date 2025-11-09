@@ -10,9 +10,9 @@ class DashboardController extends Controller
     {
         // Route users to appropriate dashboard based on their role
         if (auth()->user()->is_superuser || auth()->user()->is_admin) {
-            return redirect()->route('admin.dashboard');
+            return redirect($this->orgRoute('admin.dashboard'));
         } else {
-            return redirect()->route('user.dashboard');
+            return redirect($this->orgRoute('user.dashboard'));
         }
     }
 }

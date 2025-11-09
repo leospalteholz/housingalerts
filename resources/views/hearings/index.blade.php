@@ -10,7 +10,7 @@
                     Export CSV
                 </a>
                 @if(auth()->user()->is_admin || auth()->user()->is_superuser)
-                    <a href="{{ route('hearings.create') }}"
+                    <a href="{{ orgRoute('hearings.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         Add New Hearing
                     </a>
@@ -74,7 +74,7 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
                                                 <a href="{{ route('hearings.show', $hearing) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
-                                                <form method="POST" action="{{ route('hearings.approve', $hearing) }}">
+                                                <form method="POST" action="{{ orgRoute('hearings.approve', $hearing) }}">
                                                     @csrf
                                                     @method('PATCH')
                                                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-1 px-3 rounded text-sm">
@@ -186,7 +186,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
                                     <a href="{{ route('hearings.show', $hearing) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
-                                    <a href="{{ route('hearings.edit', $hearing) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
+                                    <a href="{{ orgRoute('hearings.edit', $hearing) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
                                 </td>
                             </tr>
                         @empty
@@ -288,7 +288,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
                                     <a href="{{ route('hearings.show', $hearing) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
-                                    <a href="{{ route('hearings.edit', $hearing) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
+                                    <a href="{{ orgRoute('hearings.edit', $hearing) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
                                 </td>
                             </tr>
                         @empty

@@ -6,7 +6,7 @@
     </x-slot>
     
     <div class="max-w-md mx-auto py-8">
-        <form method="POST" action="{{ route('councillors.store') }}" class="bg-white rounded shadow p-6">
+    <form method="POST" action="{{ orgRoute('councillors.store') }}" class="bg-white rounded shadow p-6">
             @csrf
             
             <div class="mb-4">
@@ -72,7 +72,7 @@
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
                     Create Councillor
                 </button>
-                <a href="{{ route('councillors.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
+                <a href="{{ orgRoute('councillors.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
                     Cancel
                 </a>
             </div>

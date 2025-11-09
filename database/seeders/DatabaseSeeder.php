@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
         $hfl = \App\Models\Organization::updateOrCreate(
             [ 'name' => 'Homes for Living' ],
             [ 
-                'slug' => 'homes-for-living',
+                'slug' => 'hfl',
                 'areas_active' => 'Greater Victoria, BC',
                 'about' => 'Homes for Living is a non-profit volunteer organization dedicated to advocating for affordable housing solutions in the Greater Victoria area. We raise awareness of barriers to housing at the local and provincial level, and advocate for policy changes to end the housing shortage and ensure access to housing for all.',
                 'website_url' => 'https://homesforliving.ca',

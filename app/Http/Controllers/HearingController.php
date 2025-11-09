@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\HearingRequest;
+use App\Models\Hearing;
+use App\Models\Organization;
+use App\Models\Region;
 
 class HearingController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Organization $organization)
     {
-        $allHearings = $this->scopedHearingsQuery()
+        $allHearings = $this->scopedHearingsQuery($organization)
             ->with(['organization', 'region'])
             ->get();
 
@@ -45,9 +48,9 @@ class HearingController extends Controller
     /**
      * Export hearings and related vote data as CSV.
      */
-    public function export()
+    public function export(?Organization $organization = null)
     {
-        $hearings = $this->fullHearingsQuery()->get();
+        $hearings = $this->fullHearingsQuery($organization)->get();
         $columns = $this->getExportColumns();
 
         $filename = 'hearings-export-' . now()->format('Y-m-d-His') . '.csv';
@@ -78,9 +81,9 @@ class HearingController extends Controller
     /**
      * Render a compact, embed-friendly hearings table.
      */
-    public function embed()
+    public function embed(?Organization $organization = null)
     {
-        $hearings = $this->fullHearingsQuery()->get();
+        $hearings = $this->fullHearingsQuery($organization)->get();
         $columns = $this->getEmbedColumns();
 
         $rows = $hearings->map(function ($hearing) use ($columns) {
@@ -102,28 +105,24 @@ class HearingController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Organization $organization)
     {
-        // Get regions based on user role
-        if (auth()->user()->is_superuser) {
-            // Superusers can see all regions across organizations
-            $regions = \App\Models\Region::with('organization')->orderBy('name')->get();
-        } else {
-            // Regular admins can only see regions within their organization
-            $regions = \App\Models\Region::where('organization_id', auth()->user()->organization_id)
-                ->orderBy('name')
-                ->get();
-        }
-        
+        $regions = Region::with('organization')
+            ->where('organization_id', $organization->id)
+            ->orderBy('name')
+            ->get();
+
         return view('hearings.create', compact('regions'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(HearingRequest $request)
+    public function store(Organization $organization, HearingRequest $request)
     {
         $validated = $request->validated();
+
+        $region = $this->findRegionForOrganization((int) ($validated['region_id'] ?? 0), $organization);
 
         // Extract datetime fields for conversion
         $startDate = $validated['start_date'];
@@ -144,12 +143,14 @@ class HearingController extends Controller
         } else {
             \Log::info('No image file received');
         }
-        
-        // Remove form-only fields before mass assignment
-        unset($validated['start_date'], $validated['start_time'], $validated['end_time'], $validated['image']);
 
-        // Create hearing with mass assignment
-        $hearing = new \App\Models\Hearing($validated);
+        // Remove form-only fields before mass assignment
+        unset($validated['start_date'], $validated['start_time'], $validated['end_time'], $validated['image'], $validated['organization_id']);
+
+        // Create hearing with mass assignment scoped to the organization
+        $hearing = new Hearing($validated);
+        $hearing->organization_id = $organization->id;
+        $hearing->region_id = $region->id;
         
         // Set datetime fields from form data
         $hearing->setDateTimeFromForm($startDate, $startTime, $endTime);
@@ -160,15 +161,6 @@ class HearingController extends Controller
         }
 
         $hearing->approved = $request->boolean('approved', auth()->user()->is_admin || auth()->user()->is_superuser);
-        
-        // Force organization_id to match the user's organization unless superuser
-        if (!auth()->user()->is_superuser && $request->has('organization_id')) {
-            $hearing->organization_id = auth()->user()->organization_id;
-        } else if (auth()->user()->is_superuser && $request->has('organization_id')) {
-            $hearing->organization_id = $request->organization_id;
-        } else {
-            $hearing->organization_id = auth()->user()->organization_id;
-        }
         
         // Save first to get an ID for the image filename
         $hearing->save();
@@ -185,7 +177,7 @@ class HearingController extends Controller
             }
         }
 
-        return redirect()->route('hearings.index')->with('success', 'Hearing created successfully!');
+        return redirect($this->orgRoute('hearings.index'))->with('success', 'Hearing created successfully!');
     }
 
     /**
@@ -229,32 +221,28 @@ class HearingController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(Organization $organization, Hearing $hearing)
     {
-        $hearing = \App\Models\Hearing::findOrFail($id);
+        $this->ensureHearingBelongsToOrganization($hearing, $organization);
         
-        // Get regions based on user role
-        if (auth()->user()->is_superuser) {
-            // Superusers can see all regions across organizations
-            $regions = \App\Models\Region::with('organization')->orderBy('name')->get();
-        } else {
-            // Regular admins can only see regions within their organization
-            $regions = \App\Models\Region::where('organization_id', auth()->user()->organization_id)
-                ->orderBy('name')
-                ->get();
-        }
-        
+        $regions = Region::with('organization')
+            ->where('organization_id', $organization->id)
+            ->orderBy('name')
+            ->get();
+
         return view('hearings.edit', compact('hearing', 'regions'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(HearingRequest $request, $id)
+    public function update(Organization $organization, HearingRequest $request, Hearing $hearing)
     {
-        $hearing = \App\Models\Hearing::findOrFail($id);
+        $this->ensureHearingBelongsToOrganization($hearing, $organization);
         
         $validated = $request->validated();
+
+        $region = $this->findRegionForOrganization((int) ($validated['region_id'] ?? 0), $organization);
 
         // Extract datetime fields for conversion
         $startDate = $validated['start_date'];
@@ -265,9 +253,11 @@ class HearingController extends Controller
         $imageFile = $request->file('image');
         
         // Remove form-only fields before mass assignment
-        unset($validated['start_date'], $validated['start_time'], $validated['end_time'], $validated['image']);
+        unset($validated['start_date'], $validated['start_time'], $validated['end_time'], $validated['image'], $validated['organization_id']);
 
         $hearing->fill($validated);
+        $hearing->organization_id = $organization->id;
+        $hearing->region_id = $region->id;
 
         // Keep development hearing title aligned with the street address
         if ($hearing->type === 'development') {
@@ -296,57 +286,50 @@ class HearingController extends Controller
         
         $hearing->save();
 
-        return redirect()->route('hearings.index')->with('success', 'Hearing updated successfully!');
+        return redirect($this->orgRoute('hearings.index'))->with('success', 'Hearing updated successfully!');
     }
 
     /**
      * Approve a pending hearing.
      */
-    public function approve($id)
+    public function approve(Organization $organization, Hearing $hearing)
     {
-        $hearing = \App\Models\Hearing::findOrFail($id);
-        $user = auth()->user();
-
-        if (!$user->is_superuser && $hearing->organization_id !== $user->organization_id) {
-            abort(403);
-        }
+        $this->ensureHearingBelongsToOrganization($hearing, $organization);
 
         if (!$hearing->approved) {
             $hearing->approved = true;
             $hearing->save();
         }
 
-        return redirect()->route('hearings.index')->with('success', 'Hearing approved successfully!');
+        return redirect($this->orgRoute('hearings.index'))->with('success', 'Hearing approved successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(Organization $organization, Hearing $hearing)
     {
-        $hearing = \App\Models\Hearing::findOrFail($id);
+        $this->ensureHearingBelongsToOrganization($hearing, $organization);
         
         // Delete associated image file
         $hearing->deleteImage();
         
         $hearing->delete();
-        return redirect()->route('hearings.index')->with('success', 'Hearing deleted successfully!');
+
+        return redirect($this->orgRoute('hearings.index'))->with('success', 'Hearing deleted successfully!');
     }
 
     /**
      * Get a query builder scoped to the authenticated user's hearing access.
      */
-    private function scopedHearingsQuery()
+    private function scopedHearingsQuery(?Organization $organization = null)
     {
         $user = auth()->user();
-        $query = \App\Models\Hearing::query();
+        $organization = $organization ?: $this->currentOrganizationOrFail();
+        $query = Hearing::query()->where('organization_id', $organization->id);
 
-        if ($user->is_superuser) {
+        if ($user->is_superuser || $user->is_admin) {
             return $query;
-        }
-
-        if ($user->is_admin) {
-            return $query->where('organization_id', $user->organization_id);
         }
 
         $monitoredRegionIds = $user->regions()->pluck('regions.id');
@@ -358,14 +341,43 @@ class HearingController extends Controller
     /**
      * Base query for public exports and embeds.
      */
-    private function fullHearingsQuery()
+    private function fullHearingsQuery(?Organization $organization = null)
     {
-        return \App\Models\Hearing::with([
+        $query = Hearing::with([
             'organization',
             'region',
             'hearingVote.councillorVotes.councillor',
-        ])->where('approved', true)
-            ->orderByDesc('start_datetime');
+        ])->where('approved', true);
+
+        if ($organization) {
+            $query->where('organization_id', $organization->id);
+        }
+
+        return $query->orderByDesc('start_datetime');
+    }
+
+    private function ensureHearingBelongsToOrganization(Hearing $hearing, Organization $organization): void
+    {
+        if ($hearing->organization_id !== $organization->id) {
+            abort(404);
+        }
+    }
+
+    private function findRegionForOrganization(int $regionId, Organization $organization): Region
+    {
+        if ($regionId <= 0) {
+            abort(422, 'A valid region is required.');
+        }
+
+        $region = Region::where('id', $regionId)
+            ->where('organization_id', $organization->id)
+            ->first();
+
+        if (!$region) {
+            abort(404);
+        }
+
+        return $region;
     }
 
     /**

@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Councillors') }}
             </h2>
-            <a href="{{ route('councillors.create') }}" 
+            <a href="{{ orgRoute('councillors.create') }}" 
                class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 Add New Councillor
             </a>
@@ -66,8 +66,8 @@
                                             {{ $councillor->elected_end ? $councillor->elected_end->format('M Y') : 'Present' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
-                                            <a href="{{ route('councillors.show', $councillor) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
-                                            <a href="{{ route('councillors.edit', $councillor) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
+                                            <a href="{{ orgRoute('councillors.show', ['councillor' => $councillor]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
+                                            <a href="{{ orgRoute('councillors.edit', ['councillor' => $councillor]) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
                                         </td>
                                     </tr>
                                 @empty
@@ -125,8 +125,8 @@
                                             {{ $councillor->elected_end ? $councillor->elected_end->format('M Y') : 'Present' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
-                                            <a href="{{ route('councillors.show', $councillor) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
-                                            <a href="{{ route('councillors.edit', $councillor) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
+                                            <a href="{{ orgRoute('councillors.show', ['councillor' => $councillor]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
+                                            <a href="{{ orgRoute('councillors.edit', ['councillor' => $councillor]) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
                                         </td>
                                     </tr>
                                 @endforeach

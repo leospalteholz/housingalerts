@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // Global HTTP middleware stack
         $middleware->use([
+            \App\Http\Middleware\ResetUrlDefaults::class,
             // \App\Http\Middleware\TrustHosts::class,
             \App\Http\Middleware\TrustProxies::class,
             \Illuminate\Http\Middleware\HandleCors::class,
@@ -49,6 +50,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'can' => \Illuminate\Auth\Middleware\Authorize::class,
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'superuser' => \App\Http\Middleware\SuperuserMiddleware::class,
+            'organization.access' => \App\Http\Middleware\EnsureOrganizationAccess::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
             'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
             'signed' => \App\Http\Middleware\ValidateSignature::class,

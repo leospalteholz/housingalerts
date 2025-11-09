@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Councillor;
+use App\Models\Organization;
 use App\Models\Region;
 use Illuminate\Http\Request;
 
@@ -11,24 +12,14 @@ class CouncillorController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Organization $organization)
     {
-        // Get regions based on user role
-        if (auth()->user()->is_superuser) {
-            $councillors = Councillor::with(['region', 'region.organization'])
-                ->orderBy('region_id')
-                ->orderBy('name')
-                ->get();
-        } else {
-            // Regular admins can only see councillors in their organization's regions
-            $councillors = Councillor::with(['region'])
-                ->whereHas('region', function($query) {
-                    $query->where('organization_id', auth()->user()->organization_id);
-                })
-                ->orderBy('region_id')
-                ->orderBy('name')
-                ->get();
-        }
+        $query = Councillor::with(['region', 'region.organization'])
+            ->whereHas('region', fn ($q) => $q->where('organization_id', $organization->id))
+            ->orderBy('region_id')
+            ->orderBy('name');
+
+        $councillors = $query->get();
         
         // Separate current and past councillors
         $currentCouncillors = $councillors->filter(function($councillor) {
@@ -45,16 +36,12 @@ class CouncillorController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Organization $organization)
     {
-        // Get regions based on user role
-        if (auth()->user()->is_superuser) {
-            $regions = Region::with('organization')->orderBy('name')->get();
-        } else {
-            $regions = Region::where('organization_id', auth()->user()->organization_id)
-                ->orderBy('name')
-                ->get();
-        }
+        $regions = Region::with('organization')
+            ->where('organization_id', $organization->id)
+            ->orderBy('name')
+            ->get();
         
         return view('councillors.create', compact('regions'));
     }
@@ -62,7 +49,7 @@ class CouncillorController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Organization $organization, Request $request)
     {
         $validated = $request->validate([
             'region_id' => 'required|exists:regions,id',
@@ -71,28 +58,20 @@ class CouncillorController extends Controller
             'elected_end' => 'nullable|date|after:elected_start',
         ]);
         
-        // Verify the region belongs to the admin's organization (if not superuser)
-        if (!auth()->user()->is_superuser) {
-            $region = Region::findOrFail($validated['region_id']);
-            if ($region->organization_id !== auth()->user()->organization_id) {
-                abort(403, 'You can only create councillors for regions in your organization.');
-            }
-        }
+        $region = Region::where('organization_id', $organization->id)
+            ->findOrFail($validated['region_id']);
         
         Councillor::create($validated);
         
-        return redirect()->route('councillors.index')->with('success', 'Councillor created successfully!');
+        return redirect($this->orgRoute('councillors.index'))->with('success', 'Councillor created successfully!');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Councillor $councillor)
+    public function show(Organization $organization, Councillor $councillor)
     {
-        // Verify access
-        if (!auth()->user()->is_superuser && $councillor->region->organization_id !== auth()->user()->organization_id) {
-            abort(403, 'You do not have permission to view this councillor.');
-        }
+        $this->ensureCouncillorBelongsToOrganization($councillor, $organization);
         
         $councillor->load(['region', 'councillorVotes.hearingVote.hearing']);
         
@@ -105,21 +84,14 @@ class CouncillorController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Councillor $councillor)
+    public function edit(Organization $organization, Councillor $councillor)
     {
-        // Verify access
-        if (!auth()->user()->is_superuser && $councillor->region->organization_id !== auth()->user()->organization_id) {
-            abort(403, 'You do not have permission to edit this councillor.');
-        }
+        $this->ensureCouncillorBelongsToOrganization($councillor, $organization);
         
-        // Get regions based on user role
-        if (auth()->user()->is_superuser) {
-            $regions = Region::with('organization')->orderBy('name')->get();
-        } else {
-            $regions = Region::where('organization_id', auth()->user()->organization_id)
-                ->orderBy('name')
-                ->get();
-        }
+        $regions = Region::with('organization')
+            ->where('organization_id', $organization->id)
+            ->orderBy('name')
+            ->get();
         
         return view('councillors.edit', compact('councillor', 'regions'));
     }
@@ -127,12 +99,9 @@ class CouncillorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Councillor $councillor)
+    public function update(Organization $organization, Request $request, Councillor $councillor)
     {
-        // Verify access
-        if (!auth()->user()->is_superuser && $councillor->region->organization_id !== auth()->user()->organization_id) {
-            abort(403, 'You do not have permission to update this councillor.');
-        }
+        $this->ensureCouncillorBelongsToOrganization($councillor, $organization);
         
         $validated = $request->validate([
             'region_id' => 'required|exists:regions,id',
@@ -141,31 +110,30 @@ class CouncillorController extends Controller
             'elected_end' => 'nullable|date|after:elected_start',
         ]);
         
-        // Verify the region belongs to the admin's organization (if not superuser)
-        if (!auth()->user()->is_superuser) {
-            $region = Region::findOrFail($validated['region_id']);
-            if ($region->organization_id !== auth()->user()->organization_id) {
-                abort(403, 'You can only assign councillors to regions in your organization.');
-            }
-        }
+        $region = Region::where('organization_id', $organization->id)
+            ->findOrFail($validated['region_id']);
         
         $councillor->update($validated);
         
-        return redirect()->route('councillors.index')->with('success', 'Councillor updated successfully!');
+        return redirect($this->orgRoute('councillors.index'))->with('success', 'Councillor updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Councillor $councillor)
+    public function destroy(Organization $organization, Councillor $councillor)
     {
-        // Verify access
-        if (!auth()->user()->is_superuser && $councillor->region->organization_id !== auth()->user()->organization_id) {
-            abort(403, 'You do not have permission to delete this councillor.');
-        }
+        $this->ensureCouncillorBelongsToOrganization($councillor, $organization);
         
         $councillor->delete();
         
-        return redirect()->route('councillors.index')->with('success', 'Councillor deleted successfully!');
+        return redirect($this->orgRoute('councillors.index'))->with('success', 'Councillor deleted successfully!');
+    }
+
+    private function ensureCouncillorBelongsToOrganization(Councillor $councillor, Organization $organization): void
+    {
+        if ($councillor->region->organization_id !== $organization->id) {
+            abort(404);
+        }
     }
 }

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Region;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class PasswordlessAuthController extends Controller
 {
@@ -35,15 +37,33 @@ class PasswordlessAuthController extends Controller
 
         // Send verification email with dashboard link for future access
         if ($user->wasRecentlyCreated) {
-            $user->sendEmailVerificationNotification();
+            $mailSent = true;
+
+            try {
+                $user->sendEmailVerificationNotification();
+            } catch (Throwable $e) {
+                $mailSent = false;
+
+                Log::error('Passwordless signup email failed to send.', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'exception' => $e->getMessage(),
+                ]);
+            }
             
-            return redirect()->route('dashboard')->with('success', 
-                'Welcome! We sent a confirmation email with your personal dashboard link for future access.'
-            );
+            $redirectUrl = RouteServiceProvider::homeRoute($user);
+
+            $message = $mailSent
+                ? 'Welcome! We sent a confirmation email with your personal dashboard link for future access.'
+                : 'Welcome! We could not send the confirmation email right now, but you are logged in and can access your dashboard below.';
+
+            return redirect()->to($redirectUrl)->with('success', $message);
         }
 
         // Existing user - just log them in
-        return redirect()->route('dashboard')->with('success', 
+        $redirectUrl = RouteServiceProvider::homeRoute($user);
+
+        return redirect()->to($redirectUrl)->with('success', 
             'Welcome back! You\'re now logged in to manage your housing alerts.'
         );
     }
@@ -63,7 +83,9 @@ class PasswordlessAuthController extends Controller
         auth()->login($user);
 
         // Redirect to the regular dashboard - no need for a separate view
-        return redirect()->route('dashboard')->with('success', 
+        $redirectUrl = RouteServiceProvider::homeRoute($user);
+
+        return redirect()->to($redirectUrl)->with('success', 
             'Welcome! You can manage your housing alert preferences below.'
         );
     }

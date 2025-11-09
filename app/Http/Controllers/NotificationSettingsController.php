@@ -16,8 +16,10 @@ class NotificationSettingsController extends Controller
     {
         $user = auth()->user();
         $settings = $user->getNotificationSettings();
+
+        $organization = $this->currentOrganizationOrFail();
         
-        return view('notification-settings', compact('settings'));
+        return view('notification-settings', compact('settings', 'organization'));
     }
 
     /**
@@ -40,7 +42,7 @@ class NotificationSettingsController extends Controller
             'send_day_of_reminders' => $request->boolean('send_day_of_reminders'),
         ]);
 
-        return redirect()->route('user.dashboard')
+        return redirect($this->orgRoute('user.dashboard'))
             ->with('success', 'Notification settings updated successfully!');
     }
 }

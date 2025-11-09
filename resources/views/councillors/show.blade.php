@@ -101,11 +101,11 @@
                     </div>
                     
                     <div class="mt-6 flex space-x-2">
-                        <a href="{{ route('councillors.edit', $councillor) }}" 
+                        <a href="{{ orgRoute('councillors.edit', ['councillor' => $councillor]) }}" 
                            class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-2 px-4 rounded">
                             Edit Councillor
                         </a>
-                        <a href="{{ route('councillors.index') }}" 
+                        <a href="{{ orgRoute('councillors.index') }}" 
                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
                             Back to List
                         </a>

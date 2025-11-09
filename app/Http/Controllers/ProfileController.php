@@ -16,8 +16,11 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $organization = $this->currentOrganizationOrFail();
+
         return view('profile.edit', [
             'user' => $request->user(),
+            'organization' => $organization,
         ]);
     }
 
@@ -34,7 +37,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    return Redirect::to($this->orgRoute('profile.edit'))->with('status', 'profile-updated');
     }
 
     /**

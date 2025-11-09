@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Region;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 
 class RegionController extends Controller
@@ -10,32 +11,27 @@ class RegionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Organization $organization)
     {
-        if (auth()->user()->is_superuser) {
-            // Superusers can see all regions across organizations
-            $regions = Region::with('organization')->get();
-        } else {
-            // All authenticated users can see regions within their organization
-            $regions = Region::where('organization_id', auth()->user()->organization_id)->get();
-        }
-        
-        // For regular users, also get their monitored regions to show which ones they're following
-        if (!auth()->user()->is_admin) {
+        $regions = Region::with('organization')
+            ->where('organization_id', $organization->id)
+            ->get();
+
+        if (!auth()->user()->is_admin && !auth()->user()->is_superuser) {
             $monitoredRegionIds = auth()->user()->regions()->pluck('regions.id');
             $regions = $regions->map(function ($region) use ($monitoredRegionIds) {
                 $region->is_monitored = $monitoredRegionIds->contains($region->id);
                 return $region;
             });
         }
-        
-        return view('regions.index', compact('regions'));
+
+        return view('regions.index', compact('regions', 'organization'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Organization $organization)
     {
         return view('regions.create');
     }
@@ -43,7 +39,7 @@ class RegionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Organization $organization, Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -57,36 +53,27 @@ class RegionController extends Controller
         $region->comments_email = $validated['comments_email'] ?? null;
         $region->remote_instructions = $validated['remote_instructions'] ?? null;
         $region->inperson_instructions = $validated['inperson_instructions'] ?? null;
-        $region->organization_id = auth()->user()->organization_id;
+            $region->organization_id = $organization->id;
         $region->save();
 
-        return redirect()->route('regions.index')->with('success', 'Region created successfully!');
+    return redirect($this->orgRoute('regions.index'))->with('success', 'Region created successfully!');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Region $region)
+    public function show(Organization $organization, Region $region)
     {
+        $this->ensureRegionBelongsToOrganization($region, $organization);
+
         $region->load(['organization', 'hearings']);
-        
-        // Check access permissions
-        if (auth()->user()->is_superuser) {
-            // Superusers can view any region
-        } else {
-            // All other users can only view regions in their organization
-            if ($region->organization_id !== auth()->user()->organization_id) {
-                abort(403, 'You do not have permission to view this region.');
-            }
-        }
-        
-        // For regular users, check if they're monitoring this region
+
         $isMonitored = false;
-        if (!auth()->user()->is_admin) {
+        if (!auth()->user()->is_admin && !auth()->user()->is_superuser) {
             $isMonitored = auth()->user()->regions()->where('regions.id', $region->id)->exists();
         }
         
-        return view('regions.show', compact('region', 'isMonitored'));
+        return view('regions.show', compact('region', 'isMonitored', 'organization'));
     }
 
     /**
@@ -180,16 +167,20 @@ class RegionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Region $region)
+    public function edit(Organization $organization, Region $region)
     {
-        return view('regions.edit', compact('region'));
+        $this->ensureRegionBelongsToOrganization($region, $organization);
+
+        return view('regions.edit', compact('region', 'organization'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Region $region)
+    public function update(Organization $organization, Request $request, Region $region)
     {
+        $this->ensureRegionBelongsToOrganization($region, $organization);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'comments_email' => 'nullable|email|max:255',
@@ -200,30 +191,34 @@ class RegionController extends Controller
         $region->fill($validated);
         $region->save();
 
-        return redirect()->route('regions.index')->with('success', 'Region updated successfully!');
+    return redirect($this->orgRoute('regions.index'))->with('success', 'Region updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Region $region)
+    public function destroy(Organization $organization, Region $region)
     {
+        $this->ensureRegionBelongsToOrganization($region, $organization);
+
         // Check if region has any hearings
         if ($region->hearings()->count() > 0) {
-            return redirect()->route('regions.index')
+            return redirect($this->orgRoute('regions.index'))
                 ->withErrors(['error' => 'Cannot delete region "' . $region->name . '" because it contains hearings. Please move or delete the hearings first.']);
         }
         
         $region->delete();
-        return redirect()->route('regions.index')->with('success', 'Region deleted successfully!');
+        return redirect($this->orgRoute('regions.index'))->with('success', 'Region deleted successfully!');
     }
 
     /**
      * Subscribe user to a region
      */
-    public function subscribe(Region $region)
+    public function subscribe(Organization $organization, Region $region)
     {
         try {
+            $this->ensureRegionBelongsToOrganization($region, $organization);
+
             \Log::info('Region subscription attempt:', [
                 'region_id' => $region->id,
                 'region_slug' => $region->slug,
@@ -276,9 +271,11 @@ class RegionController extends Controller
     /**
      * Unsubscribe user from a region
      */
-    public function unsubscribe(Region $region)
+    public function unsubscribe(Organization $organization, Region $region)
     {
         try {
+            $this->ensureRegionBelongsToOrganization($region, $organization);
+
             $user = auth()->user();
             
             // Remove user from region
@@ -288,6 +285,13 @@ class RegionController extends Controller
         } catch (\Exception $e) {
             \Log::error('Region unsubscription error: ' . $e->getMessage());
             return response()->json(['error' => 'An error occurred while unsubscribing: ' . $e->getMessage()], 500);
+        }
+    }
+
+    private function ensureRegionBelongsToOrganization(Region $region, Organization $organization): void
+    {
+        if ($region->organization_id !== $organization->id) {
+            abort(404);
         }
     }
 }

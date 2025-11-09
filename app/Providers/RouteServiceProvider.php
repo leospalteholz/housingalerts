@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -17,7 +18,24 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    public const HOME = '/dashboard';
+    public const HOME = '/';
+
+    public static function homeRoute(User $user, array $parameters = [], bool $absolute = true): string
+    {
+        $organization = $user->organization;
+
+        if (!$organization) {
+            return $absolute ? url(self::HOME) : self::HOME;
+        }
+
+        $routeName = ($user->is_superuser || $user->is_admin)
+            ? 'admin.dashboard'
+            : 'user.dashboard';
+
+        $routeParameters = array_merge(['organization' => $organization->slug], $parameters);
+
+        return route($routeName, $routeParameters, $absolute);
+    }
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.

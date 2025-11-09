@@ -65,7 +65,7 @@
     </div>
     @if($upcomingHearings->count() > 5)
         <div class="px-6 py-4 bg-gray-50 text-center">
-            <a href="{{ route('hearings.index') }}" 
+            <a href="{{ orgRoute('hearings.index') }}" 
                class="text-blue-600 hover:text-blue-800 font-medium">
                 View all {{ $upcomingHearings->count() }} upcoming hearings →
             </a>

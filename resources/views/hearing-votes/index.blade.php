@@ -66,7 +66,7 @@
                                                 {{ \Carbon\Carbon::parse($hearing->start_datetime)->format('M d, Y') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="{{ route('hearing-votes.create', ['hearing_id' => $hearing->id]) }}" 
+                                                <a href="{{ orgRoute('hearing-votes.create', ['hearing_id' => $hearing->id]) }}" 
                                                    class="inline-flex items-center px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700">
                                                     <x-icon name="plus" class="w-4 h-4 mr-1" />
                                                     Create Vote
@@ -146,11 +146,11 @@
                                                 <span class="text-red-600">{{ $tallies['against'] }} against</span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                                <a href="{{ route('hearing-votes.show', $vote) }}" 
+                                                <a href="{{ orgRoute('hearing-votes.show', ['hearing_vote' => $vote]) }}" 
                                                    class="text-indigo-600 hover:text-indigo-900">
                                                     <x-icon name="eye" class="w-5 h-5 inline" />
                                                 </a>
-                                                <a href="{{ route('hearing-votes.edit', $vote) }}" 
+                                                <a href="{{ orgRoute('hearing-votes.edit', ['hearing_vote' => $vote]) }}" 
                                                    class="text-blue-600 hover:text-blue-900">
                                                     <x-icon name="edit" class="w-5 h-5 inline" />
                                                 </a>

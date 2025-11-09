@@ -91,10 +91,10 @@
         </div>
         
         <div class="mt-6 flex space-x-4">
-            <a href="{{ route('users.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
+            <a href="{{ orgRoute('users.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
                 Back to Users
             </a>
-            <a href="{{ route('users.edit', $user) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
+            <a href="{{ orgRoute('users.edit', ['user' => $user]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
                 Edit User
             </a>
         </div>

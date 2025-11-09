@@ -14,10 +14,11 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // For superusers, show system-wide statistics
-        if (auth()->user()->is_superuser) {
+        $organization = $this->currentOrganizationOrFail();
+
+        if (auth()->user()->is_superuser && $organization->slug === 'root') {
             $organizations = Organization::withCount(['users', 'regions', 'hearings'])->get();
-            
+
             $stats = [
                 'organizations' => $organizations->count(),
                 'totalUsers' => $organizations->sum('users_count'),
@@ -26,13 +27,13 @@ class AdminDashboardController extends Controller
                 'totalVotes' => HearingVote::count(),
                 'totalCouncillors' => Councillor::count(),
             ];
-            
-            return view('admin.dashboard', compact('organizations', 'stats'));
+
+            return view('admin.dashboard', compact('organizations', 'stats', 'organization'));
         }
-        // For admin users, show statistics for their organization
-        else if (auth()->user()->is_admin) {
-            $orgId = auth()->user()->organization_id;
-            
+
+        if (auth()->user()->is_admin || auth()->user()->is_superuser) {
+            $orgId = $organization->id;
+
             $stats = [
                 'totalUsers' => User::where('organization_id', $orgId)->count(),
                 'totalRegions' => Region::where('organization_id', $orgId)->count(),
@@ -44,11 +45,10 @@ class AdminDashboardController extends Controller
                     $query->where('organization_id', $orgId);
                 })->count(),
             ];
-            
-            return view('admin.dashboard', compact('stats'));
+
+            return view('admin.dashboard', compact('stats', 'organization'));
         }
-        
-        // If somehow a regular user gets here, redirect to user dashboard
-        return redirect()->route('user.dashboard');
+
+        return redirect($this->orgRoute('user.dashboard'));
     }
 }
