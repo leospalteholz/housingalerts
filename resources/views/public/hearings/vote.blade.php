@@ -1,6 +1,6 @@
 <x-guest-layout>
-    <div class="max-w-6xl mx-auto py-14 px-6 lg:px-10">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mb-10">
+    <x-slot name="header">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
                 <h1 class="text-3xl lg:text-4xl font-bold text-gray-900">Add vote results for {{ $hearing->display_title }}</h1>
                 <p class="mt-3 text-gray-600 text-lg max-w-3xl">If the council has already voted, record the results so we can surface them alongside the hearing.</p>
@@ -10,8 +10,10 @@
                 <p class="mt-1">Leave councillor rows blank if a vote isn&rsquo;t public yet. You can come back later with the same link.</p>
             </div>
         </div>
+    </x-slot>
 
-        <div class="bg-white shadow-xl rounded-2xl p-8 sm:p-10 lg:p-14">
+    <div class="py-6 lg:py-10 px-0 lg:px-10">
+        <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-none sm:rounded-2xl py-8 px-6 sm:p-10 lg:p-14">
             @if ($errors->any())
                 <div class="mb-6 rounded border-l-4 border-red-500 bg-red-50 p-4 text-red-800">
                     <p class="font-semibold">Please fix the following issues:</p>
@@ -36,6 +38,7 @@
                             <span>{{ $hearing->start_datetime?->format('M j, Y g:i A') }}</span>
                         </div>
                     </div>
+                        <p class="mt-3 text-xs text-blue-700">Can leave blank if this hearing is in the past.</p>
                 </div>
                 <div>
                     <p class="font-semibold text-blue-800 uppercase tracking-wide text-xs">Need a change?</p>

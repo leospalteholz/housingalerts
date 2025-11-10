@@ -1,6 +1,6 @@
 <x-guest-layout>
-    <div class="max-w-7xl mx-auto py-14 px-6 lg:px-10">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mb-12">
+    <x-slot name="header">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
                 <h1 class="text-3xl lg:text-4xl font-bold text-gray-900">Submit a hearing for {{ $organization->name }}</h1>
                 <p class="mt-4 text-gray-600 text-lg max-w-3xl">
@@ -12,8 +12,10 @@
                 <p class="mt-1">Have the hearing notice or agenda handy. Include remote and in-person participation details if available.</p>
             </div>
         </div>
+    </x-slot>
 
-        <div class="bg-white shadow-xl rounded-2xl p-8 sm:p-10 lg:p-14">
+    <div class="py-6 lg:py-10 px-0 lg:px-10">
+        <div class="bg-white shadow-xl rounded-none sm:rounded-2xl py-8 px-6 sm:p-10 lg:p-14">
             @if ($errors->any())
                 <div class="mb-6 rounded border-l-4 border-red-500 bg-red-50 p-4 text-red-800">
                     <p class="font-semibold">Please fix the following issues:</p>
@@ -33,14 +35,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <label class="cursor-pointer">
                             <input type="radio" name="type" value="development" class="sr-only" {{ old('type', 'development') === 'development' ? 'checked' : '' }} onchange="toggleHearingType()">
-                            <div id="development-option" class="h-full border-2 rounded-xl p-6 text-center transition hover:shadow focus-within:ring-2 focus-within:ring-blue-500">
+                            <div id="development-option" class="h-full border-2 border-gray-200 bg-white rounded-xl p-6 text-center transition hover:shadow focus-within:ring-2 focus-within:ring-blue-500">
                                 <div class="text-lg font-medium text-gray-900">Development</div>
                                 <p class="text-sm text-gray-600 mt-1">Use for project-specific housing approvals.</p>
                             </div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="type" value="policy" class="sr-only" {{ old('type') === 'policy' ? 'checked' : '' }} onchange="toggleHearingType()">
-                            <div id="policy-option" class="h-full border-2 rounded-xl p-6 text-center transition hover:shadow focus-within:ring-2 focus-within:ring-blue-500">
+                            <div id="policy-option" class="h-full border-2 border-gray-200 bg-white rounded-xl p-6 text-center transition hover:shadow focus-within:ring-2 focus-within:ring-blue-500">
                                 <div class="text-lg font-medium text-gray-900">Policy</div>
                                 <p class="text-sm text-gray-600 mt-1">Use for official plan updates, bylaw changes, or non-project hearings.</p>
                             </div>
@@ -51,6 +53,14 @@
                 <section class="rounded-xl border border-gray-200 bg-slate-50/60 p-6 lg:p-8">
                     <h2 class="text-xl font-semibold text-gray-900 mb-6">Location &amp; basics</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div id="street-address-wrapper">
+                            <label for="street_address" class="block text-sm font-medium text-gray-700">Street address</label>
+                            <input type="text" id="street_address" name="street_address" value="{{ old('street_address') }}" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="123 Main St">
+                        </div>
+                        <div id="postal-code-wrapper">
+                            <label for="postal_code" class="block text-sm font-medium text-gray-700">Postal code</label>
+                            <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code') }}" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="A1A 1A1">
+                        </div>
                         <div>
                             <label for="region_id" class="block text-sm font-medium text-gray-700">Region</label>
                             <select id="region_id" name="region_id" required class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
@@ -60,24 +70,15 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div id="title-field" class="hidden lg:col-span-2">
-                            <label for="title" class="block text-sm font-medium text-gray-700">Hearing title</label>
-                            <input type="text" id="title" name="title" value="{{ old('title') }}" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="e.g., Official Community Plan Update">
-                        </div>
+                    </div>
+
+                    <div id="title-field" class="hidden mt-6">
+                        <label for="title" class="block text-sm font-medium text-gray-700">Hearing title</label>
+                        <input type="text" id="title" name="title" value="{{ old('title') }}" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="e.g., Official Community Plan Update">
                     </div>
 
                     <div id="development-fields" class="mt-6">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div>
-                                <label for="street_address" class="block text-sm font-medium text-gray-700">Street address</label>
-                                <input type="text" id="street_address" name="street_address" value="{{ old('street_address') }}" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="123 Main St">
-                            </div>
-                            <div>
-                                <label for="postal_code" class="block text-sm font-medium text-gray-700">Postal code</label>
-                                <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code') }}" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="A1A 1A1">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             <div>
                                 <label for="rental" class="block text-sm font-medium text-gray-700">Property type</label>
                                 <select id="rental" name="rental" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
@@ -94,10 +95,10 @@
                                 <label for="below_market_units" class="block text-sm font-medium text-gray-700">Below-market homes</label>
                                 <input type="number" id="below_market_units" name="below_market_units" value="{{ old('below_market_units', 0) }}" min="0" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
-                        </div>
-                        <div class="mt-6 lg:max-w-sm">
-                            <label for="replaced_units" class="block text-sm font-medium text-gray-700">Replaced homes</label>
-                            <input type="number" id="replaced_units" name="replaced_units" value="{{ old('replaced_units') }}" min="0" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <div>
+                                <label for="replaced_units" class="block text-sm font-medium text-gray-700">Replaced homes</label>
+                                <input type="number" id="replaced_units" name="replaced_units" value="{{ old('replaced_units') }}" min="0" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -107,7 +108,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label for="start_date" class="block text-sm font-medium text-gray-700">Hearing date</label>
-                            <input type="date" id="start_date" name="start_date" value="{{ old('start_date') }}" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <input type="date" id="start_date" name="start_date" value="{{ old('start_date') }}" required class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
                         <div>
                             <label for="start_time" class="block text-sm font-medium text-gray-700">Start time</label>
@@ -158,12 +159,9 @@
                     </div>
                 </section>
 
-                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <p class="text-sm text-gray-500">We review every submission before publishing. We'll be in touch if anything needs clarification.</p>
-                    <button type="submit" class="inline-flex items-center justify-center px-7 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-lg shadow">
-                        Save hearing
-                    </button>
-                </div>
+                <button type="submit" class="inline-flex items-center justify-center px-7 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-lg shadow">
+                    Save hearing
+                </button>
             </form>
         </div>
     </div>
@@ -173,6 +171,25 @@
             const type = document.querySelector('input[name="type"]:checked')?.value;
             const titleField = document.getElementById('title-field');
             const developmentFields = document.getElementById('development-fields');
+            const streetWrapper = document.getElementById('street-address-wrapper');
+            const postalWrapper = document.getElementById('postal-code-wrapper');
+            const developmentCard = document.getElementById('development-option');
+            const policyCard = document.getElementById('policy-option');
+
+            const highlightCard = (card, isActive) => {
+                if (!card) {
+                    return;
+                }
+
+                card.classList.toggle('border-blue-500', isActive);
+                card.classList.toggle('bg-blue-50', isActive);
+                card.classList.toggle('shadow-lg', isActive);
+                card.classList.toggle('border-gray-200', !isActive);
+                card.classList.toggle('bg-white', !isActive);
+            };
+
+            highlightCard(developmentCard, type === 'development');
+            highlightCard(policyCard, type === 'policy');
 
             if (type === 'policy') {
                 titleField.classList.remove('hidden');
@@ -189,6 +206,8 @@
                         el.required = false;
                     }
                 });
+                streetWrapper?.classList.add('hidden');
+                postalWrapper?.classList.add('hidden');
             } else {
                 titleField.classList.add('hidden');
                 const titleInput = document.getElementById('title');
@@ -204,6 +223,8 @@
                         el.required = true;
                     }
                 });
+                streetWrapper?.classList.remove('hidden');
+                postalWrapper?.classList.remove('hidden');
             }
         }
 
