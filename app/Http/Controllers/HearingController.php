@@ -48,7 +48,7 @@ class HearingController extends Controller
     /**
      * Export hearings and related vote data as CSV.
      */
-    public function export(?Organization $organization = null)
+    public function export(Organization $organization)
     {
         $hearings = $this->fullHearingsQuery($organization)->get();
         $columns = $this->getExportColumns();
@@ -81,7 +81,7 @@ class HearingController extends Controller
     /**
      * Render a compact, embed-friendly hearings table.
      */
-    public function embed(?Organization $organization = null)
+    public function embed(Organization $organization)
     {
         $hearings = $this->fullHearingsQuery($organization)->get();
         $columns = $this->getEmbedColumns();
@@ -95,6 +95,7 @@ class HearingController extends Controller
         });
 
         return view('hearings.embed', [
+            'organization' => $organization,
             'columns' => $columns,
             'rows' => $rows,
             'recordCount' => $rows->count(),
@@ -343,17 +344,14 @@ class HearingController extends Controller
     /**
      * Base query for public exports and embeds.
      */
-    private function fullHearingsQuery(?Organization $organization = null)
+    private function fullHearingsQuery(Organization $organization)
     {
         $query = Hearing::with([
             'organization',
             'region',
             'hearingVote.councillorVotes.councillor',
-        ])->where('approved', true);
-
-        if ($organization) {
-            $query->where('organization_id', $organization->id);
-        }
+        ])->where('approved', true)
+            ->where('organization_id', $organization->id);
 
         return $query->orderByDesc('start_datetime');
     }

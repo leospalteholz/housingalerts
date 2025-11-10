@@ -103,7 +103,6 @@ Route::middleware(['auth'])->group(function () {
         });
 });
 
-// Public embed/export routes (must be defined before parameterized hearing routes)
 Route::get('/{organization:slug}/hearings/export', [HearingController::class, 'export'])
     ->name('organization.hearings.export');
 Route::get('/{organization:slug}/hearings/embed', [HearingController::class, 'embed'])

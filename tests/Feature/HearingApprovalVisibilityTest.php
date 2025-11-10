@@ -75,7 +75,9 @@ class HearingApprovalVisibilityTest extends TestCase
             'is_superuser' => false,
         ]);
 
-        $response = $this->actingAs($admin)->get(route('hearings.index'));
+        $response = $this->actingAs($admin)->get(route('hearings.index', [
+            'organization' => $this->organization->slug,
+        ]));
 
         $response->assertOk();
         $response->assertSee('Pending Approval');
@@ -94,9 +96,14 @@ class HearingApprovalVisibilityTest extends TestCase
 
         $response = $this->actingAs($admin)
             ->withSession(['_token' => 'test-token'])
-            ->patch(route('hearings.approve', $this->pendingHearing), ['_token' => 'test-token']);
+            ->patch(route('hearings.approve', [
+                'organization' => $this->organization->slug,
+                'hearing' => $this->pendingHearing,
+            ]), ['_token' => 'test-token']);
 
-        $response->assertRedirect(route('hearings.index'));
+        $response->assertRedirect(route('hearings.index', [
+            'organization' => $this->organization->slug,
+        ]));
         $this->assertTrue($this->pendingHearing->fresh()->approved);
     }
 
@@ -137,7 +144,10 @@ class HearingApprovalVisibilityTest extends TestCase
 
         $response = $this->actingAs($admin)
             ->withSession(['_token' => 'test-token'])
-            ->patch(route('hearings.approve', $otherHearing), ['_token' => 'test-token']);
+            ->patch(route('hearings.approve', [
+                'organization' => $this->organization->slug,
+                'hearing' => $otherHearing,
+            ]), ['_token' => 'test-token']);
 
         $response->assertForbidden();
         $this->assertFalse($otherHearing->fresh()->approved);
@@ -152,7 +162,9 @@ class HearingApprovalVisibilityTest extends TestCase
         ]);
         $user->regions()->attach($this->region->id);
 
-        $response = $this->actingAs($user)->get(route('hearings.index'));
+        $response = $this->actingAs($user)->get(route('hearings.index', [
+            'organization' => $this->organization->slug,
+        ]));
 
         $response->assertOk();
         $response->assertSee('Approved Hearing');
@@ -161,7 +173,9 @@ class HearingApprovalVisibilityTest extends TestCase
 
     public function test_public_embed_only_shows_approved_hearings(): void
     {
-        $response = $this->get(route('hearings.embed'));
+        $response = $this->get(route('organization.hearings.embed', [
+            'organization' => $this->organization->slug,
+        ]));
 
         $response->assertOk();
         $response->assertSee('Approved Hearing');

@@ -134,7 +134,7 @@
     </div>
     <div class="bottom-bar">
         <span><strong>{{ number_format($recordCount) }}</strong> hearings • Updated {{ $generatedAt }}</span>
-        <a class="csv-button" href="{{ route('hearings.export') }}" target="_blank" rel="noopener">Export CSV</a>
+        <a class="csv-button" href="{{ route('organization.hearings.export', ['organization' => $organization->slug]) }}" target="_blank" rel="noopener">Export CSV</a>
     </div>
     @vite('resources/js/embed-tables.js')
 </body>
