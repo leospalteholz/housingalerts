@@ -7,6 +7,7 @@ use App\Http\Controllers\HearingController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\CouncillorController;
 use App\Http\Controllers\HearingVoteController;
+use App\Http\Controllers\PublicHearingSubmissionController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\NotificationSettingsController;
@@ -109,6 +110,20 @@ Route::get('/{organization:slug}/hearings/embed', [HearingController::class, 'em
     ->name('organization.hearings.embed');
 Route::get('/{organization:slug}/regions/{region}/voting-embed', [RegionController::class, 'votingEmbed'])
     ->name('regions.voting-embed');
+
+// Public hearing submission flow (no authentication required)
+Route::get('/{organization:slug}/submit-hearing', [PublicHearingSubmissionController::class, 'create'])
+    ->name('public.hearings.submit');
+Route::post('/{organization:slug}/submit-hearing', [PublicHearingSubmissionController::class, 'store'])
+    ->name('public.hearings.submit.store');
+Route::get('/{organization:slug}/submit-hearing/thank-you', [PublicHearingSubmissionController::class, 'thankYou'])
+    ->name('public.hearings.submit.thank-you');
+Route::middleware('signed')->group(function () {
+    Route::get('/{organization:slug}/submit-hearing/{hearing}/vote', [PublicHearingSubmissionController::class, 'createVote'])
+        ->name('public.hearings.submit.vote');
+    Route::post('/{organization:slug}/submit-hearing/{hearing}/vote', [PublicHearingSubmissionController::class, 'storeVote'])
+        ->name('public.hearings.submit.vote.store');
+});
 
 // Public routes - accessible to everyone
 // Individual hearing details and calendar functionality
