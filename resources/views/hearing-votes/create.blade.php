@@ -52,7 +52,7 @@
                         <!-- Passed -->
                         <div class="mb-4">
                             <label for="passed" class="block text-sm font-medium text-gray-700 mb-2">
-                                Vote Result <span class="text-red-500">*</span>
+                                Vote Result
                             </label>
                             <div class="space-y-2">
                                 <label class="inline-flex items-center mr-6">

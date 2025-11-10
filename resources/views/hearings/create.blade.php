@@ -220,7 +220,7 @@
             </div>
 
             <div class="mb-4 text-sm text-gray-600">
-                <span class="text-red-500">*</span> Required fields
+                Required fields
             </div>
             
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">Create</button>

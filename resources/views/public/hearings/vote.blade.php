@@ -1,11 +1,17 @@
 <x-guest-layout>
-    <div class="max-w-4xl mx-auto py-12 px-6">
-        <div class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-gray-900">Add vote results for {{ $hearing->display_title }}</h1>
-            <p class="mt-2 text-gray-600">Thanks for sharing this hearing. If council has already voted, record the results below so we can include them.</p>
+    <div class="max-w-6xl mx-auto py-14 px-6 lg:px-10">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mb-10">
+            <div>
+                <h1 class="text-3xl lg:text-4xl font-bold text-gray-900">Add vote results for {{ $hearing->display_title }}</h1>
+                <p class="mt-3 text-gray-600 text-lg max-w-3xl">If the council has already voted, record the results so we can surface them alongside the hearing.</p>
+            </div>
+            <div class="hidden lg:block text-sm text-gray-500 max-w-xs border-l-2 border-gray-200 pl-4">
+                <p class="font-semibold text-gray-700">Need help?</p>
+                <p class="mt-1">Leave councillor rows blank if a vote isn&rsquo;t public yet. You can come back later with the same link.</p>
+            </div>
         </div>
 
-        <div class="bg-white shadow-lg rounded-lg p-10">
+        <div class="bg-white shadow-xl rounded-2xl p-8 sm:p-10 lg:p-14">
             @if ($errors->any())
                 <div class="mb-6 rounded border-l-4 border-red-500 bg-red-50 p-4 text-red-800">
                     <p class="font-semibold">Please fix the following issues:</p>
@@ -17,48 +23,56 @@
                 </div>
             @endif
 
-            <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-blue-50 border border-blue-100 rounded-lg p-6 text-sm text-blue-900">
-                <div>
-                    <p class="font-semibold text-blue-800">Hearing details</p>
-                    <p class="mt-1">Region: {{ $hearing->region->name }}</p>
-                    <p>Scheduled: {{ $hearing->start_datetime?->format('M j, Y g:i A') }}</p>
+            <div class="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6 bg-blue-50 border border-blue-100 rounded-xl p-6 text-sm text-blue-900">
+                <div class="lg:col-span-2">
+                    <p class="font-semibold text-blue-800 uppercase tracking-wide text-xs">Hearing details</p>
+                    <div class="mt-3 flex flex-wrap gap-x-8 gap-y-2 text-sm">
+                        <div>
+                            <span class="font-medium text-blue-900">Region:</span>
+                            <span>{{ $hearing->region->name }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-blue-900">Scheduled:</span>
+                            <span>{{ $hearing->start_datetime?->format('M j, Y g:i A') }}</span>
+                        </div>
+                    </div>
                 </div>
                 <div>
-                    <p class="font-semibold text-blue-800">Need a change?</p>
-                    <p class="mt-1">If these details look wrong, please go back and submit a new hearing with corrections.</p>
+                    <p class="font-semibold text-blue-800 uppercase tracking-wide text-xs">Need a change?</p>
+                    <p class="mt-2">If anything looks incorrect, resubmit the hearing with updated information rather than editing vote results here.</p>
                 </div>
             </div>
 
-            <form method="POST" action="{{ request()->fullUrl() }}" class="space-y-8">
+            <form method="POST" action="{{ request()->fullUrl() }}" class="space-y-12">
                 @csrf
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="vote_date" class="block text-sm font-medium text-gray-700">Vote date<span class="text-red-500"> *</span></label>
-                        <input type="date" id="vote_date" name="vote_date" value="{{ old('vote_date', $hearing->start_datetime?->format('Y-m-d')) }}" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="rounded-xl border border-gray-200 bg-slate-50/60 p-6 lg:p-7">
+                        <label for="vote_date" class="block text-sm font-medium text-gray-700">Vote date</label>
+                        <input type="date" id="vote_date" name="vote_date" value="{{ old('vote_date', $hearing->start_datetime?->format('Y-m-d')) }}" class="mt-3 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
                     </div>
-                    <div>
-                        <span class="block text-sm font-medium text-gray-700">Vote result<span class="text-red-500"> *</span></span>
-                        <div class="mt-3 space-y-3">
-                            <label class="flex items-center space-x-3">
+                    <div class="rounded-xl border border-gray-200 bg-slate-50/60 p-6 lg:p-7">
+                        <span class="block text-sm font-medium text-gray-700">Vote result</span>
+                        <div class="mt-4 space-y-4 text-sm text-gray-700">
+                            <label class="flex items-center gap-3">
                                 <input type="radio" name="passed" value="1" {{ old('passed') === '1' ? 'checked' : '' }} class="h-4 w-4 text-green-600 focus:ring-green-500">
-                                <span class="text-sm text-gray-700">Approved / passed</span>
+                                <span class="font-medium text-green-700">Approved / passed</span>
                             </label>
-                            <label class="flex items-center space-x-3">
+                            <label class="flex items-center gap-3">
                                 <input type="radio" name="passed" value="0" {{ old('passed') === '0' ? 'checked' : '' }} class="h-4 w-4 text-red-600 focus:ring-red-500">
-                                <span class="text-sm text-gray-700">Rejected / failed</span>
+                                <span class="font-medium text-red-700">Rejected / failed</span>
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <div>
+                <div class="rounded-xl border border-gray-200 bg-slate-50/60 p-6 lg:p-7">
                     <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
-                    <textarea id="notes" name="notes" rows="4" class="mt-2 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">{{ old('notes') }}</textarea>
-                    <p class="mt-2 text-xs text-gray-500">Optional context about the vote (public sentiment, conditions, etc.).</p>
+                    <textarea id="notes" name="notes" rows="4" class="mt-3 block w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">{{ old('notes') }}</textarea>
+                    <p class="mt-3 text-xs text-gray-500">Optional context about the vote (public sentiment, conditions, amendments, etc.).</p>
                 </div>
 
-                <div>
+                <div class="rounded-xl border border-gray-200 bg-slate-50/60 p-6 lg:p-7">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Councillor votes</h2>
                     @if ($councillors->isEmpty())
                         <div class="rounded border border-yellow-300 bg-yellow-50 p-4 text-yellow-900 text-sm">
@@ -94,8 +108,9 @@
                     @endif
                 </div>
 
-                <div class="text-right">
-                    <button type="submit" class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <p class="text-sm text-gray-500">If you discover new information later, reopen this signed link to update the vote records.</p>
+                    <button type="submit" class="inline-flex items-center justify-center px-7 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow">
                         Save vote details
                     </button>
                 </div>

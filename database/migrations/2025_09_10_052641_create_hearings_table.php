@@ -28,7 +28,7 @@ return new class extends Migration
             $table->text('description'); // details of the hearing
             $table->string('image_url')->nullable();
             $table->datetime('start_datetime');
-            $table->datetime('end_datetime');
+            $table->datetime('end_datetime')->nullable();
             $table->string('more_info_url')->nullable();
             $table->text('remote_instructions'); // how to join (phone/virtual), could contain links
             $table->text('inperson_instructions'); // how to join in person
