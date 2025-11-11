@@ -3,14 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PublicHearingRequest;
-use App\Http\Requests\PublicHearingVoteRequest;
 use App\Models\Councillor;
 use App\Models\CouncillorVote;
 use App\Models\Hearing;
 use App\Models\HearingVote;
 use App\Models\Organization;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 
 class PublicHearingSubmissionController extends Controller
@@ -19,9 +17,25 @@ class PublicHearingSubmissionController extends Controller
     {
         $regions = $organization->regions()->orderBy('name')->get();
 
+        $councillorsByRegion = Councillor::whereIn('region_id', $regions->pluck('id'))
+            ->orderBy('name')
+            ->get()
+            ->groupBy('region_id')
+            ->map(function ($group) {
+                return $group->map(function ($councillor) {
+                    return [
+                        'id' => $councillor->id,
+                        'name' => $councillor->name,
+                        'elected_start' => optional($councillor->elected_start)->format('Y-m-d'),
+                        'elected_end' => optional($councillor->elected_end)->format('Y-m-d'),
+                    ];
+                })->values();
+            })->toArray();
+
         return view('public.hearings.submit', [
             'organization' => $organization,
             'regions' => $regions,
+            'councillorsByRegion' => $councillorsByRegion,
         ]);
     }
 
@@ -40,17 +54,30 @@ class PublicHearingSubmissionController extends Controller
         $hearing->postal_code = $validated['postal_code'] ?? null;
         $hearing->rental = array_key_exists('rental', $validated) ? (bool) $validated['rental'] : null;
         $hearing->units = $validated['units'] ?? null;
-        $hearing->below_market_units = $validated['below_market_units'] ?? 0;
+        if (!is_null($hearing->units)) {
+            $hearing->units = (int) $hearing->units;
+        }
+
+        $belowMarket = $validated['below_market_units'] ?? null;
+        $hearing->below_market_units = is_null($belowMarket) ? 0 : (int) $belowMarket;
+
         $hearing->replaced_units = $validated['replaced_units'] ?? null;
+        if (!is_null($hearing->replaced_units)) {
+            $hearing->replaced_units = (int) $hearing->replaced_units;
+        }
         $hearing->subject_to_vote = (bool) ($validated['subject_to_vote'] ?? false);
         $hearing->approved = false;
-        $hearing->description = $validated['description'];
+        $hearing->description = $validated['description'] ?? null;
         $hearing->more_info_url = $validated['more_info_url'] ?? null;
-        $hearing->remote_instructions = $validated['remote_instructions'];
-        $hearing->inperson_instructions = $validated['inperson_instructions'];
-        $hearing->comments_email = $validated['comments_email'];
+        $hearing->remote_instructions = $validated['remote_instructions'] ?? null;
+        $hearing->inperson_instructions = $validated['inperson_instructions'] ?? null;
+        $hearing->comments_email = $validated['comments_email'] ?? null;
 
-        $hearing->setDateTimeFromForm($validated['start_date'], $validated['start_time'], $validated['end_time']);
+        $hearing->setDateTimeFromForm(
+            $validated['start_date'],
+            $validated['start_time'] ?? null,
+            $validated['end_time'] ?? null
+        );
 
         if ($hearing->type === 'development' && empty($hearing->title)) {
             $hearing->title = $hearing->street_address;
@@ -58,100 +85,71 @@ class PublicHearingSubmissionController extends Controller
 
         $hearing->save();
 
-        if (!$hearing->subject_to_vote) {
-            return redirect()->route('public.hearings.submit.thank-you', [
-                'organization' => $organization->slug,
-            ])->with('status', 'Thank you! Your hearing has been submitted and will be reviewed.');
-        }
+        $hearingDate = $hearing->start_datetime;
+        $today = now()->startOfDay();
+        $isPastOrToday = $hearingDate ? $hearingDate->copy()->startOfDay()->lte($today) : false;
 
-        $signedUrl = URL::temporarySignedRoute(
-            'public.hearings.submit.vote',
-            now()->addMinutes(60),
-            [
-                'organization' => $organization->slug,
-                'hearing' => $hearing->id,
-            ]
-        );
+        $voteCreated = false;
 
-        return redirect($signedUrl);
-    }
+        if ($hearing->subject_to_vote && $isPastOrToday) {
+            $voteDate = $request->input('vote_date');
+            $votePassed = $request->input('passed');
+            $voteNotes = $request->input('notes');
 
-    public function createVote(Organization $organization, Hearing $hearing): View|RedirectResponse
-    {
-        $this->ensureHearingBelongsToOrganization($hearing, $organization);
+            $councillorSelections = collect($request->all())->filter(function ($value, $key) {
+                return str_starts_with($key, 'vote_') && !empty($value);
+            });
 
-        if (!$hearing->subject_to_vote) {
-            abort(404);
-        }
+            $hasVoteData = $voteDate || !is_null($votePassed) || $voteNotes || $councillorSelections->isNotEmpty();
 
-        if ($hearing->hearingVote) {
-            return redirect()->route('public.hearings.submit.thank-you', [
-                'organization' => $organization->slug,
-            ])->with('status', 'Thanks! We already have vote information for this hearing.');
-        }
+            if ($hasVoteData) {
+                $hearingVote = HearingVote::create([
+                    'hearing_id' => $hearing->id,
+                    'vote_date' => $voteDate,
+                    'passed' => is_null($votePassed) ? null : (bool) $votePassed,
+                    'notes' => $voteNotes,
+                ]);
 
-        $councillors = Councillor::where('region_id', $hearing->region_id)
-            ->where(function ($query) use ($hearing) {
-                $query->where('elected_start', '<=', $hearing->start_datetime)
-                    ->where(function ($q) use ($hearing) {
-                        $q->whereNull('elected_end')
-                            ->orWhere('elected_end', '>=', $hearing->start_datetime);
-                    });
-            })
-            ->orderBy('name')
-            ->get();
+                if ($councillorSelections->isNotEmpty()) {
+                    $allowedCouncillorIds = Councillor::where('region_id', $hearing->region_id)
+                        ->where('elected_start', '<=', $hearing->start_datetime)
+                        ->where(function ($query) use ($hearing) {
+                            $query->whereNull('elected_end')
+                                ->orWhere('elected_end', '>=', $hearing->start_datetime);
+                        })
+                        ->pluck('id')
+                        ->all();
 
-        return view('public.hearings.vote', [
-            'organization' => $organization,
-            'hearing' => $hearing,
-            'councillors' => $councillors,
-        ]);
-    }
+                    foreach ($councillorSelections as $key => $value) {
+                        $councillorId = (int) str_replace('vote_', '', $key);
 
-    public function storeVote(Organization $organization, Hearing $hearing, PublicHearingVoteRequest $request): RedirectResponse
-    {
-        $this->ensureHearingBelongsToOrganization($hearing, $organization);
+                        if ($councillorId <= 0 || !in_array($councillorId, $allowedCouncillorIds, true)) {
+                            continue;
+                        }
 
-        if (!$hearing->subject_to_vote) {
-            abort(404);
-        }
+                        if (!in_array($value, ['for', 'against', 'abstain', 'absent'], true)) {
+                            continue;
+                        }
 
-        if ($hearing->hearingVote) {
-            return redirect()->route('public.hearings.submit.thank-you', [
-                'organization' => $organization->slug,
-            ])->with('status', 'Thanks! We already have vote information for this hearing.');
-        }
-
-        $validated = $request->validated();
-
-        $allowedCouncillorIds = Councillor::where('region_id', $hearing->region_id)
-            ->pluck('id')
-            ->all();
-
-        $hearingVote = HearingVote::create([
-            'hearing_id' => $hearing->id,
-            'vote_date' => $validated['vote_date'],
-            'passed' => (bool) $validated['passed'],
-            'notes' => $validated['notes'] ?? null,
-        ]);
-
-        foreach ($request->all() as $key => $value) {
-            if (str_starts_with($key, 'vote_') && !empty($value)) {
-                $councillorId = (int) str_replace('vote_', '', $key);
-
-                if ($councillorId > 0 && in_array($councillorId, $allowedCouncillorIds, true)) {
-                    CouncillorVote::create([
-                        'hearing_vote_id' => $hearingVote->id,
-                        'councillor_id' => $councillorId,
-                        'vote' => $value,
-                    ]);
+                        CouncillorVote::create([
+                            'hearing_vote_id' => $hearingVote->id,
+                            'councillor_id' => $councillorId,
+                            'vote' => $value,
+                        ]);
+                    }
                 }
+
+                $voteCreated = true;
             }
         }
 
+        $statusMessage = $voteCreated
+            ? 'Thank you! Your hearing and vote details have been submitted for review.'
+            : 'Thank you! Your hearing has been submitted and will be reviewed.';
+
         return redirect()->route('public.hearings.submit.thank-you', [
             'organization' => $organization->slug,
-        ])->with('status', 'Thank you! Your hearing details have been submitted for review.');
+        ])->with('status', $statusMessage);
     }
 
     public function thankYou(Organization $organization): View

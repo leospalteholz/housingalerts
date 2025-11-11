@@ -25,14 +25,14 @@ return new class extends Migration
             $table->integer('replaced_units')->nullable(); // number of units being replaced
             $table->boolean('subject_to_vote')->default(false); // whether subject to vote
             $table->boolean('approved')->default(false); // whether reviewed/approved by admin
-            $table->text('description'); // details of the hearing
+            $table->text('description')->nullable(); // details of the hearing
             $table->string('image_url')->nullable();
             $table->datetime('start_datetime');
             $table->datetime('end_datetime')->nullable();
             $table->string('more_info_url')->nullable();
-            $table->text('remote_instructions'); // how to join (phone/virtual), could contain links
-            $table->text('inperson_instructions'); // how to join in person
-            $table->string('comments_email'); // email to submit comments
+            $table->text('remote_instructions')->nullable(); // how to join (phone/virtual), could contain links
+            $table->text('inperson_instructions')->nullable(); // how to join in person
+            $table->string('comments_email')->nullable(); // email to submit comments
             $table->timestamps();
         });
     }

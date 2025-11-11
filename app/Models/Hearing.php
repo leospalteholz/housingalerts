@@ -67,10 +67,20 @@ class Hearing extends Model
     }
 
     // Method to set datetime fields from form data
-    public function setDateTimeFromForm($startDate, $startTime, $endTime)
+    public function setDateTimeFromForm($startDate, $startTime = null, $endTime = null)
     {
-        $this->start_datetime = \Carbon\Carbon::parse($startDate . ' ' . $startTime);
-        $this->end_datetime = \Carbon\Carbon::parse($startDate . ' ' . $endTime);
+        $startTime = $startTime ?: '00:00';
+        $endTime = $endTime ?: $startTime;
+
+        $startDateTime = \Carbon\Carbon::parse(trim($startDate . ' ' . $startTime));
+        $endDateTime = \Carbon\Carbon::parse(trim($startDate . ' ' . $endTime));
+
+        if ($endDateTime->lt($startDateTime)) {
+            $endDateTime = $startDateTime;
+        }
+
+        $this->start_datetime = $startDateTime;
+        $this->end_datetime = $endDateTime;
     }
 
     /**

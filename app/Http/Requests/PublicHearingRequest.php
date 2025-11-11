@@ -17,6 +17,14 @@ class PublicHearingRequest extends FormRequest
             'below_market_units',
             'replaced_units',
             'more_info_url',
+            'description',
+            'remote_instructions',
+            'inperson_instructions',
+            'comments_email',
+            'start_time',
+            'end_time',
+            'vote_date',
+            'notes',
         ];
 
         $replacements = [];
@@ -35,6 +43,10 @@ class PublicHearingRequest extends FormRequest
             $replacements['rental'] = $this->boolean('rental');
         }
 
+        if ($this->has('passed')) {
+            $replacements['passed'] = $this->boolean('passed');
+        }
+
         $this->merge($replacements);
     }
 
@@ -49,14 +61,17 @@ class PublicHearingRequest extends FormRequest
 
         $rules = [
             'type' => ['required', Rule::in(['development', 'policy'])],
-            'description' => ['required', 'string'],
-            'remote_instructions' => ['required', 'string'],
-            'inperson_instructions' => ['required', 'string'],
-            'comments_email' => ['required', 'email', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'remote_instructions' => ['nullable', 'string'],
+            'inperson_instructions' => ['nullable', 'string'],
+            'comments_email' => ['nullable', 'email', 'max:255'],
             'start_date' => ['required', 'date'],
-            'start_time' => ['required'],
-            'end_time' => ['required'],
+            'start_time' => ['nullable', 'date_format:H:i'],
+            'end_time' => ['nullable', 'date_format:H:i'],
             'subject_to_vote' => ['required', 'boolean'],
+            'vote_date' => ['nullable', 'date'],
+            'passed' => ['nullable', 'boolean'],
+            'notes' => ['nullable', 'string'],
             'region_id' => [
                 'required',
                 Rule::exists('regions', 'id')->where(function ($query) use ($organization) {

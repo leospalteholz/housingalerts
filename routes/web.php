@@ -118,12 +118,6 @@ Route::post('/{organization:slug}/submit-hearing', [PublicHearingSubmissionContr
     ->name('public.hearings.submit.store');
 Route::get('/{organization:slug}/submit-hearing/thank-you', [PublicHearingSubmissionController::class, 'thankYou'])
     ->name('public.hearings.submit.thank-you');
-Route::middleware('signed')->group(function () {
-    Route::get('/{organization:slug}/submit-hearing/{hearing}/vote', [PublicHearingSubmissionController::class, 'createVote'])
-        ->name('public.hearings.submit.vote');
-    Route::post('/{organization:slug}/submit-hearing/{hearing}/vote', [PublicHearingSubmissionController::class, 'storeVote'])
-        ->name('public.hearings.submit.vote.store');
-});
 
 // Public routes - accessible to everyone
 // Individual hearing details and calendar functionality

@@ -5,10 +5,6 @@
                 <h1 class="text-3xl lg:text-4xl font-bold text-gray-900">Add vote results for {{ $hearing->display_title }}</h1>
                 <p class="mt-3 text-gray-600 text-lg max-w-3xl">If the council has already voted, record the results so we can surface them alongside the hearing.</p>
             </div>
-            <div class="hidden lg:block text-sm text-gray-500 max-w-xs border-l-2 border-gray-200 pl-4">
-                <p class="font-semibold text-gray-700">Need help?</p>
-                <p class="mt-1">Leave councillor rows blank if a vote isn&rsquo;t public yet. You can come back later with the same link.</p>
-            </div>
         </div>
     </x-slot>
 
@@ -38,11 +34,6 @@
                             <span>{{ $hearing->start_datetime?->format('M j, Y g:i A') }}</span>
                         </div>
                     </div>
-                        <p class="mt-3 text-xs text-blue-700">Can leave blank if this hearing is in the past.</p>
-                </div>
-                <div>
-                    <p class="font-semibold text-blue-800 uppercase tracking-wide text-xs">Need a change?</p>
-                    <p class="mt-2">If anything looks incorrect, resubmit the hearing with updated information rather than editing vote results here.</p>
                 </div>
             </div>
 
@@ -112,7 +103,6 @@
                 </div>
 
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <p class="text-sm text-gray-500">If you discover new information later, reopen this signed link to update the vote records.</p>
                     <button type="submit" class="inline-flex items-center justify-center px-7 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow">
                         Save vote details
                     </button>
