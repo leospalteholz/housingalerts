@@ -134,16 +134,16 @@ class HearingController extends Controller
         $imageFile = $request->file('image');
         
         // Debug logging
-        if ($imageFile) {
-            \Log::info('Image file received:', [
-                'name' => $imageFile->getClientOriginalName(),
-                'size' => $imageFile->getSize(),
-                'mime' => $imageFile->getMimeType(),
-                'extension' => $imageFile->getClientOriginalExtension()
-            ]);
-        } else {
-            \Log::info('No image file received');
-        }
+        // if ($imageFile) {
+        //     \Log::info('Image file received:', [
+        //         'name' => $imageFile->getClientOriginalName(),
+        //         'size' => $imageFile->getSize(),
+        //         'mime' => $imageFile->getMimeType(),
+        //         'extension' => $imageFile->getClientOriginalExtension()
+        //     ]);
+        // } else {
+        //     \Log::info('No image file received');
+        // }
 
         // Remove form-only fields before mass assignment
         unset($validated['start_date'], $validated['start_time'], $validated['end_time'], $validated['image'], $validated['organization_id']);
@@ -550,7 +550,7 @@ class HearingController extends Controller
     {
         $this->ensureHearingBelongsToOrganization($hearing, $organization);
 
-        $icsContent = $this->generateIcsContent($hearing);
+        $icsContent = $hearing->generateIcsContent();
         $filename = 'hearing-' . $hearing->id . '.ics';
         
         return response($icsContent)
@@ -605,36 +605,6 @@ class HearingController extends Controller
             default:
                 abort(404, 'Calendar provider not supported');
         }
-    }
-
-    /**
-     * Generate ICS file content
-     */
-    private function generateIcsContent(\App\Models\Hearing $hearing)
-    {
-        $startDateTime = $this->getHearingDateTime($hearing, 'start');
-        $endDateTime = $this->getHearingDateTime($hearing, 'end');
-        $title = $hearing->display_title;
-        $description = $this->formatHearingDescription($hearing);
-        $location = $this->getHearingLocation($hearing);
-        $uid = 'hearing-' . $hearing->id . '@' . request()->getHost();
-        $timestamp = now()->format('Ymd\THis\Z');
-
-        $ics = "BEGIN:VCALENDAR\r\n";
-        $ics .= "VERSION:2.0\r\n";
-        $ics .= "PRODID:-//Housing Alerts//Housing Alerts//EN\r\n";
-        $ics .= "BEGIN:VEVENT\r\n";
-        $ics .= "UID:" . $uid . "\r\n";
-        $ics .= "DTSTAMP:" . $timestamp . "\r\n";
-        $ics .= "DTSTART:" . $startDateTime . "\r\n";
-        $ics .= "DTEND:" . $endDateTime . "\r\n";
-        $ics .= "SUMMARY:" . $this->escapeIcsText($title) . "\r\n";
-        $ics .= "DESCRIPTION:" . $this->escapeIcsText($description) . "\r\n";
-        $ics .= "LOCATION:" . $this->escapeIcsText($location) . "\r\n";
-        $ics .= "END:VEVENT\r\n";
-        $ics .= "END:VCALENDAR\r\n";
-
-        return $ics;
     }
 
     /**
@@ -695,20 +665,4 @@ class HearingController extends Controller
         return '';
     }
 
-    /**
-     * Escape text for ICS format
-     */
-    private function escapeIcsText($text)
-    {
-        // First normalize line endings to \n
-        $text = str_replace(["\r\n", "\r"], "\n", $text);
-        
-        // Then escape special characters
-        $text = str_replace(["\\", ",", ";"], ["\\\\", "\\,", "\\;"], $text);
-        
-        // Finally convert \n to proper ICS line breaks
-        $text = str_replace("\n", "\\n", $text);
-        
-        return $text;
-    }
 }

@@ -19,7 +19,7 @@ class Hearing extends Model
         'below_market_units',
         'replaced_units',
         'subject_to_vote',
-    'approved',
+        'approved',
         'description',
         'image_url',
         'start_datetime',
