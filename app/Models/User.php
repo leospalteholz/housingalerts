@@ -49,6 +49,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'unsubscribed_at' => 'datetime',
         'password' => 'hashed',
+        'dashboard_token_expires_at' => 'datetime',
     ];
 
     /**
@@ -117,6 +118,7 @@ class User extends Authenticatable implements MustVerifyEmail
         } while (static::where('dashboard_token', $token)->exists());
 
         $this->dashboard_token = $token;
+        $this->dashboard_token_expires_at = now()->addWeek();
         $this->save();
 
         return $token;
@@ -127,11 +129,18 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getDashboardUrl(): string
     {
-        if (!$this->dashboard_token) {
+        if (!$this->dashboard_token || !$this->dashboard_token_expires_at || $this->dashboard_token_expires_at->isPast()) {
             $this->generateDashboardToken();
         }
 
         return route('dashboard.token', ['token' => $this->dashboard_token]);
+    }
+
+    public function hasValidDashboardToken(): bool
+    {
+        return !empty($this->dashboard_token)
+            && !is_null($this->dashboard_token_expires_at)
+            && $this->dashboard_token_expires_at->isFuture();
     }
 
     /**

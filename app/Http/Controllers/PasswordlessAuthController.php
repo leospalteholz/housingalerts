@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Notifications\ExistingPasswordlessUserNotification;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -20,23 +21,27 @@ class PasswordlessAuthController extends Controller
             'name' => 'nullable|string|max:255',
         ]);
 
-        $user = User::findOrCreatePasswordless(
-            $request->email, 
-            $request->name
-        );
+        $existingUser = User::where('email', $request->email)->first();
 
-        // Set organization ID to 2 (Homes for Living) for new users
-        // FIXME obviously this is a temporary hack until we have proper org management
-        if ($user->wasRecentlyCreated) {
-            $user->organization_id = 2;
-            $user->save();
+        if ($existingUser && $existingUser->requiresPassword()) {
+            return redirect()->route('login')->with('status', 'Please sign in with your password to continue.');
         }
 
-        // Auto-login the user immediately
-        auth()->login($user);
+        if (!$existingUser) {
+            $user = User::findOrCreatePasswordless(
+                $request->email,
+                $request->name
+            );
 
-        // Send verification email with dashboard link for future access
-        if ($user->wasRecentlyCreated) {
+            if ($user->wasRecentlyCreated) {
+                // Set organization ID to 2 (Homes for Living) for new users
+                // FIXME obviously this is a temporary hack until we have proper org management
+                $user->organization_id = 2;
+                $user->save();
+            }
+
+            auth()->login($user);
+
             $mailSent = true;
 
             try {
@@ -50,7 +55,7 @@ class PasswordlessAuthController extends Controller
                     'exception' => $e->getMessage(),
                 ]);
             }
-            
+
             $redirectUrl = RouteServiceProvider::homeRoute($user);
 
             $message = $mailSent
@@ -60,12 +65,54 @@ class PasswordlessAuthController extends Controller
             return redirect()->to($redirectUrl)->with('success', $message);
         }
 
-        // Existing user - just log them in
-        $redirectUrl = RouteServiceProvider::homeRoute($user);
+        $user = $existingUser;
 
-        return redirect()->to($redirectUrl)->with('success', 
-            'Welcome back! You\'re now logged in to manage your housing alerts.'
-        );
+        if (!$user->hasVerifiedEmail()) {
+            auth()->login($user);
+
+            $mailSent = true;
+
+            try {
+                $user->sendEmailVerificationNotification();
+            } catch (Throwable $e) {
+                $mailSent = false;
+
+                Log::error('Passwordless verification resend failed.', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'exception' => $e->getMessage(),
+                ]);
+            }
+
+            $redirectUrl = RouteServiceProvider::homeRoute($user);
+
+            $message = $mailSent
+                ? 'Welcome back! Please verify your email to receive housing alerts.'
+                : 'Welcome back! We could not resend the verification email, but you can update your housing alerts below.';
+
+            return redirect()->to($redirectUrl)->with('success', $message);
+        }
+
+        $user->generateDashboardToken();
+
+        $emailDispatched = true;
+
+        try {
+            $user->notify(new ExistingPasswordlessUserNotification());
+        } catch (Throwable $e) {
+            $emailDispatched = false;
+
+            Log::error('Passwordless dashboard link email failed to send.', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'exception' => $e->getMessage(),
+            ]);
+        }
+
+        return view('auth.passwordless-existing', [
+            'email' => $user->email,
+            'emailDispatched' => $emailDispatched,
+        ]);
     }
 
     /**
@@ -77,6 +124,29 @@ class PasswordlessAuthController extends Controller
 
         if (!$user) {
             abort(404, 'Invalid dashboard link');
+        }
+
+        if (!$user->hasValidDashboardToken()) {
+            $user->generateDashboardToken();
+
+            $emailDispatched = true;
+
+            try {
+                $user->notify(new ExistingPasswordlessUserNotification());
+            } catch (Throwable $e) {
+                $emailDispatched = false;
+
+                Log::error('Passwordless dashboard link expired resend failed.', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'exception' => $e->getMessage(),
+                ]);
+            }
+
+            return view('auth.passwordless-expired', [
+                'email' => $user->email,
+                'emailDispatched' => $emailDispatched,
+            ]);
         }
 
         // Auto-login the user for this session
