@@ -37,8 +37,12 @@ Route::get('/', function () {
 
 // Passwordless authentication routes
 use App\Http\Controllers\PasswordlessAuthController;
-Route::post('/signup-passwordless', [PasswordlessAuthController::class, 'signup'])->name('signup.passwordless');
-Route::get('/dashboard/{token}', [PasswordlessAuthController::class, 'dashboard'])->name('dashboard.token');
+Route::post('/signup-passwordless', [PasswordlessAuthController::class, 'signup'])
+    ->middleware('throttle:passwordless-signup')
+    ->name('signup.passwordless');
+Route::get('/dashboard/{token}', [PasswordlessAuthController::class, 'dashboard'])
+    ->middleware('throttle:passwordless-dashboard')
+    ->name('dashboard.token');
 
 // Superuser-only routes
 Route::middleware(['auth', 'superuser'])->group(function () {

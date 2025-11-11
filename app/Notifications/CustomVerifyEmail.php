@@ -27,9 +27,7 @@ class CustomVerifyEmail extends VerifyEmailBase
 
         // Add dashboard link for passwordless users
         if ($notifiable->isPasswordless()) {
-            $message->line('**Save this link for future access to your preferences:**')
-                   ->line('🔗 **Your Personal Dashboard:** ' . $notifiable->getDashboardUrl())
-                   ->line('You can use this link anytime to update which regions you want housing alerts for.');
+            $message->line('**You can access your dashboard in the future by entering your email address at https://housingalerts.ca to get a link to the dashboard**');
         }
 
         return $message->line('If you didn\'t create an account with Housing Alerts, please ignore this email.')
