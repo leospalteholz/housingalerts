@@ -18,13 +18,12 @@ class UnsubscribeTest extends TestCase
         // Create a test organization and user
         $organization = Organization::create([
             'name' => 'Test Organization',
-            'domain' => 'test.com',
+            'contact_email' => 'contact@test.org',
         ]);
 
-        $user = User::create([
+        $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => bcrypt('password'),
             'organization_id' => $organization->id,
             'email_verified_at' => now(),
         ]);
@@ -42,13 +41,12 @@ class UnsubscribeTest extends TestCase
         // Create a test organization and user
         $organization = Organization::create([
             'name' => 'Test Organization',
-            'domain' => 'test.com',
+            'contact_email' => 'contact@test.org',
         ]);
 
-        $user = User::create([
+        $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => bcrypt('password'),
             'organization_id' => $organization->id,
             'email_verified_at' => now(),
         ]);
@@ -68,13 +66,12 @@ class UnsubscribeTest extends TestCase
         // Create a test organization and user
         $organization = Organization::create([
             'name' => 'Test Organization',
-            'domain' => 'test.com',
+            'contact_email' => 'contact@test.org',
         ]);
 
-        $user = User::create([
+        $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => bcrypt('password'),
             'organization_id' => $organization->id,
             'email_verified_at' => now(),
         ]);
@@ -85,9 +82,9 @@ class UnsubscribeTest extends TestCase
 
         $response = $this->post($unsubscribeUrl);
 
-        $response->assertStatus(200);
-        $response->assertSee("You've Been Unsubscribed");
-        $response->assertSee('test@example.com');
+    $response->assertStatus(200);
+    $response->assertSeeText('Been Unsubscribed');
+    $response->assertSee('test@example.com');
 
         // Verify user is now unsubscribed
         $user->refresh();
@@ -99,13 +96,12 @@ class UnsubscribeTest extends TestCase
         // Create a test organization and user
         $organization = Organization::create([
             'name' => 'Test Organization',
-            'domain' => 'test.com',
+            'contact_email' => 'contact@test.org',
         ]);
 
-        $user = User::create([
+        $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => bcrypt('password'),
             'organization_id' => $organization->id,
             'email_verified_at' => now(),
             'unsubscribed_at' => now(),

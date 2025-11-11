@@ -16,13 +16,12 @@ class ResubscribeTest extends TestCase
         // Create a test organization and user
         $organization = Organization::create([
             'name' => 'Test Organization',
-            'domain' => 'test.com',
+            'contact_email' => 'contact@test.org',
         ]);
 
-        $user = User::create([
+        $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => bcrypt('password'),
             'organization_id' => $organization->id,
             'email_verified_at' => now(),
             'unsubscribed_at' => now(), // User is initially unsubscribed
@@ -35,10 +34,14 @@ class ResubscribeTest extends TestCase
         $this->assertNotNull($user->unsubscribed_at);
 
         // Post to resubscribe route
-        $response = $this->post(route('user.resubscribe'));
+        $response = $this->post(route('user.resubscribe', [
+            'organization' => $organization->slug,
+        ]));
 
         // Should redirect to dashboard with success message
-        $response->assertRedirect(route('user.dashboard'))
+        $response->assertRedirect(route('user.dashboard', [
+            'organization' => $organization->slug,
+        ]))
                 ->assertSessionHas('success', 'You have been resubscribed to notifications.');
 
         // Verify user is now resubscribed
@@ -51,13 +54,12 @@ class ResubscribeTest extends TestCase
         // Create a test organization and user
         $organization = Organization::create([
             'name' => 'Test Organization',
-            'domain' => 'test.com',
+            'contact_email' => 'contact@test.org',
         ]);
 
-        $user = User::create([
+        $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => bcrypt('password'),
             'organization_id' => $organization->id,
             'email_verified_at' => now(),
             'unsubscribed_at' => now(), // User is unsubscribed
@@ -67,7 +69,9 @@ class ResubscribeTest extends TestCase
         $this->actingAs($user);
 
         // Visit dashboard
-        $response = $this->get(route('user.dashboard'));
+        $response = $this->get(route('user.dashboard', [
+            'organization' => $organization->slug,
+        ]));
 
         // Should see unsubscribed notice
         $response->assertStatus(200)
@@ -80,13 +84,12 @@ class ResubscribeTest extends TestCase
         // Create a test organization and user
         $organization = Organization::create([
             'name' => 'Test Organization',
-            'domain' => 'test.com',
+            'contact_email' => 'contact@test.org',
         ]);
 
-        $user = User::create([
+        $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => bcrypt('password'),
             'organization_id' => $organization->id,
             'email_verified_at' => now(),
             'unsubscribed_at' => null, // User is subscribed
@@ -96,7 +99,9 @@ class ResubscribeTest extends TestCase
         $this->actingAs($user);
 
         // Visit dashboard
-        $response = $this->get(route('user.dashboard'));
+        $response = $this->get(route('user.dashboard', [
+            'organization' => $organization->slug,
+        ]));
 
         // Should not see unsubscribed notice
         $response->assertStatus(200)

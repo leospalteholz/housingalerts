@@ -79,8 +79,10 @@ class RegionController extends Controller
     /**
      * Render an embeddable councillor vote breakdown for a region.
      */
-    public function votingEmbed(Region $region)
+    public function votingEmbed(Organization $organization, Region $region)
     {
+        $this->ensureRegionBelongsToOrganization($region, $organization);
+
         $region->load('organization');
 
         $councillors = $region->councillors()->orderBy('name')->get();

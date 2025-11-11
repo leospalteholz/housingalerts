@@ -123,7 +123,10 @@ class RegionCouncillorEmbedTest extends TestCase
             'vote' => 'against',
         ]);
 
-    $response = $this->get(route('regions.voting-embed', $region));
+        $response = $this->get(route('regions.voting-embed', [
+            'organization' => $organization->slug,
+            'region' => $region,
+        ]));
 
         $response->assertOk();
         $response->assertSee('Councillor Alpha');

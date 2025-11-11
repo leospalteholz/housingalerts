@@ -149,7 +149,7 @@ class HearingApprovalVisibilityTest extends TestCase
                 'hearing' => $otherHearing,
             ]), ['_token' => 'test-token']);
 
-        $response->assertForbidden();
+    $response->assertNotFound();
         $this->assertFalse($otherHearing->fresh()->approved);
     }
 

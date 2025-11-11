@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -12,29 +13,49 @@ class ProfileTest extends TestCase
 
     public function test_profile_page_is_displayed(): void
     {
-        $user = User::factory()->create();
+        $organization = Organization::create([
+            'name' => 'Test Organization',
+            'contact_email' => 'contact@test.org',
+        ]);
+
+        $user = User::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
 
         $response = $this
             ->actingAs($user)
-            ->get('/profile');
+            ->get(route('profile.edit', [
+                'organization' => $organization->slug,
+            ]));
 
         $response->assertOk();
     }
 
     public function test_profile_information_can_be_updated(): void
     {
-        $user = User::factory()->create();
+        $organization = Organization::create([
+            'name' => 'Test Organization',
+            'contact_email' => 'contact@test.org',
+        ]);
+
+        $user = User::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->patch(route('profile.update', [
+                'organization' => $organization->slug,
+            ]), [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect(route('profile.edit', [
+                'organization' => $organization->slug,
+            ]));
 
         $user->refresh();
 
@@ -45,29 +66,49 @@ class ProfileTest extends TestCase
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
     {
-        $user = User::factory()->create();
+        $organization = Organization::create([
+            'name' => 'Test Organization',
+            'contact_email' => 'contact@test.org',
+        ]);
+
+        $user = User::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->patch(route('profile.update', [
+                'organization' => $organization->slug,
+            ]), [
                 'name' => 'Test User',
                 'email' => $user->email,
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect(route('profile.edit', [
+                'organization' => $organization->slug,
+            ]));
 
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
     public function test_user_can_delete_their_account(): void
     {
-        $user = User::factory()->create();
+        $organization = Organization::create([
+            'name' => 'Test Organization',
+            'contact_email' => 'contact@test.org',
+        ]);
+
+        $user = User::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
 
         $response = $this
             ->actingAs($user)
-            ->delete('/profile', [
+            ->delete(route('profile.destroy', [
+                'organization' => $organization->slug,
+            ]), [
                 'password' => 'password',
             ]);
 
@@ -81,18 +122,31 @@ class ProfileTest extends TestCase
 
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {
-        $user = User::factory()->create();
+        $organization = Organization::create([
+            'name' => 'Test Organization',
+            'contact_email' => 'contact@test.org',
+        ]);
+
+        $user = User::factory()->create([
+            'organization_id' => $organization->id,
+        ]);
 
         $response = $this
             ->actingAs($user)
-            ->from('/profile')
-            ->delete('/profile', [
+            ->from(route('profile.edit', [
+                'organization' => $organization->slug,
+            ]))
+            ->delete(route('profile.destroy', [
+                'organization' => $organization->slug,
+            ]), [
                 'password' => 'wrong-password',
             ]);
 
         $response
             ->assertSessionHasErrorsIn('userDeletion', 'password')
-            ->assertRedirect('/profile');
+            ->assertRedirect(route('profile.edit', [
+                'organization' => $organization->slug,
+            ]));
 
         $this->assertNotNull($user->fresh());
     }
