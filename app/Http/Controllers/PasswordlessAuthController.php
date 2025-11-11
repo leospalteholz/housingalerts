@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Organization;
 use App\Models\User;
 use App\Notifications\ExistingPasswordlessUserNotification;
 use App\Providers\RouteServiceProvider;
@@ -34,27 +35,23 @@ class PasswordlessAuthController extends Controller
             );
 
             if ($user->wasRecentlyCreated) {
-                // Set organization ID to 2 (Homes for Living) for new users
-                // FIXME obviously this is a temporary hack until we have proper org management
-                $user->organization_id = 2;
-                $user->save();
+                // Temporarily assign new users to Homes for Living organization via slug lookup
+                $defaultOrganization = Organization::where('slug', 'hfl')->first();
+
+                if ($defaultOrganization) {
+                    $user->organization()->associate($defaultOrganization);
+                    $user->save();
+                } else {
+                    Log::warning('Default organization slug "hfl" not found during passwordless signup.', [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                    ]);
+                }
             }
 
             auth()->login($user);
 
-            $mailSent = true;
-
-            try {
-                $user->sendEmailVerificationNotification();
-            } catch (Throwable $e) {
-                $mailSent = false;
-
-                Log::error('Passwordless signup email failed to send.', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
-                    'exception' => $e->getMessage(),
-                ]);
-            }
+            $mailSent = $this->sendVerificationEmail($user, 'Passwordless signup email failed to send.');
 
             $redirectUrl = RouteServiceProvider::homeRoute($user);
 
@@ -70,19 +67,7 @@ class PasswordlessAuthController extends Controller
         if (!$user->hasVerifiedEmail()) {
             auth()->login($user);
 
-            $mailSent = true;
-
-            try {
-                $user->sendEmailVerificationNotification();
-            } catch (Throwable $e) {
-                $mailSent = false;
-
-                Log::error('Passwordless verification resend failed.', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
-                    'exception' => $e->getMessage(),
-                ]);
-            }
+            $mailSent = $this->sendVerificationEmail($user, 'Passwordless verification resend failed.');
 
             $redirectUrl = RouteServiceProvider::homeRoute($user);
 
@@ -93,19 +78,7 @@ class PasswordlessAuthController extends Controller
             return redirect()->to($redirectUrl)->with('success', $message);
         }
 
-        $emailDispatched = true;
-
-        try {
-            $user->notify(new ExistingPasswordlessUserNotification());
-        } catch (Throwable $e) {
-            $emailDispatched = false;
-
-            Log::error('Passwordless dashboard link email failed to send.', [
-                'user_id' => $user->id,
-                'email' => $user->email,
-                'exception' => $e->getMessage(),
-            ]);
-        }
+        $emailDispatched = $this->sendDashboardLink($user, 'Passwordless dashboard link email failed to send.');
 
         return view('auth.passwordless-existing', [
             'email' => $user->email,
@@ -127,19 +100,7 @@ class PasswordlessAuthController extends Controller
         }
 
         if (!$user->hasValidDashboardToken()) {
-            $emailDispatched = true;
-
-            try {
-                $user->notify(new ExistingPasswordlessUserNotification());
-            } catch (Throwable $e) {
-                $emailDispatched = false;
-
-                Log::error('Passwordless dashboard link expired resend failed.', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
-                    'exception' => $e->getMessage(),
-                ]);
-            }
+            $emailDispatched = $this->sendDashboardLink($user, 'Passwordless dashboard link expired resend failed.');
 
             return view('auth.passwordless-expired', [
                 'email' => $user->email,
@@ -156,5 +117,32 @@ class PasswordlessAuthController extends Controller
         return redirect()->to($redirectUrl)->with('success', 
             'Welcome! You can manage your housing alert preferences below.'
         );
+    }
+
+    private function sendVerificationEmail(User $user, string $logMessage): bool
+    {
+        return $this->dispatchNotification($user, fn () => $user->sendEmailVerificationNotification(), $logMessage);
+    }
+
+    private function sendDashboardLink(User $user, string $logMessage): bool
+    {
+        return $this->dispatchNotification($user, fn () => $user->notify(new ExistingPasswordlessUserNotification()), $logMessage);
+    }
+
+    private function dispatchNotification(User $user, callable $callback, string $logMessage): bool
+    {
+        try {
+            $callback();
+
+            return true;
+        } catch (Throwable $e) {
+            Log::error($logMessage, [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'exception' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
     }
 }
