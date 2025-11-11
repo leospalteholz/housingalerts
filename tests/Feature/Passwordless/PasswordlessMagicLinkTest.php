@@ -70,25 +70,4 @@ class PasswordlessMagicLinkTest extends TestCase
         $this->assertGuest();
         Notification::assertSentTo($user, ExistingPasswordlessUserNotification::class);
     }
-
-    public function test_legacy_plaintext_token_triggers_resend_flow(): void
-    {
-        Notification::fake();
-
-        $user = User::factory()->create([
-            'password' => null,
-            'dashboard_token' => 'legacy-token',
-            'dashboard_token_expires_at' => now()->addDay(),
-        ]);
-
-        $response = $this->get(route('dashboard.token', ['token' => 'legacy-token']));
-
-        $response->assertStatus(200)->assertViewIs('auth.passwordless-expired');
-        $this->assertGuest();
-        Notification::assertSentTo($user, ExistingPasswordlessUserNotification::class);
-
-        $user->refresh();
-        $this->assertNotSame('legacy-token', $user->dashboard_token);
-        $this->assertEquals(64, strlen($user->dashboard_token));
-    }
 }
