@@ -93,8 +93,6 @@ class PasswordlessAuthController extends Controller
             return redirect()->to($redirectUrl)->with('success', $message);
         }
 
-        $user->generateDashboardToken();
-
         $emailDispatched = true;
 
         try {
@@ -120,15 +118,15 @@ class PasswordlessAuthController extends Controller
      */
     public function dashboard(Request $request, string $token)
     {
-        $user = User::where('dashboard_token', $token)->first();
+        $hashedToken = hash('sha256', $token);
+
+        $user = User::where('dashboard_token', $hashedToken)->first();
 
         if (!$user) {
             abort(404, 'Invalid dashboard link');
         }
 
         if (!$user->hasValidDashboardToken()) {
-            $user->generateDashboardToken();
-
             $emailDispatched = true;
 
             try {

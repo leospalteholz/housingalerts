@@ -115,9 +115,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         do {
             $token = bin2hex(random_bytes(32)); // 64 character hex string
-        } while (static::where('dashboard_token', $token)->exists());
+            $hashed = hash('sha256', $token);
+        } while (static::where('dashboard_token', $hashed)->exists());
 
-        $this->dashboard_token = $token;
+        $this->dashboard_token = $hashed;
         $this->dashboard_token_expires_at = now()->addWeek();
         $this->save();
 
@@ -129,11 +130,9 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getDashboardUrl(): string
     {
-        if (!$this->dashboard_token || !$this->dashboard_token_expires_at || $this->dashboard_token_expires_at->isPast()) {
-            $this->generateDashboardToken();
-        }
+        $token = $this->generateDashboardToken();
 
-        return route('dashboard.token', ['token' => $this->dashboard_token]);
+        return route('dashboard.token', ['token' => $token]);
     }
 
     public function hasValidDashboardToken(): bool
