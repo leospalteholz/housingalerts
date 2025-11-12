@@ -18,17 +18,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Always run composer install if vendor does not exist
-if [ ! -d "vendor" ]; then
-    echo "📦 vendor directory missing, running composer install..."
-    composer install --optimize-autoloader --no-dev
-# Otherwise, only run composer if composer.json or composer.lock changed
-elif git diff HEAD~1 HEAD --name-only | grep -q "composer.json\|composer.lock"; then
-    echo "📦 Composer files changed, updating dependencies..."
-    composer install --optimize-autoloader --no-dev
-else
-    echo "📦 No composer changes detected, skipping dependency update"
-fi
+# Run the composer install
+composer install --optimize-autoloader --no-dev
 
 # Build frontend assets
 if [ -f "package.json" ]; then
