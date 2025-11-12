@@ -4,7 +4,7 @@
             <!-- Welcome Section -->
             <div class="text-center">
                 <h1 class="text-4xl font-bold text-gray-900 mb-6">
-                    Welcome {{ $subscriber->name ?? $subscriber->email }}
+                    Welcome {{ $subscriber->email }}
                 </h1>
                 <p class="text-lg text-gray-600 mb-8">
                     Thank you for signing up to help support housing in your community!
@@ -217,6 +217,18 @@
                     </div>
                 </div>
             @endif
+
+            <div class="bg-white border border-red-200 rounded-lg shadow-sm p-6 text-center">
+                <h2 class="text-lg font-semibold text-red-700 mb-2">Delete your account</h2>
+                <p class="text-sm text-gray-600 mb-4">Deleting your account will remove your subscriptions and notification preferences. This action cannot be undone.</p>
+                <form method="POST" action="{{ route('subscriber.destroy') }}" onsubmit="return confirm('Are you sure you want to permanently delete your Housing Alerts account? This action cannot be undone.');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition">
+                        Delete my account
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 

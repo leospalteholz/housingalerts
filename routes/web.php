@@ -103,6 +103,7 @@ Route::middleware(['auth:subscriber'])->group(function () {
     Route::post('/resubscribe', [UserDashboardController::class, 'resubscribe'])->name('subscriber.resubscribe');
     Route::post('/notification-preferences', [UserDashboardController::class, 'updateNotificationPreferences'])->name('subscriber.notification-preferences');
     Route::get('/hearings/upcoming', [UserDashboardController::class, 'getUpcomingHearings'])->name('subscriber.hearings');
+    Route::delete('/account', [UserDashboardController::class, 'destroy'])->name('subscriber.destroy');
 });
 
 Route::middleware(['auth:subscriber'])->prefix('{organization:slug}')->group(function () {

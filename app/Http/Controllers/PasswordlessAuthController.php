@@ -84,7 +84,7 @@ class PasswordlessAuthController extends Controller
         }
 
         // Redirect to the regular dashboard - no need for a separate view
-        $redirectUrl = RouteServiceProvider::homeRoute($subscriber);
+        $redirectUrl = RouteServiceProvider::homeRoute($subscriber, ['token' => $token]);
 
         return redirect()->to($redirectUrl)->with('success', 
             'Welcome! You can manage your housing alert preferences below.'

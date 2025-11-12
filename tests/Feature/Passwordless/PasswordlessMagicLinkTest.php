@@ -39,9 +39,9 @@ class PasswordlessMagicLinkTest extends TestCase
 
         $rawToken = $subscriber->generateDashboardToken();
 
-        $response = $this->get(route('dashboard.token', ['token' => $rawToken]));
+    $response = $this->get(route('dashboard.token', ['token' => $rawToken]));
 
-        $response->assertRedirect(route('subscriber.dashboard'));
+    $response->assertRedirect(route('subscriber.dashboard', ['token' => $rawToken]));
         $this->assertAuthenticatedAs($subscriber, 'subscriber');
     }
 

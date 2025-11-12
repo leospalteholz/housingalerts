@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Region;
 use App\Models\Hearing;
+use Illuminate\Support\Facades\Auth;
 
 class UserDashboardController extends Controller
 {
@@ -72,6 +73,23 @@ class UserDashboardController extends Controller
         $subscriber->save();
 
         return redirect()->route('subscriber.dashboard')->with('success', 'You have been resubscribed to notifications.');
+    }
+
+    public function destroy(Request $request)
+    {
+        $subscriber = auth('subscriber')->user();
+
+        abort_unless($subscriber, 403);
+
+        Auth::guard('subscriber')->logout();
+
+        $subscriber->regions()->detach();
+        $subscriber->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/')->with('success', 'Your Housing Alerts account has been deleted.');
     }
 
     /**

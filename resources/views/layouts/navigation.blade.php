@@ -58,36 +58,45 @@
             <!-- Settings Dropdown -->
             @if($displayUser)
             <div class="hidden sm:flex sm:items-center sm:ml-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ $displayUser->name ?? $displayUser->email }}</div>
+                @if($subscriber)
+                    <div class="flex items-center space-x-4">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center px-3 py-2 bg-gray-100 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition">
+                                {{ __('Log Out') }}
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                                <div>{{ $displayUser->name ?? $displayUser->email }}</div>
 
-                            <div class="ml-1">
-                                <x-icon name="chevron-down" class="fill-current h-4 w-4" />
-                            </div>
-                        </button>
-                    </x-slot>
+                                <div class="ml-1">
+                                    <x-icon name="chevron-down" class="fill-current h-4 w-4" />
+                                </div>
+                            </button>
+                        </x-slot>
 
-                    <x-slot name="content">
-                        @if(!$subscriber)
+                        <x-slot name="content">
                             <x-dropdown-link :href="orgRoute('profile.edit')">
                                 {{ __('Profile') }}
                             </x-dropdown-link>
-                        @endif
 
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
+                            <!-- Authentication -->
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
 
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+                                <x-dropdown-link :href="route('logout')"
+                                        onclick="event.preventDefault();
+                                                    this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
+                        </x-slot>
+                    </x-dropdown>
+                @endif
             </div>
             @endif
 

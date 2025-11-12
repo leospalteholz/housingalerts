@@ -144,4 +144,37 @@ class SubscriberDashboardTest extends TestCase
         $this->assertStringNotContainsString('Future Unapproved', $content);
         $this->assertStringNotContainsString('Past Hearing', $content);
     }
+
+    public function test_subscriber_can_delete_their_account(): void
+    {
+        $organization = Organization::factory()->create();
+        $region = Region::factory()->for($organization, 'organization')->create();
+
+        $subscriber = Subscriber::factory()->create([
+            'email_verified_at' => now(),
+        ]);
+
+        $subscriber->regions()->attach($region->id);
+
+        SubscriberNotificationSettings::create([
+            'subscriber_id' => $subscriber->id,
+            'notify_development_hearings' => true,
+            'notify_policy_hearings' => true,
+            'send_day_of_reminders' => true,
+        ]);
+
+        $response = $this->actingAs($subscriber, 'subscriber')
+            ->delete(route('subscriber.destroy'));
+
+        $response->assertRedirect('/');
+        $response->assertSessionHas('success', 'Your Housing Alerts account has been deleted.');
+
+        $this->assertDatabaseMissing('subscribers', ['id' => $subscriber->id]);
+        $this->assertDatabaseMissing('region_subscriber', [
+            'subscriber_id' => $subscriber->id,
+            'region_id' => $region->id,
+        ]);
+
+        $this->assertGuest('subscriber');
+    }
 }
