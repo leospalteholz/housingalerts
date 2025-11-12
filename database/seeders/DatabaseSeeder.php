@@ -12,6 +12,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command?->info('Skipping DatabaseSeeder in production environment.');
+
+            return;
+        }
+
         $rootOrg = \App\Models\Organization::updateOrCreate(
             [ 'name' => 'Housing Alerts' ],
             [ 
