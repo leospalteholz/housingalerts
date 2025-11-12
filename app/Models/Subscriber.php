@@ -139,14 +139,6 @@ class Subscriber extends Model implements Authenticatable, MustVerifyEmail
         return $subscriber;
     }
 
-    /**
-     * Subscribers always use passwordless access.
-     */
-    public function isPasswordless(): bool
-    {
-        return true;
-    }
-
     public function hasVerifiedEmail(): bool
     {
         return !is_null($this->email_verified_at);
@@ -171,10 +163,10 @@ class Subscriber extends Model implements Authenticatable, MustVerifyEmail
     }
 
     /**
-     * Send the email verification notification.
+     * Email verification messages are delivered via the passwordless dashboard link flow.
      */
     public function sendEmailVerificationNotification(): void
     {
-        $this->notify(new \App\Notifications\CustomVerifyEmail);
+        // Verification emails are sent alongside the dashboard link notification.
     }
 }

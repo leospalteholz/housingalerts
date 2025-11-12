@@ -14,7 +14,7 @@ class PasswordlessSignupTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_new_email_creates_subscriber_and_sends_verification(): void
+    public function test_new_email_creates_subscriber_and_sends_dashboard_link(): void
     {
         Notification::fake();
 

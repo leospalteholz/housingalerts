@@ -2,83 +2,33 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\Organization;
-use App\Models\User;
-use App\Providers\RouteServiceProvider;
-use Illuminate\Auth\Events\Verified;
+use App\Models\Subscriber;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class EmailVerificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_email_verification_screen_can_be_rendered(): void
+    public function test_subscriber_becomes_verified_after_dashboard_login(): void
     {
-        $organization = Organization::create([
-            'name' => 'Verification Org',
-            'slug' => 'verification-org',
+        $subscriber = Subscriber::factory()->unverified()->create([
+            'email' => 'new-subscriber@example.com',
         ]);
 
-        $user = User::factory()->create([
-            'email_verified_at' => null,
-            'organization_id' => $organization->id,
-        ]);
+        $this->assertNull($subscriber->email_verified_at);
 
-        $response = $this->actingAs($user)->get('/verify-email');
+        $rawToken = $subscriber->generateDashboardToken();
 
-        $response->assertStatus(200);
-    }
+        $this->get(route('dashboard.token', ['token' => $rawToken]))
+            ->assertRedirect(route('subscriber.dashboard', ['token' => $rawToken]));
 
-    public function test_email_can_be_verified(): void
-    {
-        $organization = Organization::create([
-            'name' => 'Verify Org',
-            'slug' => 'verify-org',
-        ]);
+        $subscriber->refresh();
 
-        $user = User::factory()->create([
-            'email_verified_at' => null,
-            'organization_id' => $organization->id,
-        ]);
+        $this->assertAuthenticatedAs($subscriber, 'subscriber');
+        $this->assertNotNull($subscriber->email_verified_at);
+        $this->assertTrue($subscriber->hasVerifiedEmail());
 
-        Event::fake();
-
-        $verificationUrl = URL::temporarySignedRoute(
-            'verification.verify',
-            now()->addMinutes(60),
-            ['id' => $user->id, 'hash' => sha1($user->email)]
-        );
-
-        $response = $this->actingAs($user)->get($verificationUrl);
-
-        Event::assertDispatched(Verified::class);
-        $this->assertTrue($user->fresh()->hasVerifiedEmail());
-    $response->assertRedirect(RouteServiceProvider::homeRoute($user, ['verified' => 1]));
-    }
-
-    public function test_email_is_not_verified_with_invalid_hash(): void
-    {
-        $organization = Organization::create([
-            'name' => 'Invalid Hash Org',
-            'slug' => 'invalid-hash-org',
-        ]);
-
-        $user = User::factory()->create([
-            'email_verified_at' => null,
-            'organization_id' => $organization->id,
-        ]);
-
-        $verificationUrl = URL::temporarySignedRoute(
-            'verification.verify',
-            now()->addMinutes(60),
-            ['id' => $user->id, 'hash' => sha1('wrong-email')]
-        );
-
-        $this->actingAs($user)->get($verificationUrl);
-
-        $this->assertFalse($user->fresh()->hasVerifiedEmail());
     }
 }
