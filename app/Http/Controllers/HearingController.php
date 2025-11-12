@@ -6,6 +6,7 @@ use App\Http\Requests\HearingRequest;
 use App\Models\Hearing;
 use App\Models\Organization;
 use App\Models\Region;
+use Illuminate\Support\Facades\View;
 
 class HearingController extends Controller
 {
@@ -184,11 +185,13 @@ class HearingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Organization $organization, Hearing $hearing)
+    public function show(Hearing $hearing)
     {
-        $this->ensureHearingBelongsToOrganization($hearing, $organization);
-
         $hearing->load(['region', 'organization']);
+
+        if ($hearing->organization) {
+            View::share('currentOrganization', $hearing->organization);
+        }
         
         // Public hearing view - no additional access restrictions needed
         
@@ -197,7 +200,7 @@ class HearingController extends Controller
         $emailNotifications = collect();
         
         if (auth()->check() && (auth()->user()->is_admin || auth()->user()->is_superuser)) {
-            $subscribedUsers = \App\Models\User::whereHas('regions', function ($query) use ($hearing) {
+            $subscribedUsers = \App\Models\Subscriber::whereHas('regions', function ($query) use ($hearing) {
                 $query->where('region_id', $hearing->region_id);
             })
             ->whereHas('notificationSettings', function ($query) use ($hearing) {
@@ -213,7 +216,7 @@ class HearingController extends Controller
             
             // Get email notifications for this hearing
             $emailNotifications = \App\Models\EmailNotification::where('hearing_id', $hearing->id)
-                ->with('user')
+                ->with('subscriber')
                 ->orderBy('created_at', 'desc')
                 ->get();
         }
@@ -327,18 +330,23 @@ class HearingController extends Controller
      */
     private function scopedHearingsQuery(?Organization $organization = null)
     {
-        $user = auth()->user();
+        $admin = auth()->user();
+        $subscriber = auth('subscriber')->user();
         $organization = $organization ?: $this->currentOrganizationOrFail();
         $query = Hearing::query()->where('organization_id', $organization->id);
 
-        if ($user->is_superuser || $user->is_admin) {
+        if ($admin && ($admin->is_superuser || $admin->is_admin)) {
             return $query;
         }
 
-        $monitoredRegionIds = $user->regions()->pluck('regions.id');
+        if ($subscriber) {
+            $monitoredRegionIds = $subscriber->regions()->pluck('regions.id');
 
-        return $query->whereIn('region_id', $monitoredRegionIds)
-            ->where('approved', true);
+            return $query->whereIn('region_id', $monitoredRegionIds)
+                ->where('approved', true);
+        }
+
+        return $query->whereRaw('1 = 0');
     }
 
     /**
@@ -535,10 +543,8 @@ class HearingController extends Controller
     /**
      * Add hearing to calendar - redirect to calendar service
      */
-    public function addToCalendar(Organization $organization, Hearing $hearing, $provider)
+    public function addToCalendar(Hearing $hearing, $provider)
     {
-        $this->ensureHearingBelongsToOrganization($hearing, $organization);
-
         $url = $this->generateCalendarUrl($hearing, $provider);
         return redirect($url);
     }
@@ -546,10 +552,8 @@ class HearingController extends Controller
     /**
      * Download ICS file for hearing
      */
-    public function downloadIcs(Organization $organization, Hearing $hearing)
+    public function downloadIcs(Hearing $hearing)
     {
-        $this->ensureHearingBelongsToOrganization($hearing, $organization);
-
         $icsContent = $hearing->generateIcsContent();
         $filename = 'hearing-' . $hearing->id . '.ics';
         

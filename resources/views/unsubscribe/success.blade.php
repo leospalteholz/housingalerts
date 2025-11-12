@@ -11,7 +11,7 @@
             
             <div class="mb-6">
                 <p class="text-gray-600 mb-2">We've successfully unsubscribed:</p>
-                <p class="font-semibold text-gray-900">{{ $user->email }}</p>
+                <p class="font-semibold text-gray-900">{{ $subscriber->email }}</p>
             </div>
             
             <div class="bg-green-50 border border-green-200 rounded-md p-4 mb-6">

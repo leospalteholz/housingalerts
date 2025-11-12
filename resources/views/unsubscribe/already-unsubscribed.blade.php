@@ -11,7 +11,7 @@
             
             <div class="mb-6">
                 <p class="text-gray-600 mb-2">The email address:</p>
-                <p class="font-semibold text-gray-900">{{ $user->email }}</p>
+                <p class="font-semibold text-gray-900">{{ $subscriber->email }}</p>
                 <p class="text-gray-600 mt-2">is already unsubscribed from all housing alerts.</p>
             </div>
             

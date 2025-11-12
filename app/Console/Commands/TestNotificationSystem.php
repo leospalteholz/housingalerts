@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\EmailNotification;
-use App\Models\User;
+use App\Models\Subscriber;
 use App\Models\Hearing;
 use App\Services\NotificationService;
 use Illuminate\Console\Command;
@@ -34,25 +34,25 @@ class TestNotificationSystem extends Command
         
         // Get the first hearing and user for testing
         $hearing = Hearing::first();
-        $user = User::first();
+        $subscriber = Subscriber::first();
         
-        if (!$hearing || !$user) {
+        if (!$hearing || !$subscriber) {
             $this->error('Need at least one hearing and one user in the database to test.');
             return 1;
         }
         
         $this->info("Testing with hearing: {$hearing->title}");
-        $this->info("Testing with user: {$user->email}");
+        $this->info("Testing with user: {$subscriber->email}");
         
         // Clear any existing notifications for this test
-        EmailNotification::where('user_id', $user->id)
+        EmailNotification::where('subscriber_id', $subscriber->id)
             ->where('hearing_id', $hearing->id)
             ->delete();
         
         // Create a test notification that's old enough to be processed (2 minutes ago)
         $testCreatedAt = Carbon::now()->subMinutes(2);
         $notification = new EmailNotification([
-            'user_id' => $user->id,
+            'subscriber_id' => $subscriber->id,
             'hearing_id' => $hearing->id,
             'notification_type' => 'hearing_created',
             'email_address' => 'leo.spalteholz@gmail.com',
@@ -70,7 +70,7 @@ class TestNotificationSystem extends Command
         $this->info("   Type: {$notification->notification_type}");
         
         // Check what notifications exist in the database
-        $allNotifications = EmailNotification::where('user_id', $user->id)
+    $allNotifications = EmailNotification::where('subscriber_id', $subscriber->id)
             ->where('hearing_id', $hearing->id)
             ->get();
         

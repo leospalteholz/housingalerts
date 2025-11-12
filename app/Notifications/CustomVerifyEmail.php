@@ -26,7 +26,7 @@ class CustomVerifyEmail extends VerifyEmailBase
             ->line('Once verified, you\'ll start receiving timely notifications about housing hearings in the regions you selected.');
 
         // Add dashboard link for passwordless users
-        if ($notifiable->isPasswordless()) {
+        if (method_exists($notifiable, 'isPasswordless') && $notifiable->isPasswordless()) {
             $message->line('**You can access your dashboard in the future by entering your email address at https://housingalerts.ca to get a link to the dashboard**');
         }
 

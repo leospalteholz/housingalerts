@@ -51,7 +51,7 @@
                         </div>
                     </div>
                     <div class="ml-4 flex gap-2">
-                        <a href="{{ orgRoute('hearings.show', ['hearing' => $hearing]) }}" 
+                        <a href="{{ route('hearings.show', ['hearing' => $hearing]) }}" 
                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
                             View Details
                         </a>
@@ -64,11 +64,8 @@
         @endforeach
     </div>
     @if($upcomingHearings->count() > 5)
-        <div class="px-6 py-4 bg-gray-50 text-center">
-            <a href="{{ orgRoute('hearings.index') }}" 
-               class="text-blue-600 hover:text-blue-800 font-medium">
-                View all {{ $upcomingHearings->count() }} upcoming hearings →
-            </a>
+        <div class="px-6 py-4 bg-gray-50 text-center text-sm text-gray-600">
+            Showing the first 5 hearings. Check your dashboard for more updates soon.
         </div>
     @endif
 @else

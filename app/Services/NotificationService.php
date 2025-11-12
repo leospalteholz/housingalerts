@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\EmailNotification;
-use App\Models\User;
+use App\Models\Subscriber;
 use App\Models\Hearing;
 use Carbon\Carbon;
 
@@ -14,27 +14,33 @@ class NotificationService
      */
     public function queueHearingCreatedNotifications(Hearing $hearing): int
     {
-        // Get all users who want hearing created notifications for this region
-        $users = User::whereHas('regions', function ($query) use ($hearing) {
-            $query->where('region_id', $hearing->region_id);
-        })
-        ->where('hearing_created_notifications', true)
-        ->get();
+        $subscribers = Subscriber::query()
+            ->whereNull('unsubscribed_at')
+            ->whereHas('regions', function ($query) use ($hearing) {
+                $query->where('region_id', $hearing->region_id);
+            })
+            ->whereNotNull('email_verified_at')
+            ->whereHas('notificationSettings', function ($query) use ($hearing) {
+                if ($hearing->type === 'policy') {
+                    $query->where('notify_policy_hearings', true);
+                } else {
+                    $query->where('notify_development_hearings', true);
+                }
+            })
+            ->get();
         
         $queuedCount = 0;
         
-        foreach ($users as $user) {
-            // Check if we've already sent this notification
-            if (EmailNotification::alreadySent($user->id, $hearing->id, 'hearing_created')) {
+        foreach ($subscribers as $subscriber) {
+            if (EmailNotification::alreadySent($subscriber->id, $hearing->id, 'hearing_created')) {
                 continue;
             }
             
-            // Queue the notification
             EmailNotification::create([
-                'user_id' => $user->id,
+                'subscriber_id' => $subscriber->id,
                 'hearing_id' => $hearing->id,
                 'notification_type' => 'hearing_created',
-                'email_address' => $user->email,
+                'email_address' => $subscriber->email,
                 'status' => 'queued',
                 'opted_in' => true,
                 'created_at' => Carbon::now()
@@ -51,27 +57,29 @@ class NotificationService
      */
     public function queueDayOfReminderNotifications(Hearing $hearing): int
     {
-        // Get all users who want day-of reminders for this region
-        $users = User::whereHas('regions', function ($query) use ($hearing) {
-            $query->where('region_id', $hearing->region_id);
-        })
-        ->where('day_of_reminders', true)
-        ->get();
+        $subscribers = Subscriber::query()
+            ->whereNull('unsubscribed_at')
+            ->whereHas('regions', function ($query) use ($hearing) {
+                $query->where('region_id', $hearing->region_id);
+            })
+            ->whereNotNull('email_verified_at')
+            ->whereHas('notificationSettings', function ($query) {
+                $query->where('send_day_of_reminders', true);
+            })
+            ->get();
         
         $queuedCount = 0;
         
-        foreach ($users as $user) {
-            // Check if we've already sent this notification
-            if (EmailNotification::alreadySent($user->id, $hearing->id, 'day_of_reminder')) {
+        foreach ($subscribers as $subscriber) {
+            if (EmailNotification::alreadySent($subscriber->id, $hearing->id, 'day_of_reminder')) {
                 continue;
             }
             
-            // Queue the notification
             EmailNotification::create([
-                'user_id' => $user->id,
+                'subscriber_id' => $subscriber->id,
                 'hearing_id' => $hearing->id,
                 'notification_type' => 'day_of_reminder',
-                'email_address' => $user->email,
+                'email_address' => $subscriber->email,
                 'status' => 'queued',
                 'opted_in' => true,
                 'created_at' => Carbon::now()

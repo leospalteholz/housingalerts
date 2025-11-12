@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_notification_settings', function (Blueprint $table) {
+        Schema::create('subscriber_notification_settings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('subscriber_id')->constrained()->onDelete('cascade');
             $table->boolean('notify_development_hearings')->default(true);
             $table->boolean('notify_policy_hearings')->default(true);
             $table->boolean('send_day_of_reminders')->default(false);
             $table->timestamps();
-            
-            // Ensure one settings record per user
-            $table->unique('user_id');
+
+            $table->unique('subscriber_id');
         });
     }
 
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_notification_settings');
+        Schema::dropIfExists('subscriber_notification_settings');
     }
 };

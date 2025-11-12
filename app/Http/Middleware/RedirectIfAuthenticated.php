@@ -31,6 +31,16 @@ class RedirectIfAuthenticated
             }
         }
 
+        if (!in_array('subscriber', $guards, true) && Auth::guard('subscriber')->check()) {
+            $subscriber = Auth::guard('subscriber')->user();
+
+            if ($subscriber) {
+                return redirect(RouteServiceProvider::homeRoute($subscriber));
+            }
+
+            return redirect(RouteServiceProvider::HOME);
+        }
+
         return $next($request);
     }
 }

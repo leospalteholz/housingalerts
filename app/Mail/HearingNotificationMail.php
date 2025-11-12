@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\User;
+use App\Models\Subscriber;
 use App\Models\Hearing;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -20,12 +20,13 @@ class HearingNotificationMail extends Mailable
      * Create a new message instance.
      */
     public function __construct(
-        public User $user,
+        public Subscriber $subscriber,
         public Hearing $hearing,
         public string $template,
-        public array $templateData = []
+        public array $templateData = [],
+        public ?string $dashboardUrl = null
     ) {
-        //
+        $this->dashboardUrl = $dashboardUrl ?: $subscriber->getDashboardUrl();
     }
 
     /**
@@ -46,9 +47,10 @@ class HearingNotificationMail extends Mailable
         return new Content(
             view: "emails.hearing-{$this->template}",
             with: [
-                'user' => $this->user,
+                'subscriber' => $this->subscriber,
                 'hearing' => $this->hearing,
                 'data' => $this->templateData,
+                'dashboardUrl' => $this->dashboardUrl,
             ]
         );
     }

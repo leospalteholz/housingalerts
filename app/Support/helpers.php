@@ -32,6 +32,31 @@ if (!function_exists('orgRoute')) {
             }
         }
 
+        if (!$organization instanceof Organization) {
+            $subscriber = Auth::guard('subscriber')->user();
+
+            if ($subscriber) {
+                static $subscriberOrganizationCache = [];
+
+                $subscriberId = $subscriber->getKey();
+
+                if (!array_key_exists($subscriberId, $subscriberOrganizationCache)) {
+                    $subscriberOrganizationCache[$subscriberId] = $subscriber->regions()
+                        ->with('organization')
+                        ->get()
+                        ->pluck('organization')
+                        ->filter()
+                        ->first();
+                }
+
+                $subscriberOrganization = $subscriberOrganizationCache[$subscriberId] ?? null;
+
+                if ($subscriberOrganization instanceof Organization) {
+                    $organization = $subscriberOrganization;
+                }
+            }
+        }
+
         $parameters = Arr::wrap($parameters);
 
         if ($organization instanceof Organization) {

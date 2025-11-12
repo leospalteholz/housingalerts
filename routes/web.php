@@ -10,8 +10,9 @@ use App\Http\Controllers\HearingVoteController;
 use App\Http\Controllers\PublicHearingSubmissionController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserDashboardController;
-use App\Http\Controllers\NotificationSettingsController;
+use App\Http\Controllers\SignupController;
 use App\Providers\RouteServiceProvider;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,6 +29,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->to(RouteServiceProvider::homeRoute(auth()->user()));
+    }
+
+    if (Auth::guard('subscriber')->check()) {
+        return redirect()->to(RouteServiceProvider::homeRoute(Auth::guard('subscriber')->user()));
     }
 
     // Get regions for the rotating header animation
@@ -51,7 +56,7 @@ Route::middleware(['auth', 'superuser'])->group(function () {
 });
 
 // Authenticated routes scoped by organization slug
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth:web'])->group(function () {
     Route::prefix('{organization:slug}')
         ->middleware('organization.access')
         ->group(function () {
@@ -79,33 +84,28 @@ Route::middleware(['auth'])->group(function () {
             });
 
             // User dashboards and preferences
-            Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
-                ->name('user.dashboard');
-            Route::post('/user/resubscribe', [UserDashboardController::class, 'resubscribe'])
-                ->name('user.resubscribe');
-            Route::post('/user/notification-preferences', [UserDashboardController::class, 'updateNotificationPreferences'])
-                ->name('user.notification-preferences');
-            Route::get('/user/hearings', [UserDashboardController::class, 'getUpcomingHearings'])
-                ->name('user.hearings');
-
-            // Notification settings
-            Route::get('/notification-settings', [NotificationSettingsController::class, 'show'])
-                ->name('notification-settings');
-            Route::post('/notification-settings', [NotificationSettingsController::class, 'update'])
-                ->name('notification-settings.update');
-
             // Hearings & regions accessible to authenticated users
             Route::get('/hearings', [HearingController::class, 'index'])->name('hearings.index');
             Route::get('/regions', [RegionController::class, 'index'])->name('regions.index');
             Route::get('/regions/{region}', [RegionController::class, 'show'])->name('regions.show');
-            Route::post('/regions/{region}/subscribe', [RegionController::class, 'subscribe'])->name('regions.subscribe');
-            Route::post('/regions/{region}/unsubscribe', [RegionController::class, 'unsubscribe'])->name('regions.unsubscribe');
 
             // Profile management
             Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
             Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
             Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
         });
+});
+
+Route::middleware(['auth:subscriber'])->group(function () {
+    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('subscriber.dashboard');
+    Route::post('/resubscribe', [UserDashboardController::class, 'resubscribe'])->name('subscriber.resubscribe');
+    Route::post('/notification-preferences', [UserDashboardController::class, 'updateNotificationPreferences'])->name('subscriber.notification-preferences');
+    Route::get('/hearings/upcoming', [UserDashboardController::class, 'getUpcomingHearings'])->name('subscriber.hearings');
+});
+
+Route::middleware(['auth:subscriber'])->prefix('{organization:slug}')->group(function () {
+    Route::post('/regions/{region}/subscribe', [RegionController::class, 'subscribe'])->name('regions.subscribe');
+    Route::post('/regions/{region}/unsubscribe', [RegionController::class, 'unsubscribe'])->name('regions.unsubscribe');
 });
 
 Route::get('/{organization:slug}/hearings/export', [HearingController::class, 'export'])
@@ -125,12 +125,11 @@ Route::get('/{organization:slug}/submit-hearing/thank-you', [PublicHearingSubmis
 
 // Public routes - accessible to everyone
 // Individual hearing details and calendar functionality
-Route::get('/{organization:slug}/hearings/{hearing}', [HearingController::class, 'show'])->name('hearings.show');
-Route::get('/{organization:slug}/hearings/{hearing}/calendar/{provider}', [HearingController::class, 'addToCalendar'])->name('hearings.calendar');
-Route::get('/{organization:slug}/hearings/{hearing}/calendar.ics', [HearingController::class, 'downloadIcs'])->name('hearings.ics');
+Route::get('/hearings/{hearing}', [HearingController::class, 'show'])->name('hearings.show');
+Route::get('/hearings/{hearing}/calendar/{provider}', [HearingController::class, 'addToCalendar'])->name('hearings.calendar');
+Route::get('/hearings/{hearing}/calendar.ics', [HearingController::class, 'downloadIcs'])->name('hearings.ics');
 
 // Signup routes (accessible to guests)
-use App\Http\Controllers\SignupController;
 Route::middleware(['web'])->group(function () {
     Route::get('/signup', [SignupController::class, 'showSignupForm'])->name('signup');
     Route::post('/signup', [SignupController::class, 'processSignup'])->name('signup.process');

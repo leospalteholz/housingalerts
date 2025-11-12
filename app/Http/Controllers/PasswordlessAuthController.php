@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Organization;
+use App\Models\Subscriber;
 use App\Models\User;
 use App\Notifications\ExistingPasswordlessUserNotification;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -22,38 +23,25 @@ class PasswordlessAuthController extends Controller
             'name' => 'nullable|string|max:255',
         ]);
 
-        $existingUser = User::where('email', $request->email)->first();
+        $existingAdmin = User::where('email', $request->email)->first();
 
-        if ($existingUser && $existingUser->requiresPassword()) {
+        if ($existingAdmin && $existingAdmin->requiresPassword()) {
             return redirect()->route('login')->with('status', 'Please sign in with your password to continue.');
         }
 
-        if (!$existingUser) {
-            $user = User::findOrCreatePasswordless(
+        $existingSubscriber = Subscriber::where('email', $request->email)->first();
+
+        if (!$existingSubscriber) {
+            $subscriber = Subscriber::findOrCreateByEmail(
                 $request->email,
                 $request->name
             );
 
-            if ($user->wasRecentlyCreated) {
-                // Temporarily assign new users to Homes for Living organization via slug lookup
-                $defaultOrganization = Organization::where('slug', 'hfl')->first();
+            Auth::guard('subscriber')->login($subscriber);
 
-                if ($defaultOrganization) {
-                    $user->organization()->associate($defaultOrganization);
-                    $user->save();
-                } else {
-                    Log::warning('Default organization slug "hfl" not found during passwordless signup.', [
-                        'user_id' => $user->id,
-                        'email' => $user->email,
-                    ]);
-                }
-            }
+            $mailSent = $this->sendVerificationEmail($subscriber, 'Passwordless signup email failed to send.');
 
-            auth()->login($user);
-
-            $mailSent = $this->sendVerificationEmail($user, 'Passwordless signup email failed to send.');
-
-            $redirectUrl = RouteServiceProvider::homeRoute($user);
+            $redirectUrl = RouteServiceProvider::homeRoute($subscriber);
 
             $message = $mailSent
                 ? 'Welcome! We sent a confirmation email with your personal dashboard link for future access.'
@@ -62,14 +50,14 @@ class PasswordlessAuthController extends Controller
             return redirect()->to($redirectUrl)->with('success', $message);
         }
 
-        $user = $existingUser;
+        $subscriber = $existingSubscriber;
 
-        if (!$user->hasVerifiedEmail()) {
-            auth()->login($user);
+        if (!$subscriber->hasVerifiedEmail()) {
+            Auth::guard('subscriber')->login($subscriber);
 
-            $mailSent = $this->sendVerificationEmail($user, 'Passwordless verification resend failed.');
+            $mailSent = $this->sendVerificationEmail($subscriber, 'Passwordless verification resend failed.');
 
-            $redirectUrl = RouteServiceProvider::homeRoute($user);
+            $redirectUrl = RouteServiceProvider::homeRoute($subscriber);
 
             $message = $mailSent
                 ? 'Welcome back! Please verify your email to receive housing alerts.'
@@ -78,10 +66,10 @@ class PasswordlessAuthController extends Controller
             return redirect()->to($redirectUrl)->with('success', $message);
         }
 
-        $emailDispatched = $this->sendDashboardLink($user, 'Passwordless dashboard link email failed to send.');
+        $emailDispatched = $this->sendDashboardLink($subscriber, 'Passwordless dashboard link email failed to send.');
 
         return view('auth.passwordless-existing', [
-            'email' => $user->email,
+            'email' => $subscriber->email,
             'emailDispatched' => $emailDispatched,
         ]);
     }
@@ -93,43 +81,43 @@ class PasswordlessAuthController extends Controller
     {
         $hashedToken = hash('sha256', $token);
 
-        $user = User::where('dashboard_token', $hashedToken)->first();
+        $subscriber = Subscriber::where('dashboard_token', $hashedToken)->first();
 
-        if (!$user) {
+        if (!$subscriber) {
             abort(404, 'Invalid dashboard link');
         }
 
-        if (!$user->hasValidDashboardToken()) {
-            $emailDispatched = $this->sendDashboardLink($user, 'Passwordless dashboard link expired resend failed.');
+        if (!$subscriber->hasValidDashboardToken()) {
+            $emailDispatched = $this->sendDashboardLink($subscriber, 'Passwordless dashboard link expired resend failed.');
 
             return view('auth.passwordless-expired', [
-                'email' => $user->email,
+                'email' => $subscriber->email,
                 'emailDispatched' => $emailDispatched,
             ]);
         }
 
         // Auto-login the user for this session
-        auth()->login($user);
+        Auth::guard('subscriber')->login($subscriber);
 
         // Redirect to the regular dashboard - no need for a separate view
-        $redirectUrl = RouteServiceProvider::homeRoute($user);
+        $redirectUrl = RouteServiceProvider::homeRoute($subscriber);
 
         return redirect()->to($redirectUrl)->with('success', 
             'Welcome! You can manage your housing alert preferences below.'
         );
     }
 
-    private function sendVerificationEmail(User $user, string $logMessage): bool
+    private function sendVerificationEmail(Subscriber $subscriber, string $logMessage): bool
     {
-        return $this->dispatchNotification($user, fn () => $user->sendEmailVerificationNotification(), $logMessage);
+        return $this->dispatchNotification($subscriber, fn () => $subscriber->sendEmailVerificationNotification(), $logMessage);
     }
 
-    private function sendDashboardLink(User $user, string $logMessage): bool
+    private function sendDashboardLink(Subscriber $subscriber, string $logMessage): bool
     {
-        return $this->dispatchNotification($user, fn () => $user->notify(new ExistingPasswordlessUserNotification()), $logMessage);
+        return $this->dispatchNotification($subscriber, fn () => $subscriber->notify(new ExistingPasswordlessUserNotification()), $logMessage);
     }
 
-    private function dispatchNotification(User $user, callable $callback, string $logMessage): bool
+    private function dispatchNotification(Subscriber $subscriber, callable $callback, string $logMessage): bool
     {
         try {
             $callback();
@@ -137,8 +125,8 @@ class PasswordlessAuthController extends Controller
             return true;
         } catch (Throwable $e) {
             Log::error($logMessage, [
-                'user_id' => $user->id,
-                'email' => $user->email,
+                'subscriber_id' => $subscriber->id,
+                'email' => $subscriber->email,
                 'exception' => $e->getMessage(),
             ]);
 

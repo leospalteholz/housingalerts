@@ -2,11 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Organization;
+use App\Models\Subscriber;
 use App\Http\Controllers\UnsubscribeController;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class UnsubscribeTest extends TestCase
@@ -15,20 +13,13 @@ class UnsubscribeTest extends TestCase
 
     public function test_unsubscribe_url_generation()
     {
-        // Create a test organization and user
-        $organization = Organization::create([
-            'name' => 'Test Organization',
-            'contact_email' => 'contact@test.org',
-        ]);
-
-        $user = User::factory()->create([
-            'name' => 'Test User',
+        $subscriber = Subscriber::factory()->create([
+            'name' => 'Test Subscriber',
             'email' => 'test@example.com',
-            'organization_id' => $organization->id,
             'email_verified_at' => now(),
         ]);
 
-        $unsubscribeUrl = UnsubscribeController::generateUnsubscribeUrl($user);
+        $unsubscribeUrl = UnsubscribeController::generateUnsubscribeUrl($subscriber);
 
         // Verify the URL contains the expected components
         $this->assertStringContainsString('/unsubscribe', $unsubscribeUrl);
@@ -38,20 +29,13 @@ class UnsubscribeTest extends TestCase
 
     public function test_unsubscribe_shows_confirmation_page()
     {
-        // Create a test organization and user
-        $organization = Organization::create([
-            'name' => 'Test Organization',
-            'contact_email' => 'contact@test.org',
-        ]);
-
-        $user = User::factory()->create([
-            'name' => 'Test User',
+        $subscriber = Subscriber::factory()->create([
+            'name' => 'Test Subscriber',
             'email' => 'test@example.com',
-            'organization_id' => $organization->id,
             'email_verified_at' => now(),
         ]);
 
-        $unsubscribeUrl = UnsubscribeController::generateUnsubscribeUrl($user);
+        $unsubscribeUrl = UnsubscribeController::generateUnsubscribeUrl($subscriber);
 
         $response = $this->get($unsubscribeUrl);
 
@@ -63,22 +47,15 @@ class UnsubscribeTest extends TestCase
 
     public function test_unsubscribe_process_works()
     {
-        // Create a test organization and user
-        $organization = Organization::create([
-            'name' => 'Test Organization',
-            'contact_email' => 'contact@test.org',
-        ]);
-
-        $user = User::factory()->create([
-            'name' => 'Test User',
+        $subscriber = Subscriber::factory()->create([
+            'name' => 'Test Subscriber',
             'email' => 'test@example.com',
-            'organization_id' => $organization->id,
             'email_verified_at' => now(),
         ]);
 
-        $this->assertNull($user->unsubscribed_at);
+        $this->assertNull($subscriber->unsubscribed_at);
 
-        $unsubscribeUrl = UnsubscribeController::generateUnsubscribeUrl($user);
+        $unsubscribeUrl = UnsubscribeController::generateUnsubscribeUrl($subscriber);
 
         $response = $this->post($unsubscribeUrl);
 
@@ -86,28 +63,19 @@ class UnsubscribeTest extends TestCase
     $response->assertSeeText('Been Unsubscribed');
     $response->assertSee('test@example.com');
 
-        // Verify user is now unsubscribed
-        $user->refresh();
-        $this->assertNotNull($user->unsubscribed_at);
+    $subscriber->refresh();
+    $this->assertNotNull($subscriber->unsubscribed_at);
     }
 
     public function test_already_unsubscribed_user_sees_appropriate_message()
     {
-        // Create a test organization and user
-        $organization = Organization::create([
-            'name' => 'Test Organization',
-            'contact_email' => 'contact@test.org',
-        ]);
-
-        $user = User::factory()->create([
-            'name' => 'Test User',
+        $subscriber = Subscriber::factory()->unsubscribed()->create([
+            'name' => 'Test Subscriber',
             'email' => 'test@example.com',
-            'organization_id' => $organization->id,
             'email_verified_at' => now(),
-            'unsubscribed_at' => now(),
         ]);
 
-        $unsubscribeUrl = UnsubscribeController::generateUnsubscribeUrl($user);
+        $unsubscribeUrl = UnsubscribeController::generateUnsubscribeUrl($subscriber);
 
         $response = $this->get($unsubscribeUrl);
 

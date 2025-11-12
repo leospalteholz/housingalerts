@@ -364,7 +364,7 @@
             </div>
             
             <div style="text-align: center;">
-                <a href="{{ route('hearings.show', ['organization' => $hearing->organization->slug, 'hearing' => $hearing]) }}" class="cta-button">
+                <a href="{{ route('hearings.show', ['hearing' => $hearing]) }}" class="cta-button">
                     View hearing details
                 </a>
             </div>
@@ -373,10 +373,14 @@
         <div class="footer">
             <p>You're receiving this email because you've subscribed to hearing notifications for {{ $hearing->region->name }}.</p>
             
-            <p>You can manage your notification preferences in your <a href="{{ route('dashboard') }}">dashboard</a>.</p>
+            @if($dashboardUrl)
+                <p>You can manage your notification preferences in your <a href="{{ $dashboardUrl }}">dashboard</a>.</p>
+            @else
+                <p>You can manage your notification preferences from your dashboard.</p>
+            @endif
             
             <div class="unsubscribe">
-                <p>If you no longer wish to receive any housing alert emails, you can <a href="{{ \App\Http\Controllers\UnsubscribeController::generateUnsubscribeUrl($user) }}">unsubscribe from all notifications</a>.</p>
+                <p>If you no longer wish to receive any housing alert emails, you can <a href="{{ \App\Http\Controllers\UnsubscribeController::generateUnsubscribeUrl($subscriber) }}">unsubscribe from all notifications</a>.</p>
             </div>
         </div>
     </div>

@@ -27,7 +27,7 @@ class EmailNotification extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
+    'subscriber_id',
         'hearing_id',
         'notification_type',
         'email_address',
@@ -51,11 +51,11 @@ class EmailNotification extends Model
     ];
 
     /**
-     * Get the user that received this notification.
+     * Get the subscriber that received this notification.
      */
-    public function user(): BelongsTo
+    public function subscriber(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Subscriber::class);
     }
 
     /**
@@ -69,10 +69,10 @@ class EmailNotification extends Model
     /**
      * Check if a notification has already been sent.
      */
-    public static function alreadySent(int $userId, int $hearingId, string $notificationType): bool
+    public static function alreadySent(int $subscriberId, int $hearingId, string $notificationType): bool
     {
         return self::where([
-            'user_id' => $userId,
+            'subscriber_id' => $subscriberId,
             'hearing_id' => $hearingId,
             'notification_type' => $notificationType,
         ])->exists();
@@ -81,10 +81,10 @@ class EmailNotification extends Model
     /**
      * Log a sent notification.
      */
-    public static function logSent(int $userId, int $hearingId, string $notificationType, string $emailAddress, bool $optedIn = true, string $status = 'sent', ?string $failureReason = null): self
+    public static function logSent(int $subscriberId, int $hearingId, string $notificationType, string $emailAddress, bool $optedIn = true, string $status = 'sent', ?string $failureReason = null): self
     {
         return self::create([
-            'user_id' => $userId,
+            'subscriber_id' => $subscriberId,
             'hearing_id' => $hearingId,
             'notification_type' => $notificationType,
             'email_address' => $emailAddress,

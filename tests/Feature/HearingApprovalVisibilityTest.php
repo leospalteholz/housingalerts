@@ -6,6 +6,7 @@ use App\Models\Hearing;
 use App\Models\Organization;
 use App\Models\Region;
 use App\Models\User;
+use App\Models\Subscriber;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -149,26 +150,22 @@ class HearingApprovalVisibilityTest extends TestCase
                 'hearing' => $otherHearing,
             ]), ['_token' => 'test-token']);
 
-    $response->assertNotFound();
+        $response->assertNotFound();
         $this->assertFalse($otherHearing->fresh()->approved);
     }
 
     public function test_regular_user_only_sees_approved_hearings(): void
     {
-        $user = User::factory()->create([
-            'organization_id' => $this->organization->id,
-            'is_admin' => false,
-            'is_superuser' => false,
+        $subscriber = Subscriber::factory()->create([
+            'email_verified_at' => now(),
         ]);
-        $user->regions()->attach($this->region->id);
+        $subscriber->regions()->attach($this->region->id);
 
-        $response = $this->actingAs($user)->get(route('hearings.index', [
-            'organization' => $this->organization->slug,
-        ]));
-
+        $response = $this->actingAs($subscriber, 'subscriber')->get(route('subscriber.hearings'));
         $response->assertOk();
         $response->assertSee('Approved Hearing');
         $response->assertDontSee('Pending Hearing');
+
     }
 
     public function test_public_embed_only_shows_approved_hearings(): void

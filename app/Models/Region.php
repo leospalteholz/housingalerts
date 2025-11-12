@@ -66,8 +66,9 @@ class Region extends Model
         return $this->hasMany(Hearing::class);
     }
 
-    public function users() {
-        return $this->belongsToMany(User::class, 'user_region');
+    public function subscribers()
+    {
+        return $this->belongsToMany(Subscriber::class, 'region_subscriber');
     }
 
     public function councillors() {

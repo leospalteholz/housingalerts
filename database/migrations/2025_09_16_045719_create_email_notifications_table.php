@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('email_notifications', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
+            $table->unsignedBigInteger('subscriber_id')->nullable();
+            $table->foreign('subscriber_id')->references('id')->on('subscribers')->nullOnDelete();
             $table->unsignedBigInteger('hearing_id')->nullable();
             $table->foreign('hearing_id')->references('id')->on('hearings')->nullOnDelete();
             $table->enum('notification_type', ['hearing_created', 'day_of_reminder']);
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->timestamp('created_at')->nullable();
             
             // Prevent duplicate notifications
-            $table->unique(['user_id', 'hearing_id', 'notification_type'], 'unique_notification');
+            $table->unique(['subscriber_id', 'hearing_id', 'notification_type'], 'unique_notification');
         });
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Subscriber;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -20,8 +21,16 @@ class RouteServiceProvider extends ServiceProvider
      */
     public const HOME = '/';
 
-    public static function homeRoute(User $user, array $parameters = [], bool $absolute = true): string
+    public static function homeRoute($user, array $parameters = [], bool $absolute = true): string
     {
+        if ($user instanceof Subscriber) {
+            return route('subscriber.dashboard', $parameters, $absolute);
+        }
+
+        if (!($user instanceof User)) {
+            return $absolute ? url(self::HOME) : self::HOME;
+        }
+
         $organization = $user->organization;
 
         if (!$organization) {
@@ -30,7 +39,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $routeName = ($user->is_superuser || $user->is_admin)
             ? 'admin.dashboard'
-            : 'user.dashboard';
+            : 'dashboard';
 
         $routeParameters = array_merge(['organization' => $organization->slug], $parameters);
 

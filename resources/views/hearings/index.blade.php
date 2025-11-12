@@ -73,7 +73,7 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
-                                                <a href="{{ orgRoute('hearings.show', ['hearing' => $hearing]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
+                                                <a href="{{ route('hearings.show', ['hearing' => $hearing]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
                                                 <form method="POST" action="{{ orgRoute('hearings.approve', ['hearing' => $hearing]) }}">
                                                     @csrf
                                                     @method('PATCH')
@@ -185,7 +185,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
-                                    <a href="{{ orgRoute('hearings.show', ['hearing' => $hearing]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
+                                    <a href="{{ route('hearings.show', ['hearing' => $hearing]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
                                     <a href="{{ orgRoute('hearings.edit', ['hearing' => $hearing]) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
                                 </td>
                             </tr>
@@ -287,7 +287,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
-                                    <a href="{{ orgRoute('hearings.show', ['hearing' => $hearing]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
+                                    <a href="{{ route('hearings.show', ['hearing' => $hearing]) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded text-sm">View</a>
                                     <a href="{{ orgRoute('hearings.edit', ['hearing' => $hearing]) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
                                 </td>
                             </tr>

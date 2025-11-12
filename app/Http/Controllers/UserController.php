@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Organization;
 use App\Models\Region;
 use App\Models\User;
-use App\Models\UserNotificationSettings;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -17,7 +16,7 @@ class UserController extends Controller
      */
     public function index(Organization $organization): View
     {
-        $users = User::with(['organization', 'regions'])
+        $users = User::with(['organization'])
             ->where('organization_id', $organization->id)
             ->orderBy('name')
             ->get();
@@ -37,12 +36,7 @@ class UserController extends Controller
             ? Organization::orderBy('name')->get()
             : collect([$organization]);
 
-        $regions = Region::with('organization')
-            ->where('organization_id', $organization->id)
-            ->orderBy('name')
-            ->get();
-
-        return view('users.create', compact('organizations', 'regions'));
+        return view('users.create', compact('organizations'));
     }
 
     /**
@@ -58,8 +52,6 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'is_admin' => 'required|boolean',
             'organization_id' => $isSuperUser ? 'nullable|exists:organizations,id' : 'nullable',
-            'regions' => 'nullable|array',
-            'regions.*' => 'exists:regions,id',
         ]);
 
         // Ensure the new user is tied to the current organization unless explicitly overridden by a superuser.
@@ -74,19 +66,6 @@ class UserController extends Controller
         // Create the user
         $user = User::create($validated);
 
-        // Create default notification settings
-        UserNotificationSettings::create([
-            'user_id' => $user->id,
-            'notify_development_hearings' => true,
-            'notify_policy_hearings' => true,
-            'send_day_of_reminders' => true,
-        ]);
-
-        // Attach regions if provided
-        if (!empty($validated['regions'])) {
-            $user->regions()->sync($validated['regions']);
-        }
-
         return redirect($this->orgRoute('users.index'))->with('success', 'User created successfully!');
     }
 
@@ -95,7 +74,7 @@ class UserController extends Controller
      */
     public function show(Organization $organization, User $user): View
     {
-        $user = $this->resolveAccessibleUser($organization, $user->load(['regions', 'organization']));
+    $user = $this->resolveAccessibleUser($organization, $user->load(['organization']));
 
         return view('users.show', compact('user'));
     }

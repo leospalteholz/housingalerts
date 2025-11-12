@@ -4,7 +4,7 @@
             <!-- Welcome Section -->
             <div class="text-center">
                 <h1 class="text-4xl font-bold text-gray-900 mb-6">
-                    Welcome {{ auth()->user()->name }}
+                    Welcome {{ $subscriber->name ?? $subscriber->email }}
                 </h1>
                 <p class="text-lg text-gray-600 mb-8">
                     Thank you for signing up to help support housing in your community!
@@ -42,33 +42,8 @@
                 </div>
             @endif
             
-            <!-- Email Verification Status -->
-            @if(!auth()->user()->hasVerifiedEmail())
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <x-icon name="exclamation-triangle" class="h-5 w-5 text-yellow-400" />
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-yellow-700">
-                                <strong>You won't receive any hearing notifications until you verify your email.</strong></br> 
-                                Check your inbox and click the link to verify your account.
-                            </p>
-                            <div class="mt-2">
-                                <form method="POST" action="{{ route('verification.send') }}" class="inline">
-                                    @csrf
-                                    <button type="submit" class="text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded hover:bg-yellow-200 transition">
-                                        Resend Verification Email
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
             <!-- Unsubscribed Status -->
-            @if(auth()->user()->unsubscribed_at)
+            @if($subscriber->unsubscribed_at)
                 <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
                     <div class="flex">
                         <div class="flex-shrink-0">
@@ -80,7 +55,7 @@
                                 You won't receive any hearing notifications until you resubscribe.
                             </p>
                             <div class="mt-2">
-                                <form method="POST" action="{{ route('user.resubscribe') }}" class="inline">
+                                <form method="POST" action="{{ route('subscriber.resubscribe') }}" class="inline">
                                     @csrf
                                     <button type="submit" class="text-sm bg-red-100 text-red-800 px-3 py-1 rounded hover:bg-red-200 transition">
                                         Resubscribe to Notifications
@@ -117,8 +92,9 @@
                               <input type="checkbox" 
                                   class="region-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" 
                                   data-region-slug="{{ $region->slug }}"
-                                                       data-region-name="{{ $region->name }}"
-                                                       {{ $region->is_monitored ? 'checked' : '' }}>
+                                  data-organization-slug="{{ $region->organization->slug }}"
+                                  data-region-name="{{ $region->name }}"
+                                  {{ $region->is_monitored ? 'checked' : '' }}>
                                                 <span class="sr-only">Subscribe to {{ $region->name }}</span>
                                             </label>
                                         </div>
@@ -201,44 +177,46 @@
             </div>
 
             
-            <div class="text-center">
-                <p class="text-sm text-gray-600">Hearing tracking is provided by:</p>
-            </div>
-            <!-- Organization Information Card -->
-            <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-                <div class="p-6">
-                    
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center">
-                        {{ auth()->user()->organization->name }}
-                    </h2>
-                    
-                    @if(auth()->user()->organization->about)
-                        <div class="text-gray-700 leading-relaxed mb-6 text-center">
-                            {{ auth()->user()->organization->about }}
-                        </div>
-                    @endif
+            @if($primaryOrganization)
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">Hearing tracking is provided by:</p>
+                </div>
+                <!-- Organization Information Card -->
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                    <div class="p-6">
+                        
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4 text-center">
+                            {{ $primaryOrganization->name }}
+                        </h2>
+                        
+                        @if($primaryOrganization->about)
+                            <div class="text-gray-700 leading-relaxed mb-6 text-center">
+                                {{ $primaryOrganization->about }}
+                            </div>
+                        @endif
 
-                    <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                        <span class="text-sm text-gray-600">Want to learn more?</span>
-                        <div class="flex flex-wrap justify-center gap-4">
-                            @if(auth()->user()->organization->contact_email)
-                                <a href="mailto:{{ auth()->user()->organization->contact_email }}" 
-                                   class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition">
-                                    <x-icon name="mail" class="w-4 h-4 mr-2" />
-                                    Contact Us
-                                </a>
-                            @endif
-                            @if(auth()->user()->organization->website_url)
-                                <a href="{{ auth()->user()->organization->website_url }}" target="_blank"
-                                   class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition">
-                                    <x-icon name="external-link" class="w-4 h-4 mr-2" />
-                                    Visit Website
-                                </a>
-                            @endif
+                        <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                            <span class="text-sm text-gray-600">Want to learn more?</span>
+                            <div class="flex flex-wrap justify-center gap-4">
+                                @if($primaryOrganization->contact_email)
+                                    <a href="mailto:{{ $primaryOrganization->contact_email }}" 
+                                       class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition">
+                                        <x-icon name="mail" class="w-4 h-4 mr-2" />
+                                        Contact Us
+                                    </a>
+                                @endif
+                                @if($primaryOrganization->website_url)
+                                    <a href="{{ $primaryOrganization->website_url }}" target="_blank"
+                                       class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition">
+                                        <x-icon name="external-link" class="w-4 h-4 mr-2" />
+                                        Visit Website
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 
@@ -248,12 +226,14 @@
             const checkboxes = document.querySelectorAll('.region-checkbox');
             const messageDiv = document.getElementById('subscription-message');
             const baseUrl = '{{ url('/') }}';
-            const organizationSlug = @js($organization->slug);
+            const notificationPreferencesUrl = '{{ route('subscriber.notification-preferences') }}';
+            const hearingsUrl = '{{ route('subscriber.hearings') }}';
             
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
                     const regionSlug = this.dataset.regionSlug;
                     const regionName = this.dataset.regionName;
+                    const organizationSlug = this.dataset.organizationSlug;
                     const isChecked = this.checked;
                     
                     // Disable checkbox during request
@@ -317,7 +297,7 @@
                     // Disable checkbox during request
                     this.disabled = true;
                     
-                    const url = `${baseUrl}/${organizationSlug}/user/notification-preferences`;
+                    const url = notificationPreferencesUrl;
                     
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                     
@@ -401,7 +381,7 @@
                     `;
                     
                     // Fetch updated hearings
-                    fetch(`${baseUrl}/${organizationSlug}/user/hearings`, {
+                    fetch(hearingsUrl, {
                         method: 'GET',
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',

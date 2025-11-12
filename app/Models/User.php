@@ -21,12 +21,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'dashboard_token',
         'is_admin',
         'is_superuser',
         'organization_id',
         'email_verified_at',
-        'unsubscribed_at',
     ];
 
     /**
@@ -36,7 +34,6 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $hidden = [
         'password',
-        'dashboard_token',
         'remember_token',
     ];
 
@@ -47,9 +44,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'unsubscribed_at' => 'datetime',
         'password' => 'hashed',
-        'dashboard_token_expires_at' => 'datetime',
     ];
 
     /**
@@ -60,44 +55,14 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new \App\Notifications\CustomVerifyEmail);
     }
 
-    public function organization() {
+    public function organization()
+    {
         return $this->belongsTo(Organization::class);
     }
 
-    public function regions() {
-        return $this->belongsToMany(Region::class, 'user_region');
-    }
-
-    /**
-     * Get the user's notification settings.
-     */
-    public function notificationSettings()
-    {
-        return $this->hasOne(UserNotificationSettings::class);
-    }
-
-    /**
-     * Get the user's email notifications.
-     */
-    public function emailNotifications()
-    {
-        return $this->hasMany(EmailNotification::class);
-    }
-
-    /**
-     * Get notification settings, creating default ones if they don't exist.
-     */
-    public function getNotificationSettings(): UserNotificationSettings
-    {
-        return UserNotificationSettings::getOrCreateForUser($this);
-    }
-
-    /**
-     * Check if this is a passwordless regular user.
-     */
     public function isPasswordless(): bool
     {
-        return $this->password === null;
+        return false;
     }
 
     /**
@@ -106,59 +71,5 @@ class User extends Authenticatable implements MustVerifyEmail
     public function requiresPassword(): bool
     {
         return $this->is_admin || $this->is_superuser;
-    }
-
-    /**
-     * Generate a unique dashboard token for passwordless access.
-     */
-    public function generateDashboardToken(): string
-    {
-        do {
-            $token = bin2hex(random_bytes(32)); // 64 character hex string
-            $hashed = hash('sha256', $token);
-        } while (static::where('dashboard_token', $hashed)->exists());
-
-        $this->dashboard_token = $hashed;
-        $this->dashboard_token_expires_at = now()->addWeek();
-        $this->save();
-
-        return $token;
-    }
-
-    /**
-     * Get the dashboard URL for this user.
-     */
-    public function getDashboardUrl(): string
-    {
-        $token = $this->generateDashboardToken();
-
-        return route('dashboard.token', ['token' => $token]);
-    }
-
-    public function hasValidDashboardToken(): bool
-    {
-        return !empty($this->dashboard_token)
-            && !is_null($this->dashboard_token_expires_at)
-            && $this->dashboard_token_expires_at->isFuture();
-    }
-
-    /**
-     * Create or find a passwordless user by email.
-     */
-    public static function findOrCreatePasswordless(string $email, string $name = null): self
-    {
-        $user = static::where('email', $email)->first();
-
-        if (!$user) {
-            $user = static::create([
-                'email' => $email,
-                'name' => $name ?: explode('@', $email)[0], // Use email prefix as default name
-                'password' => null // Explicitly passwordless
-            ]);
-            
-            $user->generateDashboardToken();
-        }
-
-        return $user;
     }
 }

@@ -2,8 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Organization;
+use App\Models\Subscriber;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,67 +12,37 @@ class ResubscribeTest extends TestCase
 
     public function test_user_can_resubscribe_after_unsubscribing()
     {
-        // Create a test organization and user
-        $organization = Organization::create([
-            'name' => 'Test Organization',
-            'contact_email' => 'contact@test.org',
-        ]);
-
-        $user = User::factory()->create([
-            'name' => 'Test User',
+        $subscriber = Subscriber::factory()->unsubscribed()->create([
+            'name' => 'Test Subscriber',
             'email' => 'test@example.com',
-            'organization_id' => $organization->id,
             'email_verified_at' => now(),
-            'unsubscribed_at' => now(), // User is initially unsubscribed
         ]);
 
-        // Authenticate the user
-        $this->actingAs($user);
+        $this->actingAs($subscriber, 'subscriber');
 
-        // Verify user is unsubscribed
-        $this->assertNotNull($user->unsubscribed_at);
+        $this->assertNotNull($subscriber->unsubscribed_at);
 
-        // Post to resubscribe route
-        $response = $this->post(route('user.resubscribe', [
-            'organization' => $organization->slug,
-        ]));
+        $response = $this->post(route('subscriber.resubscribe'));
 
-        // Should redirect to dashboard with success message
-        $response->assertRedirect(route('user.dashboard', [
-            'organization' => $organization->slug,
-        ]))
+        $response->assertRedirect(route('subscriber.dashboard'))
                 ->assertSessionHas('success', 'You have been resubscribed to notifications.');
 
-        // Verify user is now resubscribed
-        $user->refresh();
-        $this->assertNull($user->unsubscribed_at);
+        $subscriber->refresh();
+        $this->assertNull($subscriber->unsubscribed_at);
     }
 
     public function test_dashboard_shows_unsubscribed_notice()
     {
-        // Create a test organization and user
-        $organization = Organization::create([
-            'name' => 'Test Organization',
-            'contact_email' => 'contact@test.org',
-        ]);
-
-        $user = User::factory()->create([
-            'name' => 'Test User',
+        $subscriber = Subscriber::factory()->unsubscribed()->create([
+            'name' => 'Test Subscriber',
             'email' => 'test@example.com',
-            'organization_id' => $organization->id,
             'email_verified_at' => now(),
-            'unsubscribed_at' => now(), // User is unsubscribed
         ]);
 
-        // Authenticate the user
-        $this->actingAs($user);
+        $this->actingAs($subscriber, 'subscriber');
 
-        // Visit dashboard
-        $response = $this->get(route('user.dashboard', [
-            'organization' => $organization->slug,
-        ]));
+        $response = $this->get(route('subscriber.dashboard'));
 
-        // Should see unsubscribed notice
         $response->assertStatus(200)
                 ->assertSee('You have unsubscribed from all notifications')
                 ->assertSee('Resubscribe to Notifications');
@@ -81,29 +50,16 @@ class ResubscribeTest extends TestCase
 
     public function test_dashboard_does_not_show_unsubscribed_notice_when_user_is_subscribed()
     {
-        // Create a test organization and user
-        $organization = Organization::create([
-            'name' => 'Test Organization',
-            'contact_email' => 'contact@test.org',
-        ]);
-
-        $user = User::factory()->create([
-            'name' => 'Test User',
+        $subscriber = Subscriber::factory()->create([
+            'name' => 'Test Subscriber',
             'email' => 'test@example.com',
-            'organization_id' => $organization->id,
             'email_verified_at' => now(),
-            'unsubscribed_at' => null, // User is subscribed
         ]);
 
-        // Authenticate the user
-        $this->actingAs($user);
+        $this->actingAs($subscriber, 'subscriber');
 
-        // Visit dashboard
-        $response = $this->get(route('user.dashboard', [
-            'organization' => $organization->slug,
-        ]));
+        $response = $this->get(route('subscriber.dashboard'));
 
-        // Should not see unsubscribed notice
         $response->assertStatus(200)
                 ->assertDontSee('You have unsubscribed from all notifications')
                 ->assertDontSee('Resubscribe to Notifications');

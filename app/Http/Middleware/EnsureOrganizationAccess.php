@@ -27,12 +27,13 @@ class EnsureOrganizationAccess
         }
 
         $user = $request->user();
+        $subscriber = $request->user('subscriber');
 
-        if (!$user) {
+        if (!$user && !$subscriber) {
             abort(403);
         }
 
-        if (!$user->is_superuser && $user->organization_id !== $organization->id) {
+        if ($user && !$user->is_superuser && $user->organization_id !== $organization->id) {
             abort(403, 'You do not have access to this organization.');
         }
 

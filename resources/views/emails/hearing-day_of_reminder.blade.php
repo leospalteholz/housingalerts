@@ -91,7 +91,7 @@
     </div>
     
     <div class="content">
-        <p>Hello {{ $user->name }},</p>
+    <p>Hello {{ $subscriber->name ?? 'there' }},</p>
         
         <div class="urgent-notice">
             ⏰ REMINDER: There's a {{ strtolower($hearing->type) }} hearing happening TODAY!
@@ -122,7 +122,7 @@
         </div>
         
         <div style="text-align: center;">
-            <a href="{{ route('hearings.show', ['organization' => $hearing->organization->slug, 'hearing' => $hearing]) }}" class="button">
+            <a href="{{ route('hearings.show', ['hearing' => $hearing]) }}" class="button">
                 View Full Details
             </a>
             
@@ -149,10 +149,14 @@
             
             <p>Your voice matters! Participating in these hearings helps shape housing policy in your community.</p>
             
-            <p>You can manage your notification preferences in your <a href="{{ route('user.dashboard') }}">dashboard</a>.</p>
+            @if($dashboardUrl)
+                <p>You can manage your notification preferences in your <a href="{{ $dashboardUrl }}">dashboard</a>.</p>
+            @else
+                <p>You can manage your notification preferences from your dashboard.</p>
+            @endif
             
             <div class="unsubscribe">
-                <p>To stop receiving all housing alert emails, <a href="{{ \App\Http\Controllers\UnsubscribeController::generateUnsubscribeUrl($user) }}">unsubscribe from all notifications</a>.</p>
+                <p>To stop receiving all housing alert emails, <a href="{{ \App\Http\Controllers\UnsubscribeController::generateUnsubscribeUrl($subscriber) }}">unsubscribe from all notifications</a>.</p>
             </div>
         </div>
     </div>

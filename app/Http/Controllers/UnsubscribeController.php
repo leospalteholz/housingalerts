@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Subscriber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 
@@ -19,18 +19,17 @@ class UnsubscribeController extends Controller
         }
 
         $email = $request->query('email');
-        $user = User::where('email', $email)->first();
+        $subscriber = Subscriber::where('email', $email)->first();
 
-        if (!$user) {
-            abort(404, 'User not found.');
+        if (!$subscriber) {
+            abort(404, 'Subscriber not found.');
         }
 
-        // Check if user is already unsubscribed
-        if ($user->unsubscribed_at) {
-            return view('unsubscribe.already-unsubscribed', compact('user'));
+        if ($subscriber->unsubscribed_at) {
+            return view('unsubscribe.already-unsubscribed', ['subscriber' => $subscriber]);
         }
 
-        return view('unsubscribe.confirm', compact('user'));
+        return view('unsubscribe.confirm', ['subscriber' => $subscriber]);
     }
 
     /**
@@ -44,28 +43,27 @@ class UnsubscribeController extends Controller
         }
 
         $email = $request->query('email');
-        $user = User::where('email', $email)->first();
+        $subscriber = Subscriber::where('email', $email)->first();
 
-        if (!$user) {
-            abort(404, 'User not found.');
+        if (!$subscriber) {
+            abort(404, 'Subscriber not found.');
         }
 
-        // Unsubscribe the user by setting the timestamp
-        $user->unsubscribed_at = now();
-        $user->save();
+        $subscriber->unsubscribed_at = now();
+        $subscriber->save();
 
-        return view('unsubscribe.success', compact('user'));
+        return view('unsubscribe.success', ['subscriber' => $subscriber]);
     }
 
     /**
      * Generate a signed unsubscribe URL for a user
      */
-    public static function generateUnsubscribeUrl(User $user): string
+    public static function generateUnsubscribeUrl(Subscriber $subscriber): string
     {
         return URL::temporarySignedRoute(
             'unsubscribe.show',
             now()->addDays(30), // Valid for 30 days
-            ['email' => $user->email]
+            ['email' => $subscriber->email]
         );
     }
 }
