@@ -41,6 +41,9 @@
                             <x-nav-link :href="orgRoute('users.index')" :active="request()->routeIs('users.*')">
                                 {{ __('Users') }}
                             </x-nav-link>
+                            <x-nav-link :href="orgRoute('subscribers.index')" :active="request()->routeIs('subscribers.*')">
+                                {{ __('Subscribers') }}
+                            </x-nav-link>
                             <x-nav-link :href="orgRoute('regions.index')" :active="request()->routeIs('regions.*')">
                                 {{ __('Regions') }}
                             </x-nav-link>
@@ -127,6 +130,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="orgRoute('users.index')" :active="request()->routeIs('users.*')">
                         {{ __('Users') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="orgRoute('subscribers.index')" :active="request()->routeIs('subscribers.*')">
+                        {{ __('Subscribers') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="orgRoute('regions.index')" :active="request()->routeIs('regions.*')">
                         {{ __('Regions') }}

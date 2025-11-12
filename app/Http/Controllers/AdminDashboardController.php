@@ -9,6 +9,7 @@ use App\Models\Hearing;
 use App\Models\Organization;
 use App\Models\HearingVote;
 use App\Models\Councillor;
+use App\Models\Subscriber;
 
 class AdminDashboardController extends Controller
 {
@@ -26,6 +27,7 @@ class AdminDashboardController extends Controller
                 'totalHearings' => $organizations->sum('hearings_count'),
                 'totalVotes' => HearingVote::count(),
                 'totalCouncillors' => Councillor::count(),
+                'totalSubscribers' => Subscriber::count(),
             ];
 
             return view('admin.dashboard', compact('organizations', 'stats', 'organization'));
@@ -42,6 +44,9 @@ class AdminDashboardController extends Controller
                     $query->where('organization_id', $orgId);
                 })->count(),
                 'totalCouncillors' => Councillor::whereHas('region', function($query) use ($orgId) {
+                    $query->where('organization_id', $orgId);
+                })->count(),
+                'totalSubscribers' => Subscriber::whereHas('regions', function ($query) use ($orgId) {
                     $query->where('organization_id', $orgId);
                 })->count(),
             ];

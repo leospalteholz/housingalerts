@@ -11,6 +11,7 @@ use App\Http\Controllers\PublicHearingSubmissionController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\SignupController;
+use App\Http\Controllers\SubscriberAdminController;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -74,6 +75,7 @@ Route::middleware(['auth:web'])->group(function () {
                 Route::patch('hearings/{hearing}/approve', [HearingController::class, 'approve'])
                     ->name('hearings.approve');
                 Route::resource('users', UserController::class);
+                Route::resource('subscribers', SubscriberAdminController::class)->only(['index', 'destroy']);
                 Route::resource('councillors', CouncillorController::class);
                 Route::resource('hearing-votes', HearingVoteController::class);
 

@@ -80,6 +80,25 @@
                                 </div>
                             </a>
 
+                            <!-- Subscribers -->
+                            <a href="{{ orgRoute('subscribers.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start">
+                                        <span class="rounded-lg inline-flex p-2 bg-blue-50 text-blue-700 ring-4 ring-white flex-shrink-0">
+                                            <x-icon name="users" class="h-5 w-5" />
+                                        </span>
+                                        <div class="ml-4">
+                                            <h3 class="text-base font-medium text-gray-900 group-hover:text-gray-700">
+                                                Manage Subscribers
+                                                <span class="absolute inset-0" aria-hidden="true"></span>
+                                            </h3>
+                                            <p class="mt-1 text-sm text-gray-500">Review and manage housing alert subscribers.</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-2xl font-bold text-gray-400">{{ $stats['totalSubscribers'] ?? 0 }}</span>
+                                </div>
+                            </a>
+
                             <!-- Regions -->
                             <a href="{{ orgRoute('regions.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
                                 <div class="flex items-start justify-between">

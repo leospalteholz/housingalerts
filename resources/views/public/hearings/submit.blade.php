@@ -105,7 +105,7 @@
 
                 <section class="rounded-xl border border-gray-200 bg-slate-50/60 p-6 lg:p-8">
                     <h2 class="text-xl font-semibold text-gray-900 mb-6">Details</h2>
-                    <p class="mt-2 text-xs text-gray-500">You can leave these fields blank if you don’t have the information handy.</p>
+                    <p class="mt-2 text-xs text-gray-500">You can leave these fields blank if you are recording a hearing in the past</p>
                     <div class="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-8">
                         <div>
                             <label for="description" class="block text-sm font-medium text-gray-700">Describe the proposal</label>
@@ -214,7 +214,7 @@
                                     <tbody id="councillor-table-body" class="bg-white divide-y divide-gray-200 text-sm"></tbody>
                                 </table>
                             </div>
-                            <p class="mt-3 text-xs text-gray-500">Leave councillors blank if their vote isn’t known yet.</p>
+                            <p class="mt-3 text-xs text-gray-500">Leave councillors blank if you're unsure about their vote.</p>
                         </div>
                     </div>
                 </section>

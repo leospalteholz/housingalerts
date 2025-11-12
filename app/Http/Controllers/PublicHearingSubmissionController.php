@@ -143,13 +143,9 @@ class PublicHearingSubmissionController extends Controller
             }
         }
 
-        $statusMessage = $voteCreated
-            ? 'Thank you! Your hearing and vote details have been submitted for review.'
-            : 'Thank you! Your hearing has been submitted and will be reviewed.';
-
         return redirect()->route('public.hearings.submit.thank-you', [
             'organization' => $organization->slug,
-        ])->with('status', $statusMessage);
+        ]);
     }
 
     public function thankYou(Organization $organization): View
