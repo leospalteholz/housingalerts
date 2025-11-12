@@ -48,6 +48,10 @@ php artisan cache:clear
 echo "🗄️  Running database migrations..."
 php artisan migrate --force
 
+# Ensure an admin user exists in production
+echo "🔐 Ensuring admin user exists..."
+php artisan app:create-admin --no-interaction
+
 # Create storage symbolic link (if it doesn't exist)
 echo "🔗 Creating storage symbolic link..."
 php artisan storage:link
