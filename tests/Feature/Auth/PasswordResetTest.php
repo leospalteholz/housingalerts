@@ -25,8 +25,9 @@ class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        $this->post('/forgot-password', ['email' => $user->email]);
+    $response = $this->post('/forgot-password', ['email' => $user->email]);
 
+    $response->assertSessionHas('status', 'If an account exists for that email address, a password reset link has been sent.');
         Notification::assertSentTo($user, ResetPassword::class);
     }
 
