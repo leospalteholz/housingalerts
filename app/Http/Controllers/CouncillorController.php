@@ -14,23 +14,31 @@ class CouncillorController extends Controller
      */
     public function index(Organization $organization)
     {
-        $query = Councillor::with(['region', 'region.organization'])
-            ->whereHas('region', fn ($q) => $q->where('organization_id', $organization->id))
-            ->orderBy('region_id')
-            ->orderBy('name');
+        $regions = Region::with([
+                'organization',
+                'councillors' => function ($query) {
+                    $query->orderBy('name');
+                },
+            ])
+            ->where('organization_id', $organization->id)
+            ->orderBy('name')
+            ->get();
 
-        $councillors = $query->get();
-        
-        // Separate current and past councillors
-        $currentCouncillors = $councillors->filter(function($councillor) {
-            return $councillor->isCurrentlyServing();
-        });
-        
-        $pastCouncillors = $councillors->filter(function($councillor) {
-            return !$councillor->isCurrentlyServing();
-        });
-        
-        return view('councillors.index', compact('currentCouncillors', 'pastCouncillors'));
+        $regionGroups = $regions->map(function (Region $region) {
+            $current = $region->councillors->filter(fn ($councillor) => $councillor->isCurrentlyServing());
+            $past = $region->councillors->filter(fn ($councillor) => !$councillor->isCurrentlyServing());
+
+            return [
+                'region' => $region,
+                'current' => $current,
+                'past' => $past,
+            ];
+        })->values();
+
+        $currentCount = $regionGroups->sum(fn ($group) => $group['current']->count());
+        $pastCount = $regionGroups->sum(fn ($group) => $group['past']->count());
+
+        return view('councillors.index', compact('regionGroups', 'currentCount', 'pastCount'));
     }
 
     /**
