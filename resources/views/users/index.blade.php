@@ -30,6 +30,13 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse ($admins as $user)
+                                @php
+                                    $targetOrganizationSlug = $isSuperUserView
+                                        ? optional($user->organization)->slug ?? $organization->slug
+                                        : $organization->slug;
+                                    $editUrl = route('users.edit', ['organization' => $targetOrganizationSlug, 'user' => $user]);
+                                    $deleteUrl = route('users.destroy', ['organization' => $targetOrganizationSlug, 'user' => $user]);
+                                @endphp
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
@@ -47,12 +54,12 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="text-sm text-gray-900">{{ $user->organization->name }}</span>
+                                        <span class="text-sm text-gray-900">{{ optional($user->organization)->name ?? 'Unassigned' }}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
-                                        <a href="{{ orgRoute('users.edit', ['user' => $user]) }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
+                                        <a href="{{ $editUrl }}" class="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold py-1 px-3 rounded text-sm">Edit</a>
                                         @if($user->id !== auth()->id())
-                                            <form action="{{ orgRoute('users.destroy', ['user' => $user]) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                                            <form action="{{ $deleteUrl }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded text-sm">Delete</button>

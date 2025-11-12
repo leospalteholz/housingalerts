@@ -29,7 +29,6 @@ class UserAdminTest extends TestCase
             'email' => 'casey@example.com',
             'password' => 'Secret123!',
             'password_confirmation' => 'Secret123!',
-            'is_admin' => false,
         ];
 
         $response = $this->actingAs($admin)
@@ -43,7 +42,7 @@ class UserAdminTest extends TestCase
         $this->assertSame($organization->id, $createdUser->organization_id);
         $this->assertTrue(Hash::check('Secret123!', $createdUser->password));
         $this->assertNotNull($createdUser->email_verified_at);
-    $this->assertFalse((bool) $createdUser->is_admin);
+        $this->assertTrue((bool) $createdUser->is_admin);
     }
 
     public function test_superuser_can_create_user_for_any_organization(): void
@@ -63,7 +62,6 @@ class UserAdminTest extends TestCase
             'email' => 'external@example.com',
             'password' => 'Outside123!',
             'password_confirmation' => 'Outside123!',
-            'is_admin' => true,
             'organization_id' => $targetOrganization->id,
         ];
 
@@ -76,7 +74,7 @@ class UserAdminTest extends TestCase
         $created = User::where('email', 'external@example.com')->first();
         $this->assertNotNull($created);
         $this->assertSame($targetOrganization->id, $created->organization_id);
-    $this->assertTrue((bool) $created->is_admin);
+        $this->assertTrue((bool) $created->is_admin);
     }
 
     public function test_admin_cannot_delete_their_own_account(): void

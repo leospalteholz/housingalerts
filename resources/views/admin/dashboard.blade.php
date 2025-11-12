@@ -139,7 +139,7 @@
 
                             <!-- Organizations (Superuser only) -->
                             @if(auth()->user()->is_superuser)
-                            <a href="{{ route('users.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
+                            <a href="{{ route('organizations.index') }}" class="group relative bg-white p-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 rounded-lg border border-gray-200 hover:border-gray-300 transition">
                                 <div class="flex items-start justify-between">
                                     <div class="flex items-start">
                                         <span class="rounded-lg inline-flex p-2 bg-gray-50 text-gray-700 ring-4 ring-white flex-shrink-0">

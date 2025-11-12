@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Organization;
-use App\Models\Region;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -16,15 +15,27 @@ class UserController extends Controller
      */
     public function index(Organization $organization): View
     {
-        $users = User::with(['organization'])
-            ->where('organization_id', $organization->id)
-            ->orderBy('name')
-            ->get();
+        $isSuperUser = auth()->user()->is_superuser;
 
-        $admins = $users->filter(fn (User $user) => $user->is_admin || $user->is_superuser);
-        $regularUsers = $users->filter(fn (User $user) => !$user->is_admin && !$user->is_superuser);
+        $usersQuery = User::with(['organization'])
+            ->orderBy('organization_id')
+            ->orderBy('name');
 
-        return view('users.index', compact('admins', 'regularUsers'));
+        if (!$isSuperUser) {
+            $usersQuery->where('organization_id', $organization->id);
+        }
+
+        $users = $usersQuery->get();
+
+        $admins = $users
+            ->filter(fn (User $user) => $user->is_admin || $user->is_superuser)
+            ->values();
+
+        return view('users.index', [
+            'admins' => $admins,
+            'organization' => $organization,
+            'isSuperUserView' => $isSuperUser,
+        ]);
     }
 
     /**
@@ -36,7 +47,10 @@ class UserController extends Controller
             ? Organization::orderBy('name')->get()
             : collect([$organization]);
 
-        return view('users.create', compact('organizations'));
+        return view('users.create', [
+            'organizations' => $organizations,
+            'currentOrganization' => $organization,
+        ]);
     }
 
     /**
@@ -50,7 +64,6 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'is_admin' => 'required|boolean',
             'organization_id' => $isSuperUser ? 'nullable|exists:organizations,id' : 'nullable',
         ]);
 
@@ -62,6 +75,7 @@ class UserController extends Controller
         // Hash the password
         $validated['password'] = bcrypt($validated['password']);
         $validated['email_verified_at'] = now(); // Auto-verify admin-created users
+        $validated['is_admin'] = true;
 
         // Create the user
         $user = User::create($validated);
