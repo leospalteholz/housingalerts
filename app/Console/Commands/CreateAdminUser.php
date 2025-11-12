@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Models\Organization;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -50,42 +51,36 @@ class CreateAdminUser extends Command
         if ($user) {
             $this->info("Admin user already exists for {$email}.");
 
-            $this->ensureAdminFlags($user);
-
             return self::SUCCESS;
         }
+
+        // if the user doesn't already exist, create the root organization and the user. 
+        $rootOrg = Organization::updateOrCreate(
+            ['name' => 'Housing Alerts'],
+            [
+                'slug' => 'root',
+                'contact_email' => 'leo.spalteholz@gmail.com',
+                'website_url' => 'https://housingalerts.ca',
+                'about' => 'Housing Alerts is the platform that powers this site.  We are dedicated to providing a way for housing advocates and members of the public to stay informed about upcoming housing-related hearings in their communities.',
+                'user_visible' => false,
+            ]
+        );
+
+        
 
         $user = User::create([
             'name' => $name,
             'email' => $email,
+            'is_superuser' => true,
+            'organization_id' => $rootOrg->id,
             'password' => Hash::make($password),
             'email_verified_at' => now(),
         ]);
-
-        $this->ensureAdminFlags($user);
 
         $this->info("Created admin user for {$email}.");
 
         return self::SUCCESS;
     }
 
-    private function ensureAdminFlags(User $user): void
-    {
-        $dirty = false;
-
-        if (Schema::hasColumn($user->getTable(), 'is_admin') && ! $user->is_admin) {
-            $user->is_admin = true;
-            $dirty = true;
-        }
-
-        if (Schema::hasColumn($user->getTable(), 'is_superuser') && ! $user->is_superuser) {
-            $user->is_superuser = true;
-            $dirty = true;
-        }
-
-        if ($dirty) {
-            $user->save();
-            $this->info('Updated admin privilege flags on existing user.');
-        }
-    }
+    
 }
