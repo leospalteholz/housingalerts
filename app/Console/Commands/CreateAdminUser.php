@@ -66,12 +66,11 @@ class CreateAdminUser extends Command
             ]
         );
 
-        
-
         $user = User::create([
             'name' => $name,
             'email' => $email,
             'is_superuser' => true,
+            'is_admin' => true,
             'organization_id' => $rootOrg->id,
             'password' => Hash::make($password),
             'email_verified_at' => now(),
