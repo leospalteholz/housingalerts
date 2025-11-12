@@ -5,8 +5,7 @@ namespace Tests\Feature\Passwordless;
 use App\Models\Organization;
 use App\Models\Subscriber;
 use App\Models\User;
-use App\Notifications\CustomVerifyEmail;
-use App\Notifications\ExistingPasswordlessUserNotification;
+use App\Notifications\PasswordlessDashboardLinkNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -24,16 +23,20 @@ class PasswordlessSignupTest extends TestCase
             'name' => 'New User',
         ]);
 
-        $response->assertRedirect(route('subscriber.dashboard'));
-        $response->assertSessionHas('success');
+    $response->assertOk();
+    $response->assertViewIs('auth.passwordless-link-sent');
+    $response->assertViewHas('email', 'new-user@example.com');
+    $response->assertViewHas('emailDispatched', true);
 
         $subscriber = Subscriber::where('email', 'new-user@example.com')->first();
         $this->assertNotNull($subscriber);
         $this->assertNull($subscriber->email_verified_at);
         $this->assertNotNull($subscriber->dashboard_token);
-        $this->assertAuthenticatedAs($subscriber, 'subscriber');
+        $this->assertGuest('subscriber');
 
-        Notification::assertSentTo($subscriber, CustomVerifyEmail::class);
+        Notification::assertSentTo($subscriber, PasswordlessDashboardLinkNotification::class, function (PasswordlessDashboardLinkNotification $notification) {
+            return $notification->isForNewAccount();
+        });
     }
 
     public function test_admin_email_is_redirected_to_password_login(): void
@@ -67,11 +70,15 @@ class PasswordlessSignupTest extends TestCase
             'email' => 'pending@example.com',
         ]);
 
-        $response->assertRedirect(route('subscriber.dashboard'));
-        $response->assertSessionHas('success', 'Welcome back! Please verify your email to receive housing alerts.');
-        $this->assertAuthenticatedAs($subscriber->fresh(), 'subscriber');
+        $response->assertOk();
+        $response->assertViewIs('auth.passwordless-link-sent');
+        $response->assertViewHas('email', 'pending@example.com');
+        $response->assertViewHas('emailDispatched', true);
+        $this->assertGuest('subscriber');
 
-        Notification::assertSentTo($subscriber, CustomVerifyEmail::class);
+        Notification::assertSentTo($subscriber, PasswordlessDashboardLinkNotification::class, function (PasswordlessDashboardLinkNotification $notification) {
+            return !$notification->isForNewAccount();
+        });
     }
 
     public function test_verified_subscriber_receives_dashboard_link_view(): void
@@ -87,10 +94,13 @@ class PasswordlessSignupTest extends TestCase
         ]);
 
         $response->assertOk();
-        $response->assertViewIs('auth.passwordless-existing');
+        $response->assertViewIs('auth.passwordless-link-sent');
         $response->assertViewHas('email', 'verified@example.com');
+        $response->assertViewHas('emailDispatched', true);
         $this->assertGuest('subscriber');
 
-        Notification::assertSentTo($subscriber, ExistingPasswordlessUserNotification::class);
+        Notification::assertSentTo($subscriber, PasswordlessDashboardLinkNotification::class, function (PasswordlessDashboardLinkNotification $notification) {
+            return !$notification->isForNewAccount();
+        });
     }
 }

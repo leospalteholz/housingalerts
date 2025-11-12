@@ -44,7 +44,7 @@
 
                     <!-- Simple Email Signup -->
                     <div class="max-w-2xl mx-auto mb-12">
-                        <form action="{{ route('signup.passwordless') }}" method="POST" class="flex flex-col sm:flex-row gap-4 items-end">
+                        <form id="signup-form" action="{{ route('signup.passwordless') }}" method="POST" class="flex flex-col sm:flex-row gap-4 items-end">
                             @csrf
                             <div class="flex-1">
                                 <span class="block text-3xl font-bold text-gray-800 mb-2">Sign me up!</span>
@@ -60,8 +60,9 @@
                                 @enderror
                             </div>
                             <button type="submit" 
-                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg whitespace-nowrap transition duration-200">
-                                Subscribe
+                                    id="signup-submit"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg whitespace-nowrap transition duration-200 flex items-center justify-center gap-2">
+                                <span>Subscribe</span>
                             </button>
                         </form>
                         
@@ -146,6 +147,21 @@
                     setTimeout(() => {
                         setInterval(rotateRegion, 2500);
                     }, 2500);
+                }
+
+                const signupForm = document.getElementById('signup-form');
+                const signupButton = document.getElementById('signup-submit');
+
+                if (signupForm && signupButton) {
+                    signupForm.addEventListener('submit', function () {
+                        if (signupButton.disabled) {
+                            return;
+                        }
+
+                        signupButton.disabled = true;
+                        signupButton.classList.add('opacity-70', 'cursor-not-allowed');
+                        signupButton.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg><span>Signing you up…</span>';
+                    });
                 }
             });
         </script>

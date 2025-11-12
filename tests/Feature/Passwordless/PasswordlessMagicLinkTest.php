@@ -3,7 +3,7 @@
 namespace Tests\Feature\Passwordless;
 
 use App\Models\Subscriber;
-use App\Notifications\ExistingPasswordlessUserNotification;
+use App\Notifications\PasswordlessDashboardLinkNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -56,8 +56,10 @@ class PasswordlessMagicLinkTest extends TestCase
 
         $response = $this->get(route('dashboard.token', ['token' => 'expired-token']));
 
-    $response->assertStatus(200)->assertViewIs('auth.passwordless-expired');
-    $this->assertGuest('subscriber');
-        Notification::assertSentTo($subscriber, ExistingPasswordlessUserNotification::class);
+        $response->assertStatus(200)->assertViewIs('auth.passwordless-expired');
+        $this->assertGuest('subscriber');
+        Notification::assertSentTo($subscriber, PasswordlessDashboardLinkNotification::class, function (PasswordlessDashboardLinkNotification $notification) {
+            return !$notification->isForNewAccount();
+        });
     }
 }

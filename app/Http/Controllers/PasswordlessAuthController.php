@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Subscriber;
 use App\Models\User;
-use App\Notifications\ExistingPasswordlessUserNotification;
+use App\Notifications\PasswordlessDashboardLinkNotification;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,46 +29,26 @@ class PasswordlessAuthController extends Controller
             return redirect()->route('login')->with('status', 'Please sign in with your password to continue.');
         }
 
-        $existingSubscriber = Subscriber::where('email', $request->email)->first();
+        $subscriber = Subscriber::where('email', $request->email)->first();
 
-        if (!$existingSubscriber) {
+        if (!$subscriber) {
             $subscriber = Subscriber::findOrCreateByEmail(
                 $request->email,
                 $request->name
             );
-
-            Auth::guard('subscriber')->login($subscriber);
-
-            $mailSent = $this->sendVerificationEmail($subscriber, 'Passwordless signup email failed to send.');
-
-            $redirectUrl = RouteServiceProvider::homeRoute($subscriber);
-
-            $message = $mailSent
-                ? 'Welcome! We sent a confirmation email with your personal dashboard link for future access.'
-                : 'Welcome! We could not send the confirmation email right now, but you are logged in and can access your dashboard below.';
-
-            return redirect()->to($redirectUrl)->with('success', $message);
+        } elseif ($request->filled('name') && empty($subscriber->name)) {
+            $subscriber->name = $request->name;
+            $subscriber->save();
         }
 
-        $subscriber = $existingSubscriber;
+        $isNewAccount = $subscriber->wasRecentlyCreated ?? false;
 
-        if (!$subscriber->hasVerifiedEmail()) {
-            Auth::guard('subscriber')->login($subscriber);
+        $emailDispatched = $this->sendDashboardLink(
+            $subscriber,
+            $isNewAccount
+        );
 
-            $mailSent = $this->sendVerificationEmail($subscriber, 'Passwordless verification resend failed.');
-
-            $redirectUrl = RouteServiceProvider::homeRoute($subscriber);
-
-            $message = $mailSent
-                ? 'Welcome back! Please verify your email to receive housing alerts.'
-                : 'Welcome back! We could not resend the verification email, but you can update your housing alerts below.';
-
-            return redirect()->to($redirectUrl)->with('success', $message);
-        }
-
-        $emailDispatched = $this->sendDashboardLink($subscriber, 'Passwordless dashboard link email failed to send.');
-
-        return view('auth.passwordless-existing', [
+        return view('auth.passwordless-link-sent', [
             'email' => $subscriber->email,
             'emailDispatched' => $emailDispatched,
         ]);
@@ -88,7 +68,7 @@ class PasswordlessAuthController extends Controller
         }
 
         if (!$subscriber->hasValidDashboardToken()) {
-            $emailDispatched = $this->sendDashboardLink($subscriber, 'Passwordless dashboard link expired resend failed.');
+            $emailDispatched = $this->sendDashboardLink($subscriber, false);
 
             return view('auth.passwordless-expired', [
                 'email' => $subscriber->email,
@@ -99,6 +79,10 @@ class PasswordlessAuthController extends Controller
         // Auto-login the user for this session
         Auth::guard('subscriber')->login($subscriber);
 
+        if (!$subscriber->hasVerifiedEmail()) {
+            $subscriber->markEmailAsVerified();
+        }
+
         // Redirect to the regular dashboard - no need for a separate view
         $redirectUrl = RouteServiceProvider::homeRoute($subscriber);
 
@@ -107,14 +91,17 @@ class PasswordlessAuthController extends Controller
         );
     }
 
-    private function sendVerificationEmail(Subscriber $subscriber, string $logMessage): bool
+    private function sendDashboardLink(Subscriber $subscriber, bool $isNewAccount): bool
     {
-        return $this->dispatchNotification($subscriber, fn () => $subscriber->sendEmailVerificationNotification(), $logMessage);
-    }
+        $dashboardUrl = route('dashboard.token', ['token' => $subscriber->generateDashboardToken()]);
 
-    private function sendDashboardLink(Subscriber $subscriber, string $logMessage): bool
-    {
-        return $this->dispatchNotification($subscriber, fn () => $subscriber->notify(new ExistingPasswordlessUserNotification()), $logMessage);
+        return $this->dispatchNotification(
+            $subscriber,
+            function () use ($subscriber, $dashboardUrl, $isNewAccount) {
+                $subscriber->notify(new PasswordlessDashboardLinkNotification($dashboardUrl, $isNewAccount));
+            },
+            $isNewAccount ? 'Passwordless signup email failed to send.' : 'Passwordless dashboard link email failed to send.'
+        );
     }
 
     private function dispatchNotification(Subscriber $subscriber, callable $callback, string $logMessage): bool

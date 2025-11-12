@@ -212,7 +212,7 @@
         </div>
 
         <!-- Call to Action for Non-Authenticated Users -->
-        @if(!auth()->check())
+        @if(!auth()->check() && !auth('subscriber')->check())
             <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow p-6 mt-6">
                 <div class="text-center">
                     <h3 class="text-lg font-semibold text-white mb-2">Want to stay informed about hearings like this?</h3>
