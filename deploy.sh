@@ -53,8 +53,14 @@ echo "🔐 Ensuring admin user exists..."
 php artisan app:create-admin --no-interaction
 
 # Create storage symbolic link (if it doesn't exist)
-echo "🔗 Creating storage symbolic link..."
-php artisan storage:link
+echo "🔗 Ensuring storage symbolic link..."
+if [ -L "public/storage" ]; then
+    echo "INFO: public/storage symlink already present."
+elif [ -e "public/storage" ]; then
+    echo "WARN: public/storage exists but is not a symlink; skipping storage:link."
+else
+    php artisan storage:link
+fi
 
 # Rebuild caches for production
 echo "⚡ Rebuilding production caches..."
