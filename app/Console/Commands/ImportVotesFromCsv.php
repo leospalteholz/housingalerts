@@ -46,6 +46,27 @@ class ImportVotesFromCsv extends Command
             return self::SUCCESS;
         }
 
+        $rowsMissingAddress = $rows->filter(function ($row) {
+            $value = $row['Street Address'] ?? null;
+
+            return trim((string) $value) === '';
+        })->values();
+
+        if ($rowsMissingAddress->isNotEmpty()) {
+            $this->error('Street Address is required for every row. The import was cancelled because of the following entries:');
+
+            $rowsMissingAddress->each(function ($row) {
+                $municipality = trim((string) ($row['Municipality'] ?? 'Unknown municipality'));
+                $date = trim((string) ($row['Date'] ?? 'Unknown date'));
+
+                $this->line(" - {$municipality} ({$date})");
+            });
+
+            $this->warn('No records were imported. Please fill in the missing street addresses and try again.');
+
+            return self::FAILURE;
+        }
+
         [$regionsByKey, $missingRegions] = $this->validateRegions($rows);
         [$councillorsByKey, $missingCouncillors] = $this->validateCouncillors($rows);
 
@@ -101,10 +122,10 @@ class ImportVotesFromCsv extends Command
                         'postal_code' => $postalCode,
                         'rental' => $this->toBoolean($row['Rental']),
                         'units' => $this->toNullableInt($row['Units']),
-                        'below_market_units' => $this->toNullableInt($row['Below Market Units']),
+                        'below_market_units' => $this->toIntOrZero($row['Below Market Units']),
                         'replaced_units' => $this->toNullableInt($row['Replaced Units']),
                         'subject_to_vote' => true,
-                        'approved' => $decision,
+                        'approved' => true,
                         'description' => $description,
                         'start_datetime' => $hearingDate,
                         'end_datetime' => $hearingEnd,
@@ -237,7 +258,13 @@ class ImportVotesFromCsv extends Command
      */
     private function sanitizeHeader(?string $header): string
     {
-        return $header !== null ? trim($header) : '';
+        if ($header === null) {
+            return '';
+        }
+
+        $cleaned = preg_replace('/^\xEF\xBB\xBF/', '', $header) ?? $header;
+
+        return trim($cleaned);
     }
 
     /**
@@ -306,6 +333,14 @@ class ImportVotesFromCsv extends Command
     private function toNullableInt($value): ?int
     {
         return is_numeric($value) ? (int) $value : null;
+    }
+
+    /**
+     * Convert a CSV value to an integer, defaulting missing values to zero.
+     */
+    private function toIntOrZero($value): int
+    {
+        return is_numeric($value) ? (int) $value : 0;
     }
 
     /**
@@ -378,7 +413,7 @@ class ImportVotesFromCsv extends Command
             throw new \InvalidArgumentException('Date value is required for each row.');
         }
 
-        return Carbon::parse($value, config('app.timezone'))->setTime(18, 0, 0);
+        return Carbon::parse($value, config('app.timezone'))->setTime(19, 0, 0);
     }
 
     /**
