@@ -76,14 +76,20 @@
                 <a href="{{ orgRoute('councillors.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded">
                     Cancel
                 </a>
-                
-                <form method="POST" action="{{ orgRoute('councillors.destroy', ['councillor' => $councillor]) }}" onsubmit="return confirm('Are you sure you want to delete this councillor? This action cannot be undone.');" class="ml-auto">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded">
-                        Delete
-                    </button>
-                </form>
+            </div>
+        </form>
+        
+        <form method="POST" action="{{ orgRoute('councillors.destroy', ['councillor' => $councillor]) }}" onsubmit="return confirm('Are you sure you want to delete this councillor? This action cannot be undone.');" class="bg-white rounded shadow p-6 mt-4">
+            @csrf
+            @method('DELETE')
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Danger Zone</h3>
+                    <p class="text-sm text-gray-600 mt-1">This action cannot be undone.</p>
+                </div>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded">
+                    Delete Councillor
+                </button>
             </div>
         </form>
     </div>
