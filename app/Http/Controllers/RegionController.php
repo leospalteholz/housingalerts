@@ -91,7 +91,11 @@ class RegionController extends Controller
 
         $region->load('organization');
 
-        $councillors = $region->councillors()->orderBy('name')->get();
+        $councillors = $region->councillors()
+            ->orderBy('name')
+            ->get()
+            ->filter->isCurrentlyServing()
+            ->values();
 
         $votesByCouncillor = \App\Models\CouncillorVote::with(['hearingVote.hearing' => function ($query) use ($region) {
             $query->where('region_id', $region->id)
