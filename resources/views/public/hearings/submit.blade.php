@@ -220,8 +220,12 @@
                 </section>
 
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <button type="submit" class="inline-flex items-center justify-center px-7 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-lg shadow">
-                        Save hearing
+                    <button type="submit" id="submit-button" class="inline-flex items-center justify-center px-7 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-lg shadow">
+                        <span id="button-text">Save hearing</span>
+                        <svg id="button-spinner" class="hidden animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                     </button>
                 </div>
             </form>
@@ -451,6 +455,22 @@
             document.getElementById('subject_to_vote')?.addEventListener('change', updateVoteSection);
             document.getElementById('start_date')?.addEventListener('change', updateVoteSection);
             document.getElementById('region_id')?.addEventListener('change', updateVoteSection);
+
+            // Handle form submission to prevent duplicates
+            const form = document.querySelector('form');
+            const submitButton = document.getElementById('submit-button');
+            const buttonText = document.getElementById('button-text');
+            const buttonSpinner = document.getElementById('button-spinner');
+
+            form?.addEventListener('submit', () => {
+                if (submitButton && buttonText && buttonSpinner) {
+                    submitButton.disabled = true;
+                    submitButton.classList.remove('hover:bg-blue-700');
+                    submitButton.classList.add('bg-blue-700', 'cursor-not-allowed');
+                    buttonText.textContent = 'Saving...';
+                    buttonSpinner.classList.remove('hidden');
+                }
+            });
         });
     </script>
 </x-guest-layout>
