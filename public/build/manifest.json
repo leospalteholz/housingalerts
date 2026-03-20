@@ -1,6 +1,11 @@
 {
+  "node_modules/tablesort/src/sorts/tablesort.number.js": {
+    "file": "assets/tablesort.number-5db06716.js",
+    "isDynamicEntry": true,
+    "src": "node_modules/tablesort/src/sorts/tablesort.number.js"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-1ffc6dec.css",
+    "file": "assets/app-ee617a8e.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -8,5 +13,20 @@
     "file": "assets/app-7ee14926.js",
     "isEntry": true,
     "src": "resources/js/app.js"
+  },
+  "resources/js/embed-tables.css": {
+    "file": "assets/embed-tables-daef9a43.css",
+    "src": "resources/js/embed-tables.css"
+  },
+  "resources/js/embed-tables.js": {
+    "css": [
+      "assets/embed-tables-daef9a43.css"
+    ],
+    "dynamicImports": [
+      "node_modules/tablesort/src/sorts/tablesort.number.js"
+    ],
+    "file": "assets/embed-tables-7a4a0799.js",
+    "isEntry": true,
+    "src": "resources/js/embed-tables.js"
   }
 }

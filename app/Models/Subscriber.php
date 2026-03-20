@@ -14,9 +14,9 @@ use Illuminate\Notifications\Notifiable;
 
 class Subscriber extends Model implements Authenticatable, MustVerifyEmail
 {
+    use AuthenticatableTrait;
     use HasFactory;
     use Notifiable;
-    use AuthenticatableTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -115,7 +115,7 @@ class Subscriber extends Model implements Authenticatable, MustVerifyEmail
     public function hasValidDashboardToken(): bool
     {
         return filled($this->dashboard_token)
-            && !is_null($this->dashboard_token_expires_at)
+            && ! is_null($this->dashboard_token_expires_at)
             && $this->dashboard_token_expires_at->isFuture();
     }
 
@@ -126,7 +126,7 @@ class Subscriber extends Model implements Authenticatable, MustVerifyEmail
     {
         $subscriber = static::where('email', $email)->first();
 
-        if (!$subscriber) {
+        if (! $subscriber) {
             $subscriber = static::create([
                 'email' => $email,
                 'name' => $name ?: explode('@', $email)[0],
@@ -141,7 +141,7 @@ class Subscriber extends Model implements Authenticatable, MustVerifyEmail
 
     public function hasVerifiedEmail(): bool
     {
-        return !is_null($this->email_verified_at);
+        return ! is_null($this->email_verified_at);
     }
 
     public function markEmailAsVerified(): bool
@@ -152,6 +152,19 @@ class Subscriber extends Model implements Authenticatable, MustVerifyEmail
 
         $this->forceFill([
             'email_verified_at' => $this->freshTimestamp(),
+        ])->save();
+
+        return true;
+    }
+
+    public function markEmailAsUnverified(): bool
+    {
+        if (! $this->hasVerifiedEmail()) {
+            return false;
+        }
+
+        $this->forceFill([
+            'email_verified_at' => null,
         ])->save();
 
         return true;
