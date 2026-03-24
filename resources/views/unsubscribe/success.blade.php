@@ -25,7 +25,7 @@
                     If you change your mind, you can always re-subscribe to start receiving housing alerts again.
                 </p>
                 
-                <a href="{{ route('signup') }}" 
+                <a href="{{ url('/') }}" 
                    class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
                     Re-subscribe to Housing Alerts
                 </a>

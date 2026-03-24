@@ -48,7 +48,7 @@
             </form>
             
             <div class="mt-6 text-sm text-gray-500">
-                <p>You can always re-subscribe by <a href="{{ route('signup') }}" class="text-blue-600 hover:text-blue-800">signing up again</a>.</p>
+                <p>You can always re-subscribe from the <a href="{{ url('/') }}" class="text-blue-600 hover:text-blue-800">homepage</a>.</p>
             </div>
         </div>
     </div>

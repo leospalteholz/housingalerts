@@ -218,8 +218,8 @@
                     <h3 class="text-lg font-semibold text-white mb-2">Want to stay informed about hearings like this?</h3>
                     <p class="text-blue-100 mb-4">Sign up to receive email notifications about upcoming housing hearings in your area.</p>
                     <div class="space-x-4">
-                        <a href="{{ route('signup') }}" class="bg-white text-blue-600 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 transition duration-200">
-                            Sign Up for Notifications
+                        <a href="{{ url('/') }}" class="bg-white text-blue-600 font-semibold py-2 px-6 rounded-lg hover:bg-gray-100 transition duration-200">
+                            Get Hearing Alerts
                         </a>
                         <a href="{{ route('login') }}" class="border border-white text-white font-semibold py-2 px-6 rounded-lg hover:bg-white hover:bg-opacity-10 transition duration-200">
                             Login
