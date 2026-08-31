@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Region;
+use App\Models\CouncillorVote;
 use App\Models\Organization;
+use App\Models\Region;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class RegionController extends Controller
@@ -20,10 +22,11 @@ class RegionController extends Controller
         $subscriber = auth('subscriber')->user();
         $adminUser = auth()->user();
 
-        if ($subscriber && !$adminUser?->is_admin && !$adminUser?->is_superuser) {
+        if ($subscriber && ! $adminUser?->is_admin && ! $adminUser?->is_superuser) {
             $monitoredRegionIds = $subscriber->regions()->pluck('regions.id');
             $regions = $regions->map(function ($region) use ($monitoredRegionIds) {
                 $region->is_monitored = $monitoredRegionIds->contains($region->id);
+
                 return $region;
             });
         }
@@ -51,15 +54,15 @@ class RegionController extends Controller
             'inperson_instructions' => 'nullable|string',
         ]);
 
-        $region = new Region();
+        $region = new Region;
         $region->name = $validated['name'];
         $region->comments_email = $validated['comments_email'] ?? null;
         $region->remote_instructions = $validated['remote_instructions'] ?? null;
         $region->inperson_instructions = $validated['inperson_instructions'] ?? null;
-            $region->organization_id = $organization->id;
+        $region->organization_id = $organization->id;
         $region->save();
 
-    return redirect($this->orgRoute('regions.index'))->with('success', 'Region created successfully!');
+        return redirect($this->orgRoute('regions.index'))->with('success', 'Region created successfully!');
     }
 
     /**
@@ -75,10 +78,10 @@ class RegionController extends Controller
         $adminUser = auth()->user();
 
         $isMonitored = false;
-        if ($subscriber && !$adminUser?->is_admin && !$adminUser?->is_superuser) {
+        if ($subscriber && ! $adminUser?->is_admin && ! $adminUser?->is_superuser) {
             $isMonitored = $subscriber->regions()->where('regions.id', $region->id)->exists();
         }
-        
+
         return view('regions.show', compact('region', 'isMonitored', 'organization', 'subscriber'));
     }
 
@@ -91,13 +94,24 @@ class RegionController extends Controller
 
         $region->load('organization');
 
+        $startDate = request()->query('startDate');
+        $endDate = request()->query('endDate');
+
+        $hasValidStartDate = is_string($startDate)
+            && preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDate)
+            && Carbon::canBeCreatedFromFormat($startDate, 'Y-m-d');
+
+        $hasValidEndDate = is_string($endDate)
+            && preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDate)
+            && Carbon::canBeCreatedFromFormat($endDate, 'Y-m-d');
+
         $councillors = $region->councillors()
             ->orderBy('name')
             ->get()
             ->filter->isCurrentlyServing()
             ->values();
 
-        $votesByCouncillor = \App\Models\CouncillorVote::with(['hearingVote.hearing' => function ($query) use ($region) {
+        $votesByCouncillor = CouncillorVote::with(['hearingVote.hearing' => function ($query) use ($region) {
             $query->where('region_id', $region->id)
                 ->where('approved', true);
         }])
@@ -105,6 +119,16 @@ class RegionController extends Controller
             ->whereHas('hearingVote.hearing', function ($query) use ($region) {
                 $query->where('region_id', $region->id)
                     ->where('approved', true);
+            })
+            ->when($hasValidStartDate, function ($query) use ($startDate) {
+                $query->whereHas('hearingVote', function ($hearingVoteQuery) use ($startDate) {
+                    $hearingVoteQuery->whereDate('vote_date', '>=', $startDate);
+                });
+            })
+            ->when($hasValidEndDate, function ($query) use ($endDate) {
+                $query->whereHas('hearingVote', function ($hearingVoteQuery) use ($endDate) {
+                    $hearingVoteQuery->whereDate('vote_date', '<=', $endDate);
+                });
             })
             ->get()
             ->groupBy('councillor_id');
@@ -130,7 +154,7 @@ class RegionController extends Controller
             foreach ($votes as $vote) {
                 $hearing = optional($vote->hearingVote)->hearing;
 
-                if (!$hearing) {
+                if (! $hearing) {
                     continue;
                 }
 
@@ -159,7 +183,7 @@ class RegionController extends Controller
 
             return [
                 $councillor->name,
-                $supportPercent !== null ? $supportPercent . '%' : '—',
+                $supportPercent !== null ? $supportPercent.'%' : '—',
                 number_format($homesSupported),
                 number_format($homesOpposed),
                 number_format($rentalsOpposed),
@@ -203,7 +227,7 @@ class RegionController extends Controller
         $region->fill($validated);
         $region->save();
 
-    return redirect($this->orgRoute('regions.index'))->with('success', 'Region updated successfully!');
+        return redirect($this->orgRoute('regions.index'))->with('success', 'Region updated successfully!');
     }
 
     /**
@@ -216,10 +240,11 @@ class RegionController extends Controller
         // Check if region has any hearings
         if ($region->hearings()->count() > 0) {
             return redirect($this->orgRoute('regions.index'))
-                ->withErrors(['error' => 'Cannot delete region "' . $region->name . '" because it contains hearings. Please move or delete the hearings first.']);
+                ->withErrors(['error' => 'Cannot delete region "'.$region->name.'" because it contains hearings. Please move or delete the hearings first.']);
         }
-        
+
         $region->delete();
+
         return redirect($this->orgRoute('regions.index'))->with('success', 'Region deleted successfully!');
     }
 
@@ -233,25 +258,26 @@ class RegionController extends Controller
 
             $subscriber = auth('subscriber')->user();
 
-            if (!$subscriber) {
+            if (! $subscriber) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
             $alreadySubscribed = $subscriber->regions()->where('regions.id', $region->id)->exists();
 
-            if (!$alreadySubscribed) {
+            if (! $alreadySubscribed) {
                 $subscriber->regions()->attach($region->id);
             }
 
-            return response()->json(['success' => true, 'message' => 'Successfully subscribed to ' . $region->name]);
+            return response()->json(['success' => true, 'message' => 'Successfully subscribed to '.$region->name]);
         } catch (\Exception $e) {
             \Log::error('Region subscription error:', [
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            return response()->json(['error' => 'An error occurred while subscribing: ' . $e->getMessage()], 500);
+
+            return response()->json(['error' => 'An error occurred while subscribing: '.$e->getMessage()], 500);
         }
     }
 
@@ -265,16 +291,17 @@ class RegionController extends Controller
 
             $subscriber = auth('subscriber')->user();
 
-            if (!$subscriber) {
+            if (! $subscriber) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
             $subscriber->regions()->detach($region->id);
-            
-            return response()->json(['success' => true, 'message' => 'Successfully unsubscribed from ' . $region->name]);
+
+            return response()->json(['success' => true, 'message' => 'Successfully unsubscribed from '.$region->name]);
         } catch (\Exception $e) {
-            \Log::error('Region unsubscription error: ' . $e->getMessage());
-            return response()->json(['error' => 'An error occurred while unsubscribing: ' . $e->getMessage()], 500);
+            \Log::error('Region unsubscription error: '.$e->getMessage());
+
+            return response()->json(['error' => 'An error occurred while unsubscribing: '.$e->getMessage()], 500);
         }
     }
 

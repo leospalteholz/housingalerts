@@ -18,24 +18,24 @@ class RegionCouncillorEmbedTest extends TestCase
 
     public function test_region_embed_displays_vote_breakdown(): void
     {
-        $organization = new Organization();
+        $organization = new Organization;
         $organization->name = 'Test Org';
         $organization->slug = Str::slug('Test Org');
         $organization->contact_email = 'contact@test.org';
         $organization->save();
 
-        $region = new Region();
+        $region = new Region;
         $region->organization_id = $organization->id;
         $region->name = 'Central Region';
         $region->save();
 
-        $councillorA = new Councillor();
+        $councillorA = new Councillor;
         $councillorA->region_id = $region->id;
         $councillorA->name = 'Councillor Alpha';
         $councillorA->elected_start = now()->subYears(2)->toDateString();
         $councillorA->save();
 
-        $councillorB = new Councillor();
+        $councillorB = new Councillor;
         $councillorB->region_id = $region->id;
         $councillorB->name = 'Councillor Beta';
         $councillorB->elected_start = now()->subYears(3)->toDateString();
@@ -136,5 +136,111 @@ class RegionCouncillorEmbedTest extends TestCase
         $response->assertSee('Councillor Beta');
         $response->assertSee('0.0%');
         $response->assertSee('35');
+    }
+
+    public function test_region_embed_filters_votes_by_vote_date_query_parameters(): void
+    {
+        $organization = new Organization;
+        $organization->name = 'Test Org';
+        $organization->slug = Str::slug('Test Org');
+        $organization->contact_email = 'contact@test.org';
+        $organization->save();
+
+        $region = new Region;
+        $region->organization_id = $organization->id;
+        $region->name = 'Central Region';
+        $region->save();
+
+        $councillor = new Councillor;
+        $councillor->region_id = $region->id;
+        $councillor->name = 'Councillor Date Filter';
+        $councillor->elected_start = now()->subYears(2)->toDateString();
+        $councillor->save();
+
+        $hearingInsideRange = Hearing::create([
+            'organization_id' => $organization->id,
+            'region_id' => $region->id,
+            'type' => 'development',
+            'title' => 'Inside Range Hearing',
+            'street_address' => '100 Main St',
+            'postal_code' => 'V0V0V0',
+            'rental' => false,
+            'units' => 80,
+            'below_market_units' => 10,
+            'replaced_units' => 0,
+            'subject_to_vote' => true,
+            'approved' => true,
+            'description' => 'Inside range',
+            'start_datetime' => now()->addDays(5),
+            'end_datetime' => now()->addDays(5)->addHours(2),
+            'more_info_url' => null,
+            'remote_instructions' => 'Remote join info',
+            'inperson_instructions' => 'In-person info',
+            'comments_email' => 'comments@test.org',
+        ]);
+
+        $hearingOutsideRange = Hearing::create([
+            'organization_id' => $organization->id,
+            'region_id' => $region->id,
+            'type' => 'development',
+            'title' => 'Outside Range Hearing',
+            'street_address' => '200 Side St',
+            'postal_code' => 'V1V1V1',
+            'rental' => true,
+            'units' => 40,
+            'below_market_units' => 8,
+            'replaced_units' => 0,
+            'subject_to_vote' => true,
+            'approved' => true,
+            'description' => 'Outside range',
+            'start_datetime' => now()->addDays(10),
+            'end_datetime' => now()->addDays(10)->addHours(2),
+            'more_info_url' => null,
+            'remote_instructions' => 'Remote join info',
+            'inperson_instructions' => 'In-person info',
+            'comments_email' => 'comments@test.org',
+        ]);
+
+        $insideRangeVoteDate = now()->addDays(20)->toDateString();
+        $outsideRangeVoteDate = now()->addDays(45)->toDateString();
+
+        $voteInsideRange = HearingVote::create([
+            'hearing_id' => $hearingInsideRange->id,
+            'vote_date' => $insideRangeVoteDate,
+            'passed' => true,
+            'notes' => null,
+        ]);
+
+        $voteOutsideRange = HearingVote::create([
+            'hearing_id' => $hearingOutsideRange->id,
+            'vote_date' => $outsideRangeVoteDate,
+            'passed' => false,
+            'notes' => null,
+        ]);
+
+        CouncillorVote::create([
+            'hearing_vote_id' => $voteInsideRange->id,
+            'councillor_id' => $councillor->id,
+            'vote' => 'for',
+        ]);
+
+        CouncillorVote::create([
+            'hearing_vote_id' => $voteOutsideRange->id,
+            'councillor_id' => $councillor->id,
+            'vote' => 'against',
+        ]);
+
+        $response = $this->get(route('regions.voting-embed', [
+            'organization' => $organization->slug,
+            'region' => $region,
+            'startDate' => now()->addDays(15)->toDateString(),
+            'endDate' => now()->addDays(25)->toDateString(),
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Councillor Date Filter');
+        $response->assertSee('100.0%');
+        $response->assertSee('80');
+        $response->assertSee('0');
     }
 }
