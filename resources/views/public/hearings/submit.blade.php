@@ -9,7 +9,7 @@
             </div>
             <div class="hidden lg:block text-sm text-gray-500 max-w-xs border-l-2 border-gray-200 pl-4">
                 <p class="font-semibold text-gray-700">Tips</p>
-                <p class="mt-1">Have the hearing notice or agenda handy. Include remote and in-person participation details if available.</p>
+                <p class="mt-1">Have the hearing notice, agenda, and minutes handy if available.</p>
             </div>
         </div>
     </x-slot>
